@@ -100,3 +100,6 @@ export interface Drill {
 
 /** Spaced-repetition state of one flashcard. key: "g:<term>" (glossary) or "t:<tradeId>" (trade screenshot). */
 export interface CardState { key: string; box: number; due: string; correct: boolean; at: number; reviews: number }
+
+/** One answer in the chart exercises ("spot it"). kind: an ExerciseKind from lib/exercises.ts. */
+export interface SpotAnswer { id?: number; kind: string; correct: boolean; at: number; datasetId?: string }

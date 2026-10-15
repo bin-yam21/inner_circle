@@ -88,3 +88,13 @@ describe("analyze", () => {
     expect(Math.max(...all)).toBeLessThanOrEqual(1200);
   });
 });
+
+describe("obvious liquidity only", () => {
+  it("doesn't count a minor swing run a few candles later as a sweep", () => {
+    // Swing high at index 2 (single, not equal), wicked through at index 5 and closed back below.
+    const c = series([[10, 10.5, 9.5, 10.2], [10.2, 10.8, 10, 10.6], [10.6, 11, 10.4, 10.5], [10.5, 10.7, 10.1, 10.3], [10.3, 10.6, 10, 10.4], [10.4, 11.3, 10.3, 10.5], [10.5, 10.6, 10, 10.2]]);
+    const pools = liquidityPools(c, swings(c, 0, 6), 6, 0.01);
+    expect(pools.find((p) => p.kind === "BSL")!.sweptAt).toBe(5);
+    expect(sweeps(c, pools)).toEqual([]);
+  });
+});

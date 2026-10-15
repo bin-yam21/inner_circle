@@ -3,7 +3,8 @@
  * (daily bias calls, trades, rules) so you can see whether learning turns into results.
  * Pure functions only, so everything here is unit-tested in tests/learning.test.ts.
  */
-import type { CardState, DailyLog, Drill, LessonProgress, QuizAnswer, QuizQuestion, Rule, RuleCheck, Trade } from "./types";
+import type { CardState, DailyLog, Drill, LessonProgress, QuizAnswer, QuizQuestion, Rule, RuleCheck, SpotAnswer, Trade } from "./types";
+import { EXERCISES, type ExerciseKind } from "./exercises";
 import { groupBy, round, tradeStats, weekday, type Group } from "./stats";
 
 // Concepts --------------------------------------------------------------------
@@ -42,6 +43,8 @@ export interface Mastery {
   trades: number; expectancy: number; totalR: number; winRate: number;
   /** Replay drills where you placed a trade with a setup that uses this concept. */
   drills: number; drillExpectancy: number;
+  /** Chart drill answers for this concept (last 30) and their accuracy. */
+  chartAnswered: number; chartAccuracy: number | null;
   status: MasteryStatus;
 }
 
@@ -52,7 +55,7 @@ export interface Mastery {
 /** Replay drills that ended with a trade (win, loss or still open). */
 export const tradedDrills = (drills: Drill[]) => drills.filter((d) => d.outcome === "win" || d.outcome === "loss" || d.outcome === "open");
 
-export function conceptMastery(progress: LessonProgress[], answers: QuizAnswer[], questions: QuizQuestion[], trades: Trade[], drills: Drill[] = []): Mastery[] {
+export function conceptMastery(progress: LessonProgress[], answers: QuizAnswer[], questions: QuizQuestion[], trades: Trade[], drills: Drill[] = [], spots: SpotAnswer[] = []): Mastery[] {
   const done = new Set(progress.filter((p) => p.done).map((p) => p.lessonId));
   const byKey = new Map(answers.map((a) => [a.key, a]));
   return CONCEPTS.map((concept) => {
@@ -62,7 +65,12 @@ export function conceptMastery(progress: LessonProgress[], answers: QuizAnswer[]
     const quizCorrect = answered.filter((a) => a.correct).length;
     const quizAccuracy = answered.length ? quizCorrect / answered.length : null;
     const lessonPart = concept.lessons.length ? lessonsDone / concept.lessons.length : 0;
-    const knowledge = quizAccuracy == null ? lessonPart * 0.6 : lessonPart * 0.5 + quizAccuracy * 0.5;
+    const chart = spots.filter((s) => EXERCISES[s.kind as ExerciseKind]?.concept === concept.id).sort((a, b) => b.at - a.at).slice(0, 30);
+    const chartAccuracy = chart.length ? chart.filter((s) => s.correct).length / chart.length : null;
+    // Lessons + quiz, plus chart drills once you have some (seeing it on a chart counts as much as the quiz).
+    const knowledge = chartAccuracy == null
+      ? (quizAccuracy == null ? lessonPart * 0.6 : lessonPart * 0.5 + quizAccuracy * 0.5)
+      : quizAccuracy == null ? lessonPart * 0.5 + chartAccuracy * 0.5 : lessonPart * 0.4 + quizAccuracy * 0.3 + chartAccuracy * 0.3;
     const ts = trades.filter((t) => conceptsOfTrade(t).includes(concept.id));
     const st = tradeStats(ts);
     const ds = tradedDrills(drills).filter((d) => d.setup && concept.setups.includes(d.setup));
@@ -76,7 +84,7 @@ export function conceptMastery(progress: LessonProgress[], answers: QuizAnswer[]
     return {
       concept, lessonsDone, lessonsTotal: concept.lessons.length, quizAnswered: answered.length, quizCorrect, quizAccuracy,
       knowledge: round(knowledge), trades: st.n, expectancy: st.expectancy, totalR: st.totalR, winRate: st.winRate,
-      drills: ds.length, drillExpectancy, status,
+      drills: ds.length, drillExpectancy, chartAnswered: chart.length, chartAccuracy, status,
     };
   });
 }

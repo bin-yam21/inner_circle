@@ -210,10 +210,30 @@ await step("replay trainer: generate data, run and score a drill", async () => {
   await page.getByRole("button", { name: /Enter at market/ }).click();
   await page.locator(".lvl.entry").waitFor();
   for (let i = 0; i < 6; i++) await page.getByRole("button", { name: "+10" }).click();
+  await page.getByLabel("Show ICT structures").check();
+  await page.locator(".chartbox .overlay .zone, .chartbox .overlay .level").first().waitFor();
   await shot("replay");
   await page.getByRole("button", { name: "Finish & score" }).click();
   await page.getByRole("cell", { name: /Bullish/ }).waitFor();
   await page.locator(".stat", { hasText: "Drills" }).getByText("1", { exact: true }).waitFor();
+});
+
+await step("chart drills: answer, see feedback, stats update", async () => {
+  await go("/chart-drills");
+  await page.getByRole("button", { name: "Premium or discount", exact: true }).click();
+  await page.getByRole("button", { name: "Premium", exact: true }).click();
+  await page.locator(".alert").filter({ hasText: /range runs/ }).waitFor();
+  await page.locator(".chartbox .level.eq").waitFor();
+  await page.getByRole("button", { name: "Bullish FVG", exact: true }).click();
+  const box = await page.locator(".chartbox svg").boundingBox();
+  await page.mouse.click(box.x + box.width * 0.45, box.y + box.height * 0.5);
+  await page.locator(".alert").filter({ hasText: /^(Right|Not quite)\./ }).waitFor();
+  await page.locator(".chartbox .zone.target").first().waitFor();
+  await page.locator(".chartbox .mark-pt.click").waitFor();
+  await shot("chart-drills");
+  await page.locator(".stat", { hasText: "This session" }).getByText(/\d \/ 2/).waitFor();
+  await page.keyboard.press("Enter");
+  await page.locator(".alert").filter({ hasText: /^(Right|Not quite)\./ }).waitFor({ state: "detached" });
 });
 
 // AI features: api.anthropic.com is intercepted, so no key or money is needed. We check what

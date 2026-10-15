@@ -1,7 +1,7 @@
 import Dexie, { type Table } from "dexie";
 import type {
   Activity, ChatMessage, CheckIn, DailyLog, LessonProgress, Material, PlanTask, QuizAnswer,
-  QuizRound, Rule, RuleCheck, Setting, Trade, TradeImage, Watched, WeeklyReview, ReplayDataset, Drill, CardState,
+  QuizRound, Rule, RuleCheck, Setting, Trade, TradeImage, Watched, WeeklyReview, ReplayDataset, Drill, CardState, SpotAnswer,
 } from "./types";
 
 /**
@@ -29,6 +29,7 @@ export class AcademyDB extends Dexie {
   replayData!: Table<ReplayDataset, string>;
   drills!: Table<Drill, string>;
   cards!: Table<CardState, string>;
+  spotAnswers!: Table<SpotAnswer, number>;
 
   constructor(name = "trading-academy") {
     super(name);
@@ -52,12 +53,13 @@ export class AcademyDB extends Dexie {
     this.version(2).stores({ watched: "id, at" });
     this.version(3).stores({ replayData: "id, createdAt", drills: "id, at, datasetId" });
     this.version(4).stores({ cards: "key, due" });
+    this.version(5).stores({ spotAnswers: "++id, kind, at" });
   }
 }
 
 export const db = new AcademyDB();
 
-export const TABLES = ["progress", "quizAnswers", "quizRounds", "trades", "images", "dailyLogs", "checkins", "reviews", "rules", "ruleChecks", "materials", "plan", "settings", "activity", "chat", "watched", "replayData", "drills", "cards"] as const;
+export const TABLES = ["progress", "quizAnswers", "quizRounds", "trades", "images", "dailyLogs", "checkins", "reviews", "rules", "ruleChecks", "materials", "plan", "settings", "activity", "chat", "watched", "replayData", "drills", "cards", "spotAnswers"] as const;
 export type TableName = (typeof TABLES)[number];
 
 export const todayStr = (d = new Date()) =>

@@ -160,3 +160,14 @@ describe("monthly trends", () => {
     expect(rows[2]).toMatchObject({ trades: 0, expectancy: null, studyDays: 1 });
   });
 });
+
+describe("chart eye in mastery", () => {
+  it("blends chart drill accuracy into knowledge for the matching concept", () => {
+    const spots = [true, true, false, true].map((correct, i) => ({ kind: "fvg-bull", correct, at: i }));
+    const m = conceptMastery([], [], [], [], [], spots).find((x) => x.concept.id === "fvg")!;
+    expect(m.chartAnswered).toBe(4);
+    expect(m.chartAccuracy).toBe(0.75);
+    expect(m.knowledge).toBe(0.38); // lessons 0 × 0.5 + chart 0.75 × 0.5
+    expect(conceptMastery([], [], [], [], [], spots).find((x) => x.concept.id === "liquidity")!.chartAccuracy).toBeNull();
+  });
+});

@@ -11,6 +11,8 @@ import { CandleChart } from "../components/Charts";
 import { ConfirmButton, Empty, PageHead, Stat, toast } from "../components/ui";
 import { Icon, floatXp } from "../components/fx";
 import { XP } from "../lib/xp";
+import { analyze } from "../lib/detect";
+import { analysisOverlay, LAYERS, type Layer } from "../lib/overlay";
 
 const WINDOW = 90;
 /** Candles of history shown before the drill starts, and kept free after it. */
@@ -33,6 +35,8 @@ export default function Replay() {
   const [s, setS] = useState<Session | null>(null);
   const [picking, setPicking] = useState<Field | null>(null);
   const [playing, setPlaying] = useState(false);
+  const [showOv, setShowOv] = useState(false);
+  const [layers, setLayers] = useState<Set<Layer>>(() => new Set<Layer>(["fvg", "ob", "liquidity", "sweeps"]));
   const [selected, setSelected] = useState("");
   const [reviewId, setReviewId] = useState<string | null>(null);
   const reviewDrill = drills.find((d) => d.id === reviewId);
@@ -131,6 +135,7 @@ export default function Replay() {
     ? [{ price: s.order.entry, label: "Entry", cls: "entry" }, { price: s.order.stop, label: "Stop", cls: "stop" }, { price: s.order.target, label: "Target", cls: "target" }]
     : (["entry", "stop", "target"] as Field[]).filter((k) => Number.isFinite(draftNum(k))).map((k) => ({ price: draftNum(k), label: k[0].toUpperCase() + k.slice(1), cls: `${k} draft` })));
   const cur = s && ds ? ds.candles[s.cursor] : null;
+  const overlay = showOv && s && ds ? analysisOverlay(analyze(ds.candles, s.cursor, 150), first, layers) : undefined;
   const draftRR = s && !s.order ? (() => { const o = { entry: draftNum("entry"), stop: draftNum("stop"), target: draftNum("target") }; return [o.entry, o.stop, o.target].every(Number.isFinite) && o.entry !== o.stop ? rewardRisk(o) : null; })() : null;
 
   return (
@@ -186,7 +191,14 @@ export default function Replay() {
             </div>
           </div>
 
-          <CandleChart candles={view} firstIndex={first} decimals={dec} lines={lines} markIndex={s.cursor > s.start ? s.start : undefined} onPick={picking && !s.order ? onPick : undefined} />
+          <div className="row small ovbar">
+            <label style={{ display: "flex", gap: 6, alignItems: "center" }}><input type="checkbox" checked={showOv} onChange={(e) => setShowOv(e.target.checked)} /> Show ICT structures</label>
+            {showOv && LAYERS.map(([k, l]) => (
+              <button key={k} type="button" className="chip" aria-pressed={layers.has(k)} onClick={() => { const n = new Set(layers); if (n.has(k)) n.delete(k); else n.add(k); setLayers(n); }}>{l}</button>
+            ))}
+            {showOv && <span className="muted">Drawn from candles up to now only. Try your own read first.</span>}
+          </div>
+          <CandleChart candles={view} firstIndex={first} decimals={dec} lines={lines} markIndex={s.cursor > s.start ? s.start : undefined} onPick={picking && !s.order ? onPick : undefined} overlay={overlay} />
           {picking && !s.order && <p className="alert warn small" style={{ margin: 0 }}>Click the chart to set the <b>{picking}</b> price.</p>}
 
           <div className="grid g3">

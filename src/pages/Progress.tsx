@@ -27,17 +27,17 @@ export function LessonLink({ id }: { id: string }) {
 export default function Progress() {
   const today = todayStr();
   const data = useLiveQuery(async () => {
-    const [progress, answers, trades, logs, rules, checks, drills, activity] = await Promise.all([
-      db.progress.toArray(), db.quizAnswers.toArray(), db.trades.toArray(), db.dailyLogs.toArray(), db.rules.toArray(), db.ruleChecks.toArray(), db.drills.toArray(), db.activity.toArray(),
+    const [progress, answers, trades, logs, rules, checks, drills, activity, spots] = await Promise.all([
+      db.progress.toArray(), db.quizAnswers.toArray(), db.trades.toArray(), db.dailyLogs.toArray(), db.rules.toArray(), db.ruleChecks.toArray(), db.drills.toArray(), db.activity.toArray(), db.spotAnswers.toArray(),
     ]);
-    return { progress, answers, trades, logs, rules, checks, drills, activity };
+    return { progress, answers, trades, logs, rules, checks, drills, activity, spots };
   }, []);
   if (!data) return <p className="muted">Loading…</p>;
 
   const gates = goLiveGates(data.trades, data.logs, data.rules, data.checks, data.drills);
   const met = gates.filter((g) => g.met).length;
   const rx = prescriptions(data.trades, today);
-  const mastery = conceptMastery(data.progress, data.answers, quiz, data.trades, data.drills);
+  const mastery = conceptMastery(data.progress, data.answers, quiz, data.trades, data.drills, data.spots);
   const bias = biasStats(data.logs);
   const due = data.answers.filter((a) => isDue(a, today)).length;
   const leaks = mastery.filter((m) => m.status === "Leak");
@@ -120,9 +120,9 @@ export default function Progress() {
       ) : <Empty>Your monthly trends appear after your first study day, trade or bias call.</Empty>}
 
       <h2 className="section-title">Concept mastery</h2>
-      <p className="small muted" style={{ marginTop: -6 }}>Knowledge = lessons completed + quiz accuracy. Trades count toward a concept through their setup, or the concepts you tag in the journal. Replay = practice drills with a trade (count · expectancy).</p>
+      <p className="small muted" style={{ marginTop: -6 }}>Knowledge = lessons completed + quiz accuracy + chart drill accuracy (once you've done some). Trades count toward a concept through their setup, or the concepts you tag in the journal. Replay = practice drills with a trade (count · expectancy).</p>
       <div className="tw"><table className="wide">
-        <thead><tr><th>Concept</th><th>Status</th><th>Knowledge</th><th>Lessons</th><th>Quiz</th><th>Replay</th><th>Trades</th><th>Expectancy</th></tr></thead>
+        <thead><tr><th>Concept</th><th>Status</th><th>Knowledge</th><th>Lessons</th><th>Quiz</th><th>Chart eye</th><th>Replay</th><th>Trades</th><th>Expectancy</th></tr></thead>
         <tbody>{mastery.map((m) => {
           const next = m.concept.lessons.find((id) => !data.progress.some((p) => p.lessonId === id && p.done));
           return (
@@ -132,6 +132,7 @@ export default function Progress() {
               <td style={{ minWidth: 110 }}><Bar value={m.knowledge} /><span className="small muted">{Math.round(m.knowledge * 100)}%</span></td>
               <td className="n">{m.lessonsDone}/{m.lessonsTotal}</td>
               <td className="n">{m.quizAccuracy == null ? "–" : `${pct(m.quizAccuracy)} (${m.quizAnswered})`}</td>
+              <td className="n">{m.chartAccuracy == null ? (["fvg", "liquidity", "premium-discount", "order-blocks"].includes(m.concept.id) ? <Link to="/chart-drills" className="small">practise</Link> : "–") : `${pct(m.chartAccuracy)} (${m.chartAnswered})`}</td>
               <td className={`n ${m.drills ? (m.drillExpectancy >= 0 ? "pos" : "neg") : ""}`}>{m.drills ? `${m.drills} · ${fmtR(m.drillExpectancy)}` : "–"}</td>
               <td className="n">{m.trades || "–"}</td>
               <td className={`n ${m.trades ? (m.expectancy >= 0 ? "pos" : "neg") : ""}`}>{m.trades ? fmtR(m.expectancy) : "–"}</td>

@@ -101,11 +101,18 @@ export function liquidityPools(c: Candle[], sw: Swing[], end: number, tol: numbe
   return out.sort((p, q) => p.indices[0] - q.indices[0]);
 }
 
-/** Pools whose sweeping candle closed back inside the level: a stop run, not a breakout. */
+/** A level is "obvious" liquidity if it's equal highs/lows or held for at least this many candles before being run. */
+export const OBVIOUS_AGE = 8;
+
+/**
+ * Pools whose sweeping candle closed back inside the level: a stop run, not a breakout.
+ * Only obvious liquidity counts; running a minor swing a few candles later isn't a meaningful sweep.
+ */
 export function sweeps(c: Candle[], pools: Pool[]): Sweep[] {
   const byIndex = new Map<number, Sweep>();
   for (const p of pools) {
     if (p.sweptAt == null) continue;
+    if (!p.equal && p.sweptAt - p.indices[p.indices.length - 1] < OBVIOUS_AGE) continue;
     const k = c[p.sweptAt];
     const closedBack = p.kind === "BSL" ? k.c < p.price : k.c > p.price;
     const prev = byIndex.get(p.sweptAt);

@@ -66,7 +66,7 @@ Pure functions over candles, never looking past the candle you're "at" (no hinds
 | Swing high / low | Fractal: higher high (lower low) than the 2 candles on each side; confirmed only once those candles exist |
 | Fair value gap | 3-candle imbalance: candle 1's high below candle 3's low (bullish) or candle 1's low above candle 3's high (bearish); at least 0.15 ATR; tracks first touch (mitigated) and full fill |
 | Liquidity pools | Buy-side above swing highs, sell-side below swing lows; "equal" when two swings are within 0.15 ATR; tracks when it's swept |
-| Liquidity sweep | A wick through an unswept swing high/low that closes back inside it (turtle soup) |
+| Liquidity sweep | A wick through obvious liquidity (equal highs/lows, or a swing that held 8+ candles) that closes back inside it (turtle soup) |
 | Displacement | Body ≥ 1.2 ATR and ≥ 60% of the candle's range |
 | Order block | Last opposite-colour candle within 3 candles before a displacement candle that leaves a fair value gap |
 | Dealing range | Highest swing high and lowest swing low in the last 60 candles; equilibrium = 50%, ±5% band |

@@ -1,3 +1,5 @@
+import type { ChartOverlay } from "../lib/overlay";
+
 /** Small dependency-free SVG charts. */
 export function EquityChart({ points }: { points: { i: number; cum: number; date: string }[] }) {
   if (points.length < 2) return <p className="empty">The equity curve appears after two trades.</p>;
@@ -48,16 +50,17 @@ export function RBars({ data }: { data: { key: string; totalR: number }[] }) {
   );
 }
 
-/** Candlestick chart for the replay trainer. Click anywhere to pick a price (for entry, stop or target). */
-export function CandleChart({ candles, firstIndex, lines = [], markIndex, decimals, onPick, futureSlots = 10 }: {
+/** Candlestick chart for the replay trainer and chart drills. Click to pick a price (and the candle under it). */
+export function CandleChart({ candles, firstIndex, lines = [], markIndex, decimals, onPick, futureSlots = 10, overlay }: {
   candles: { t: number; o: number; h: number; l: number; c: number }[];
   firstIndex: number;
   lines?: { price: number; label: string; cls: string }[];
   /** Absolute index of a candle to mark with a vertical line (e.g. where the drill started). */
   markIndex?: number;
   decimals: number;
-  onPick?: (price: number) => void;
+  onPick?: (price: number, index: number) => void;
   futureSlots?: number;
+  overlay?: ChartOverlay;
 }) {
   if (!candles.length) return <p className="empty">No candles to show.</p>;
   const W = 900, H = 420, P = { l: 8, r: 74, t: 12, b: 24 };
@@ -77,9 +80,15 @@ export function CandleChart({ candles, firstIndex, lines = [], markIndex, decima
   function pick(e: React.MouseEvent<SVGSVGElement>) {
     if (!onPick) return;
     const r = e.currentTarget.getBoundingClientRect();
-    const vy = ((e.clientY - r.top) / r.height) * H;
-    onPick(Number((hi - ((vy - P.t) / (H - P.t - P.b)) * (hi - lo)).toFixed(decimals)));
+    const vy = ((e.clientY - r.top) / r.height) * H, vx = ((e.clientX - r.left) / r.width) * W;
+    const rel = Math.max(0, Math.min(candles.length - 1, Math.floor((vx - P.l) / cw)));
+    onPick(Number((hi - ((vy - P.t) / (H - P.t - P.b)) * (hi - lo)).toFixed(decimals)), firstIndex + rel);
   }
+  // Overlay geometry: clip to the plot so off-screen structures don't spill over the axis.
+  const rx = (abs: number) => Math.max(P.l, x(abs - firstIndex) - cw / 2);
+  const right = x(candles.length - 1) + cw / 2;
+  const visible = (abs: number) => abs <= firstIndex + candles.length - 1;
+  const ov = overlay ?? {};
   return (
     <div className="chartbox candles">
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`Candlestick chart, last close ${fmt(last.c)}`} onClick={pick} style={{ cursor: onPick ? "crosshair" : undefined }}>
@@ -88,6 +97,22 @@ export function CandleChart({ candles, firstIndex, lines = [], markIndex, decima
         {markIndex != null && markIndex >= firstIndex && markIndex < firstIndex + candles.length && (
           <line className="mark" x1={x(markIndex - firstIndex) + cw / 2} x2={x(markIndex - firstIndex) + cw / 2} y1={P.t} y2={H - P.b} />
         )}
+        <defs><clipPath id="plot"><rect x={P.l} y={P.t} width={W - P.l - P.r} height={H - P.t - P.b} /></clipPath></defs>
+        <g clipPath="url(#plot)" className="overlay">
+          {(ov.bands ?? []).filter((b) => b.index >= firstIndex && visible(b.index)).map((b, i) => <rect key={"b" + i} className={`band ${b.cls}`} x={x(b.index - firstIndex) - cw / 2} width={cw} y={P.t} height={H - P.t - P.b} />)}
+          {(ov.zones ?? []).filter((z) => visible(z.from)).map((z, i) => (
+            <g key={"z" + i} className={`zone ${z.cls}`}>
+              <rect x={rx(z.from)} width={Math.max(2, right - rx(z.from))} y={y(z.top)} height={Math.max(1, y(z.bottom) - y(z.top))} />
+              {z.label && <text x={rx(z.from) + 3} y={y(z.top) - 3}>{z.label}</text>}
+            </g>
+          ))}
+          {(ov.levels ?? []).filter((l) => visible(l.from)).map((l, i) => (
+            <g key={"l" + i} className={`level ${l.cls}`}>
+              <line x1={rx(l.from)} x2={right} y1={y(l.price)} y2={y(l.price)} />
+              {l.label && <text x={right - 3} y={y(l.price) - 3} textAnchor="end">{l.label}</text>}
+            </g>
+          ))}
+        </g>
         {candles.map((k, i) => {
           const up = k.c >= k.o;
           return (
@@ -97,6 +122,12 @@ export function CandleChart({ candles, firstIndex, lines = [], markIndex, decima
             </g>
           );
         })}
+        <g clipPath="url(#plot)" className="overlay">
+          {(ov.marks ?? []).filter((m) => m.index >= firstIndex && visible(m.index)).map((m, i) => {
+            const mx = x(m.index - firstIndex), my = y(m.price) + (m.up ? -6 : 6), s = Math.max(3, Math.min(6, cw * 0.4));
+            return <polygon key={"m" + i} className={`mark-pt ${m.cls}`} points={m.up ? `${mx - s},${my - s} ${mx + s},${my - s} ${mx},${my}` : `${mx - s},${my + s} ${mx + s},${my + s} ${mx},${my}`} />;
+          })}
+        </g>
         {lines.map((l) => (
           <g key={l.label} className={`lvl ${l.cls}`}>
             <line x1={P.l} x2={W - P.r} y1={y(l.price)} y2={y(l.price)} />
