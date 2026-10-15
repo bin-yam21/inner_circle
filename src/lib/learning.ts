@@ -235,3 +235,38 @@ export function cardQueue(keys: string[], states: Pick<CardState, "key" | "due">
   const fresh = keys.filter((k) => !byKey.has(k)).slice(0, newLimit);
   return [...due, ...fresh];
 }
+
+// Month-by-month trends --------------------------------------------------------
+export interface MonthRow {
+  month: string; // YYYY-MM
+  trades: number; expectancy: number | null; winRate: number | null;
+  planAdherence: number | null; biasDays: number; biasHitRate: number | null;
+  drills: number; drillBiasRate: number | null; ruleAdherence: number | null; studyDays: number;
+}
+/** One row per month that has any activity, newest first. Rates are null when there is nothing to measure. */
+export function monthlyTrends(input: { trades: Trade[]; logs: DailyLog[]; drills: Drill[]; rules: Rule[]; checks: RuleCheck[]; activity: { date: string }[] }, months = 6): MonthRow[] {
+  const m = (date: string) => date.slice(0, 7);
+  const drillMonth = (at: number) => { const d = new Date(at); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`; };
+  const keys = new Set<string>([
+    ...input.trades.map((t) => m(t.date)), ...input.logs.map((l) => m(l.date)), ...input.checks.map((c) => m(c.date)),
+    ...input.activity.map((a) => m(a.date)), ...input.drills.map((d) => drillMonth(d.at)),
+  ]);
+  const active = input.rules.filter((r) => r.active).map((r) => r.id);
+  const rate = (hits: number, n: number) => (n ? hits / n : null);
+  return [...keys].sort().reverse().slice(0, months).map((month) => {
+    const ts = input.trades.filter((t) => m(t.date) === month);
+    const st = tradeStats(ts);
+    const ex = executionStats(ts);
+    const bias = biasStats(input.logs.filter((l) => m(l.date) === month));
+    const ds = input.drills.filter((d) => drillMonth(d.at) === month);
+    const scoredDrills = ds.filter((d) => d.biasCorrect != null);
+    let ok = 0, total = 0;
+    for (const c of input.checks.filter((c) => m(c.date) === month)) for (const id of active) { total++; if (c.followed[id]) ok++; }
+    return {
+      month, trades: st.n, expectancy: st.n ? st.expectancy : null, winRate: st.n ? st.winRate : null,
+      planAdherence: ex.recorded ? ex.adherence : null, biasDays: bias.scored, biasHitRate: bias.scored ? bias.hitRate : null,
+      drills: ds.length, drillBiasRate: rate(scoredDrills.filter((d) => d.biasCorrect).length, scoredDrills.length),
+      ruleAdherence: rate(ok, total), studyDays: input.activity.filter((a) => m(a.date) === month).length,
+    };
+  });
+}

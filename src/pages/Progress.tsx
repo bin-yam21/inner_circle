@@ -2,12 +2,22 @@ import { Link } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, todayStr } from "../lib/db";
 import { explainerById, findLessonAnywhere, quiz } from "../lib/content";
-import { biasStats, conceptMastery, goLiveGates, isDue, prescriptions, type MasteryStatus } from "../lib/learning";
+import { biasStats, conceptMastery, goLiveGates, isDue, monthlyTrends, prescriptions, type MasteryStatus } from "../lib/learning";
 import { fmtR, pct } from "../lib/stats";
 import { Bar, Empty, PageHead, Stat } from "../components/ui";
 import { Icon } from "../components/fx";
 
 const STATUS_PILL: Record<MasteryStatus, string> = { "Not started": "", Studying: "", Understood: "y", Practising: "y", Edge: "g", Leak: "r" };
+
+const monthLabel = (ym: string) => new Date(ym + "-15T12:00:00").toLocaleDateString(undefined, { month: "short", year: "numeric" });
+
+/** A value with ▲/▼ against the previous month; changes smaller than `eps` count as flat. */
+function Trend({ cur, prev, show, eps = 0.02 }: { cur: number | null; prev?: number | null; show: (x: number) => string; eps?: number }) {
+  if (cur == null) return <>–</>;
+  const d = prev == null ? 0 : cur - prev;
+  const flat = Math.abs(d) < eps;
+  return <>{show(cur)}{prev != null && !flat && <span className={d > 0 ? "pos" : "neg"}> {d > 0 ? "▲" : "▼"}</span>}</>;
+}
 
 export function LessonLink({ id }: { id: string }) {
   const l = findLessonAnywhere(id);
@@ -17,10 +27,10 @@ export function LessonLink({ id }: { id: string }) {
 export default function Progress() {
   const today = todayStr();
   const data = useLiveQuery(async () => {
-    const [progress, answers, trades, logs, rules, checks, drills] = await Promise.all([
-      db.progress.toArray(), db.quizAnswers.toArray(), db.trades.toArray(), db.dailyLogs.toArray(), db.rules.toArray(), db.ruleChecks.toArray(), db.drills.toArray(),
+    const [progress, answers, trades, logs, rules, checks, drills, activity] = await Promise.all([
+      db.progress.toArray(), db.quizAnswers.toArray(), db.trades.toArray(), db.dailyLogs.toArray(), db.rules.toArray(), db.ruleChecks.toArray(), db.drills.toArray(), db.activity.toArray(),
     ]);
-    return { progress, answers, trades, logs, rules, checks, drills };
+    return { progress, answers, trades, logs, rules, checks, drills, activity };
   }, []);
   if (!data) return <p className="muted">Loading…</p>;
 
@@ -32,6 +42,7 @@ export default function Progress() {
   const due = data.answers.filter((a) => isDue(a, today)).length;
   const leaks = mastery.filter((m) => m.status === "Leak");
   const edges = mastery.filter((m) => m.status === "Edge");
+  const months = monthlyTrends(data);
 
   return (
     <div className="stack">
@@ -82,6 +93,31 @@ export default function Progress() {
           </div>
         ))}
       </div>
+
+      <h2 className="section-title">Month by month</h2>
+      {months.length ? (
+        <>
+          <div className="tw"><table className="wide">
+            <thead><tr><th>Month</th><th>Trades</th><th>Expectancy</th><th>Plan followed</th><th>Bias right</th><th>Replay drills</th><th>Rules kept</th><th>Study days</th></tr></thead>
+            <tbody>{months.map((r, i) => {
+              const prev = months[i + 1];
+              return (
+                <tr key={r.month}>
+                  <td className="n"><b>{monthLabel(r.month)}</b></td>
+                  <td className="n">{r.trades || "–"}</td>
+                  <td className="n"><Trend cur={r.expectancy} prev={prev?.expectancy} show={(x) => fmtR(x)} eps={0.05} /></td>
+                  <td className="n"><Trend cur={r.planAdherence} prev={prev?.planAdherence} show={pct} /></td>
+                  <td className="n"><Trend cur={r.biasHitRate} prev={prev?.biasHitRate} show={(x) => `${pct(x)} of ${r.biasDays}`} /></td>
+                  <td className="n">{r.drills ? <>{r.drills}{r.drillBiasRate != null && <span className="muted"> · bias {pct(r.drillBiasRate)}</span>}</> : "–"}</td>
+                  <td className="n"><Trend cur={r.ruleAdherence} prev={prev?.ruleAdherence} show={pct} /></td>
+                  <td className="n">{r.studyDays || "–"}</td>
+                </tr>
+              );
+            })}</tbody>
+          </table></div>
+          <p className="small muted" style={{ marginTop: -6 }}>▲▼ compare with the month before. Judge yourself on plan followed, bias right and rules kept first; expectancy follows them.</p>
+        </>
+      ) : <Empty>Your monthly trends appear after your first study day, trade or bias call.</Empty>}
 
       <h2 className="section-title">Concept mastery</h2>
       <p className="small muted" style={{ marginTop: -6 }}>Knowledge = lessons completed + quiz accuracy. Trades count toward a concept through their setup, or the concepts you tag in the journal. Replay = practice drills with a trade (count · expectancy).</p>

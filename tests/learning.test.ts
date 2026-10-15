@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, biasStats, cardQueue, conceptMastery, conceptsOfTrade, executionStats, goLiveGates, isDue, prescriptions, scheduleReview } from "../src/lib/learning";
+import { addDays, biasStats, cardQueue, conceptMastery, monthlyTrends, conceptsOfTrade, executionStats, goLiveGates, isDue, prescriptions, scheduleReview } from "../src/lib/learning";
 import type { DailyLog, LessonProgress, QuizAnswer, QuizQuestion, Trade } from "../src/lib/types";
 
 const mk = (date: string, r: number, extra: Partial<Trade> = {}): Trade => ({
@@ -142,5 +142,21 @@ describe("flashcard queue", () => {
   it("puts due cards first (most overdue first), then a limited number of new ones", () => {
     const q = cardQueue(["a", "b", "c", "d", "e"], [{ key: "b", due: "2026-10-14" }, { key: "c", due: "2026-10-10" }, { key: "d", due: "2026-10-20" }], "2026-10-15", 1);
     expect(q).toEqual(["c", "b", "a"]);
+  });
+});
+
+describe("monthly trends", () => {
+  it("groups by month, newest first, with null rates when nothing was measured", () => {
+    const rows = monthlyTrends({
+      trades: [mk("2026-09-10", 2, { followedPlan: true }), mk("2026-09-11", -1, { followedPlan: false }), mk("2026-10-02", 1)],
+      logs: [log("2026-10-01", "Bullish", "Bullish"), log("2026-10-02", "Bearish", "Bullish")],
+      drills: [], rules: [{ id: "r1", text: "x", category: "Risk", active: true, order: 0 }],
+      checks: [{ date: "2026-09-05", followed: { r1: true } }, { date: "2026-09-06", followed: {} }],
+      activity: [{ date: "2026-08-30" }, { date: "2026-10-01" }],
+    });
+    expect(rows.map((r) => r.month)).toEqual(["2026-10", "2026-09", "2026-08"]);
+    expect(rows[0]).toMatchObject({ trades: 1, expectancy: 1, planAdherence: null, biasDays: 2, biasHitRate: 0.5, ruleAdherence: null, studyDays: 1 });
+    expect(rows[1]).toMatchObject({ trades: 2, expectancy: 0.5, planAdherence: 0.5, biasHitRate: null, ruleAdherence: 0.5 });
+    expect(rows[2]).toMatchObject({ trades: 0, expectancy: null, studyDays: 1 });
   });
 });
