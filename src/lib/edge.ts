@@ -83,6 +83,13 @@ export function byModel(trades: Trade[], nameOf: (id: string) => string): Cell[]
   return [...group(trades, (t) => t.model ?? null).entries()].map(([k, ts]) => cellOf(nameOf(k), ts)).sort((a, b) => b.expectancy - a.expectancy);
 }
 
+/** Trades by whether (and how) they were checked before entry. */
+export function byPreCheck(trades: Trade[]): Cell[] {
+  const label = (t: Trade) => ({ meets_plan: "Checked: meets plan", partly: "Checked: partly", does_not_meet: "Checked: doesn't meet plan", manual: "Plan saved, no AI check" } as Record<string, string>)[t.preCheckDecision ?? ""] ?? "Not checked";
+  const order = ["Checked: meets plan", "Checked: partly", "Checked: doesn't meet plan", "Plan saved, no AI check", "Not checked"];
+  return [...group(trades, label).entries()].map(([k, ts]) => cellOf(k, ts)).sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+}
+
 export interface Combo extends Cell { setup: string; session: string; align: Alignment }
 /** Setup × session × bias alignment, with at least `min` trades, best first. */
 export function combos(trades: Trade[], logs: DailyLog[], min = 3): Combo[] {

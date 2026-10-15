@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../lib/db";
 import { modelById } from "../lib/content";
-import { aPlusSetups, byModel, byAlignment, byChecklist, byHour, combos, heatmap, logsByDate, matchesAPlus, MIN_SAMPLE, rDistribution, cellOf, type Cell } from "../lib/edge";
+import { aPlusSetups, byModel, byPreCheck, byAlignment, byChecklist, byHour, combos, heatmap, logsByDate, matchesAPlus, MIN_SAMPLE, rDistribution, cellOf, type Cell } from "../lib/edge";
 import { fmtR, pct } from "../lib/stats";
 import type { Trade } from "../lib/types";
 import { Empty, PageHead, Stat, Tabs } from "../components/ui";
@@ -84,6 +84,12 @@ export default function Edge() {
           <div className="card"><h3>With or against my daily bias</h3><CellTable cells={byAlignment(trades, logs)} first="Alignment" /></div>
           <div className="card"><h3>By checklist score</h3><CellTable cells={byChecklist(trades)} first="Checklist" /></div>
         </div>
+
+        {trades.some((t) => t.preCheckId) && <>
+          <h2 className="section-title">By pre-trade check</h2>
+          <CellTable cells={byPreCheck(trades)} first="Check" />
+          <p className="small muted" style={{ marginTop: -6 }}>Do checked trades that meet your plan do better than the rest? That's the test of whether your rules work.</p>
+        </>}
 
         {trades.some((t) => t.model) && <>
           <h2 className="section-title">By strategy model</h2>

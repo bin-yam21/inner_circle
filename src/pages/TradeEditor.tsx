@@ -29,6 +29,8 @@ export default function TradeEditor() {
   const [params] = useSearchParams();
   const nav = useNavigate();
   const existing = useLiveQuery(async () => (tradeId ? (await db.trades.get(tradeId)) ?? null : null), [tradeId]);
+  const preCheckId = tradeId ? null : params.get("precheck");
+  const pre = useLiveQuery(async () => (preCheckId ? (await db.preChecks.get(preCheckId)) ?? null : null), [preCheckId]);
   const [t, setT] = useState<Trade | null>(null);
   const [rText, setRText] = useState("");
   const images = useLiveQuery(() => (t ? db.images.where("tradeId").equals(t.id).toArray() : []), [t?.id], []);
@@ -37,12 +39,17 @@ export default function TradeEditor() {
 
   useEffect(() => {
     if (tradeId && existing === undefined) return;
+    if (preCheckId && pre === undefined) return;
     if (tradeId && existing === null) { setT(null); return; }
-    // A new trade can be preset from a link: ?model=<id> (from the Models page or a pre-trade check).
-    const preset = modelById(params.get("model") ?? "");
-    const base = existing ?? { ...blank(), ...(preset ? { model: preset.id, setup: preset.setups[0] ?? SETUPS[0] } : {}) };
+    // A new trade can be preset from a link: ?model=<id> (Models page) or ?precheck=<id> (pre-trade check).
+    const preset = modelById(pre?.model ?? params.get("model") ?? "");
+    const fromCheck: Partial<Trade> = pre ? {
+      market: pre.market, direction: pre.direction, timeframe: pre.timeframe, entry: pre.entry, stop: pre.stop, target: pre.target, notes: pre.notes,
+      preCheckId: pre.id, preCheckDecision: pre.verdict?.decision ?? "manual", checklist: preset ? Math.round((preset.checklist.filter((c) => pre.ticks[c]).length / preset.checklist.length) * 10) : null,
+    } : {};
+    const base = existing ?? { ...blank(), ...(preset ? { model: preset.id, setup: preset.setups[0] ?? SETUPS[0] } : {}), ...fromCheck };
     setT(base); setRText(existing ? String(existing.r) : "");
-  }, [existing, tradeId]);
+  }, [existing, tradeId, pre]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Paste screenshots straight from the clipboard (Ctrl+V / Win+Shift+S).
   useEffect(() => {
@@ -75,6 +82,11 @@ export default function TradeEditor() {
     if (!t.market.trim()) { toast("Add the market (e.g. EUR/USD)"); return; }
     if (r == null || Number.isNaN(r)) { toast("Enter the result in R, or entry, stop and exit prices"); return; }
     await db.trades.put({ ...t, market: t.market.trim().toUpperCase(), r, updatedAt: Date.now() });
+    // First save of a trade from a pre-trade check: its screenshots become the "before" images, and the check is marked as taken.
+    if (!existing && pre && t.preCheckId === pre.id) {
+      for (const b of [pre.shot1, pre.shot2]) if (b) await db.images.add({ tradeId: t.id, kind: "before", blob: b, caption: "pre-trade check" });
+      await db.preChecks.update(pre.id, { outcome: "taken", tradeId: t.id });
+    }
     await markActivity();
     toast("Trade saved");
     nav("/journal");

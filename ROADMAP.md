@@ -106,7 +106,7 @@ These are mechanical approximations of ICT's definitions, good for training the 
 
 - Each day: weakest concept → one lesson → due flashcards → 5 chart exercises → 5 targeted drills
 
-### 5.8 AI pre-trade check ⬜
+### 5.8 AI pre-trade check ✅
 
 - Screenshot + plan → Claude checks bias alignment, premium/discount, killzone and room to target against your checklist and playbook; logged with the trade
 

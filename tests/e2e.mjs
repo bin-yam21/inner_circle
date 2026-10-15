@@ -266,9 +266,13 @@ await page.route("https://api.anthropic.com/**", async (route) => {
   if (req.method() === "OPTIONS") return route.fulfill({ status: 204, headers: cors });
   const body = req.postDataJSON();
   aiBodies.push(body);
-  const answer = body.output_config?.format
-    ? JSON.stringify({ best: "Held the London long to target", worst: "Moved my stop on GBP/USD", mistakes: "Moved stop once", lessons: "Trust the stop", nextFocus: "Never touch the stop after entry" })
-    : "Verdict — B: clean entry at the order block.\nNext time — wait for displacement.";
+  const schema = body.output_config?.format?.schema;
+  const answer = schema?.properties?.decision
+    ? JSON.stringify({ decision: "partly", grade: "B", summary: "Mostly follows the OTE plan, but it's outside the killzone.", concerns: ["Stop is close to the swing low"],
+        checks: [{ item: "Higher-timeframe bias agrees with the trade direction", status: "pass", note: "Bullish bias, long" }, { item: "It's inside the London or New York killzone", status: "fail", note: "Window closed" }, { item: "An order block or FVG sits inside the OTE zone", status: "unclear", note: "Not visible on the screenshot" }] })
+    : schema
+      ? JSON.stringify({ best: "Held the London long to target", worst: "Moved my stop on GBP/USD", mistakes: "Moved stop once", lessons: "Trust the stop", nextFocus: "Never touch the stop after entry" })
+      : "Verdict — B: clean entry at the order block.\nNext time — wait for displacement.";
   await route.fulfill({ status: 200, headers: { ...cors, "content-type": "text/event-stream" }, body: sse(answer) });
 });
 const PNG = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==", "base64");
@@ -364,6 +368,48 @@ await step("playbook shows model trades and saves a definition", async () => {
   await page.getByText("Playbook saved").waitFor();
 });
 
+await step("strategy models page", async () => {
+  await go("/models");
+  await page.getByRole("heading", { name: "Optimal trade entry (OTE)" }).waitFor();
+  await page.getByRole("heading", { name: "Steps" }).first().waitFor();
+  await page.getByRole("button", { name: /Silver Bullet/ }).click();
+  await page.getByText("ICT's later public teaching").first().waitFor();
+  await page.getByRole("link", { name: /Practise in replay/ }).first().click();
+  await page.waitForURL(/replay\?drill=/);
+  if ((await page.getByLabel("Drill type").inputValue()) === "random") throw new Error("drill preset ignored");
+});
+
+await step("pre-trade check: AI verdict, then log the trade from it", async () => {
+  await go("/pretrade?model=ote");
+  await page.getByLabel("Market").fill("gbp/jpy");
+  await page.getByLabel("Entry", { exact: true }).fill("190.50");
+  await page.getByLabel("Stop", { exact: true }).fill("190.20");
+  await page.getByLabel("Target", { exact: true }).fill("191.40");
+  await page.getByLabel(/Why: bias/).fill("OB in the OTE zone");
+  await page.getByLabel("Higher-timeframe bias agrees with the trade direction").check();
+  await page.locator('input[type="file"]').first().setInputFiles({ name: "chart.png", mimeType: "image/png", buffer: PNG });
+  await page.getByText("Reward:risk to target: 3:1").waitFor();
+  await page.getByRole("button", { name: "Check my plan" }).click();
+  await page.getByRole("heading", { name: "Partly meets your plan" }).waitFor();
+  await page.locator(".checks li.fail").waitFor();
+  const b = aiBodies.at(-1);
+  const blocks = b.messages[0].content;
+  if (!blocks.some((x) => x.type === "image")) throw new Error("screenshot not sent");
+  const text = blocks.at(-1).text;
+  if (!text.includes("MODEL: Optimal trade entry (OTE)") || !text.includes("- [x] Higher-timeframe bias agrees") || !text.includes("Reward:risk to target: 3:1")) throw new Error("plan text incomplete");
+  await shot("pretrade");
+  await page.getByRole("button", { name: "I took it: log the trade" }).click();
+  await page.waitForURL(/journal\/new\?precheck=/);
+  if ((await page.getByLabel("Market").inputValue()) !== "GBP/JPY") throw new Error("not prefilled");
+  await page.getByLabel(/Result \(R\)/).fill("3");
+  await page.getByRole("button", { name: "Save trade" }).click();
+  await page.waitForURL(/#\/journal$/);
+  await go("/pretrade");
+  await page.getByRole("link", { name: "taken" }).waitFor();
+  await go("/edge");
+  await page.getByRole("heading", { name: "By pre-trade check" }).waitFor();
+});
+
 await step("broker CSV import with preview", async () => {
   await go("/journal");
   await page.getByRole("button", { name: "Import from broker" }).click();
@@ -406,6 +452,8 @@ await step("dashboard reflects activity", async () => {
   await page.getByText("1 of 65 lessons").waitFor();
   await page.getByRole("heading", { name: "Your coach" }).waitFor();
   await page.getByRole("heading", { name: /Go-live gates · \d\/7/ }).waitFor();
+  await page.locator(".study h3").filter({ hasText: "Today's study plan" }).waitFor();
+  if ((await page.locator(".study .tasks li").count()) !== 5) throw new Error("study plan should have 5 tasks");
   const plan = page.locator(".today");
   await plan.getByText("Bearish").first().waitFor();
   await plan.getByText("Only the NY open").waitFor();

@@ -217,3 +217,10 @@ b.pos{color:var(--bull)} b.neg{color:var(--bear)}
 .tasks .tick{flex:none;width:20px;height:20px;border-radius:50%;border:1.5px solid var(--rule);display:grid;place-items:center;font-size:12px;color:var(--sheet);margin-top:2px}
 .tasks li.done .tick{background:var(--bull);border-color:var(--bull)}
 .tasks li.done a{color:var(--muted);text-decoration:line-through}
+.verdict{border-left:3px solid var(--rule)}
+.verdict.ok{border-left-color:var(--bull)} .verdict.warn{border-left-color:var(--liq)} .verdict.stop{border-left-color:var(--bear)}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.checks li{display:flex;gap:10px;align-items:flex-start}
+.checks .st{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--sheet)}
+.checks li.pass .st{background:var(--bull)} .checks li.fail .st{background:var(--bear)} .checks li.unclear .st{background:var(--muted)}
+.ctx{margin:0;padding-left:18px} .ctx li.neg{color:var(--bear)}

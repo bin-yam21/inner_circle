@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aPlusSetups, alignment, byAlignment, byChecklist, byHour, cellOf, combos, heatmap, logsByDate, matchesAPlus, MIN_SAMPLE, nyHour, rDistribution } from "../src/lib/edge";
+import { aPlusSetups, alignment, byAlignment, byPreCheck, byChecklist, byHour, cellOf, combos, heatmap, logsByDate, matchesAPlus, MIN_SAMPLE, nyHour, rDistribution } from "../src/lib/edge";
 import type { DailyLog, Trade } from "../src/lib/types";
 
 let id = 0;
@@ -66,5 +66,12 @@ describe("bias alignment and combos", () => {
   it("orders checklist buckets", () => {
     const c = byChecklist([mk("2026-10-05", 1, { checklist: 9 }), mk("2026-10-05", -1, { checklist: 5 }), mk("2026-10-05", 0)]);
     expect(c.map((x) => x.key)).toEqual(["8–10", "0–5", "Not scored"]);
+  });
+});
+
+describe("by pre-trade check", () => {
+  it("groups trades by their check decision in a fixed order", () => {
+    const c = byPreCheck([mk("2026-10-05", 2, { preCheckId: "a", preCheckDecision: "meets_plan" }), mk("2026-10-05", -1), mk("2026-10-05", -1, { preCheckId: "b", preCheckDecision: "does_not_meet" })]);
+    expect(c.map((x) => x.key)).toEqual(["Checked: meets plan", "Checked: doesn't meet plan", "Not checked"]);
   });
 });

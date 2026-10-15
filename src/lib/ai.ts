@@ -172,3 +172,41 @@ export async function reviewDrill(apiKey: string, drillText: string, onText: (t:
 export async function reviewBias(apiKey: string, dayText: string, onText: (t: string) => void, signal?: AbortSignal): Promise<string> {
   return (await streamClaude(apiKey, BIAS_SYSTEM, [{ type: "text", text: dayText }], { effort: "medium", onText, signal })).text;
 }
+
+// Pre-trade check -----------------------------------------------------------------------------
+
+const PRECHECK_SYSTEM = `You check a trader's plan BEFORE they enter, against their OWN written criteria. The trader studies the ICT (Inner Circle Trader) mentorship and trades on a demo account while learning.
+You get: the execution model they intend to use (its rules and checklist), the items they ticked themselves, their active personal rules, context computed by their journal app (New York time, whether the model's time window is open, their daily bias call, their tilt/risk status, the reward:risk of the plan), their notes, and chart screenshots.
+Your job is ONLY to judge whether this plan meets their criteria. Do not predict the market, do not say whether price will go up or down, and do not tell them to take or avoid the trade: say whether the plan follows their rules.
+For every checklist item give a status:
+- "pass": the plan, context or screenshot supports it.
+- "fail": the context or screenshot contradicts it, even if the trader ticked it (be strict: e.g. entry above 50% of the visible range on a long is not in discount; outside the time window is a fail).
+- "unclear": it can't be verified from what you were given (say what would show it).
+Add any rule breaks or concerns not covered by the checklist (stop placement, room to target, trading against their own bias, tilt status). decision is "meets_plan" only if no item fails and nothing important is unclear; "partly" if minor items fail or are unclear; "does_not_meet" if a core rule fails. Grade the process A–F. Keep notes short and concrete, quoting prices when you can read them.`;
+
+const PRECHECK_SCHEMA = {
+  type: "object", additionalProperties: false,
+  required: ["decision", "grade", "checks", "concerns", "summary"],
+  properties: {
+    decision: { type: "string", enum: ["meets_plan", "partly", "does_not_meet"] },
+    grade: { type: "string", enum: ["A", "B", "C", "D", "F"] },
+    checks: { type: "array", items: { type: "object", additionalProperties: false, required: ["item", "status", "note"], properties: {
+      item: { type: "string" }, status: { type: "string", enum: ["pass", "fail", "unclear"] }, note: { type: "string" },
+    } } },
+    concerns: { type: "array", items: { type: "string" } },
+    summary: { type: "string", description: "Two or three sentences on whether the plan follows the trader's own rules." },
+  },
+} as const;
+
+export type PreCheckVerdict = import("./types").PreCheckVerdict;
+
+export async function preTradeCheck(apiKey: string, planText: string, shots: Blob[], signal?: AbortSignal): Promise<PreCheckVerdict> {
+  const content: Anthropic.Beta.BetaContentBlockParam[] = [];
+  for (const [i, b] of shots.slice(0, 2).entries()) { content.push({ type: "text", text: `Chart screenshot ${i + 1}:` }); content.push(await imageBlock(b)); }
+  content.push({ type: "text", text: planText });
+  const { final, text } = await streamClaude(apiKey, PRECHECK_SYSTEM, content, {
+    effort: "medium", format: { type: "json_schema", schema: PRECHECK_SCHEMA as unknown as Record<string, unknown> }, signal,
+  });
+  if (final.stop_reason === "max_tokens") throw new Error("The check was cut off. Try again.");
+  return JSON.parse(text) as PreCheckVerdict;
+}

@@ -47,6 +47,8 @@ export interface Trade {
   concepts?: string[];
   /** Execution model used (StrategyModel id). */
   model?: string;
+  /** The pre-trade check this trade came from, and its decision ("manual" = checked without AI). */
+  preCheckId?: string; preCheckDecision?: PreCheckVerdict["decision"] | "manual";
   /** Last AI coach review of this trade, and when it was written. */
   aiReview?: string; aiReviewAt?: number;
   createdAt: number; updatedAt: number;
@@ -114,3 +116,21 @@ export interface CardState { key: string; box: number; due: string; correct: boo
 
 /** One answer in the chart exercises ("spot it"). kind: an ExerciseKind from lib/exercises.ts. */
 export interface SpotAnswer { id?: number; kind: string; correct: boolean; at: number; datasetId?: string }
+
+/** AI pre-trade check result: does the plan follow the trader's own model, checklist and rules? */
+export interface PreCheckVerdict {
+  decision: "meets_plan" | "partly" | "does_not_meet"; grade: "A" | "B" | "C" | "D" | "F";
+  checks: { item: string; status: "pass" | "fail" | "unclear"; note: string }[]; concerns: string[]; summary: string;
+}
+/** A plan written before entry. Screenshots are separate fields (not an array) so backups embed them. */
+export interface PreCheck {
+  id: string; at: number; date: string; market: string; direction: Direction; model?: string; timeframe: string;
+  entry: number | null; stop: number | null; target: number | null; notes: string;
+  /** Checklist items the trader ticked themselves. */
+  ticks: Record<string, boolean>;
+  /** Context the app computed when the plan was checked (time, window, bias, tilt, reward:risk). */
+  context: string;
+  shot1?: Blob; shot2?: Blob;
+  verdict?: PreCheckVerdict;
+  outcome: "open" | "taken" | "skipped"; tradeId?: string;
+}
