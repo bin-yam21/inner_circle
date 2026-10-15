@@ -185,3 +185,28 @@ b.pos{color:var(--bull)} b.neg{color:var(--bear)}
 .skill:hover{border-color:var(--accent)} .skill:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ovbar{gap:8px;align-items:center}
 .chartbox .mark-pt.sweep{fill:var(--liq);stroke:var(--sheet);stroke-width:1}
+
+/* Edge finder. Chart poles validated with the dataviz palette checker against the
+   app's light (#ffffff) and dark (#171e26) surfaces: all checks pass, CVD ΔE 9.5 / 8.7. */
+:root{--chart-pos:#00876a;--chart-neg:#c43f2a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--chart-pos:#2aa886;--chart-neg:#e4644f}}
+:root[data-theme="dark"]{--chart-pos:#2aa886;--chart-neg:#e4644f}
+.heat{display:grid;gap:2px}
+.heat-h{font-family:var(--f-mono);font-size:11px;color:var(--muted);display:flex;align-items:center;padding:4px 6px}
+.heat-c{min-height:52px;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:var(--ink);font-family:var(--f-mono);font-size:13px;cursor:default;outline-offset:2px}
+.heat-c small{font-size:10px;color:var(--muted)}
+.heat-c.thin{border:1px dashed var(--muted)}
+.heat-c.empty{background:var(--paper);color:var(--muted)}
+.heat-c:focus-visible{outline:2px solid var(--accent)}
+.heat-legend{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.heat-legend i{display:inline-block;width:140px;height:10px;border-radius:5px;background:linear-gradient(90deg,var(--chart-neg),var(--sheet) 50%,var(--chart-pos));border:1px solid var(--rule)}
+.edge-chart svg{display:block;width:100%;height:auto;min-width:0}
+.edge-chart .ebar.pos{fill:var(--chart-pos)} .edge-chart .ebar.neg{fill:var(--chart-neg)} .edge-chart .ebar.flat{fill:var(--muted)}
+.edge-chart .ebar.thin{opacity:.45}
+.edge-chart .hit{fill:transparent;cursor:default;outline:none}
+.edge-chart .hit:hover,.edge-chart .hit:focus-visible{fill:var(--ink);fill-opacity:.05}
+.edge-chart text.val{fill:var(--ink);font-weight:600}
+.edge-tip{position:absolute;transform:translate(-50%,calc(-100% - 10px));background:var(--ink);color:var(--paper);font-size:12px;line-height:1.4;padding:6px 9px;border-radius:6px;pointer-events:none;max-width:280px;white-space:normal;z-index:5;box-shadow:0 4px 14px rgba(0,0,0,.18)}
+.tableview{margin-top:10px}
+.tableview summary{cursor:pointer;color:var(--accent)}
+.aplus{border-left:3px solid var(--liq)} .aplus.confirmed{border-left-color:var(--chart-pos)}

@@ -27,12 +27,14 @@ In Chrome or Edge you can **install it as an app**: use the install icon in the 
 | Reference | Core rules, concept diagrams, PD array hierarchy, time of day, IPDA, macro and seasonals, ICT's worked trades, 2026 case studies |
 | Quizzes | 64 questions with spaced repetition (a question comes back after 1, 3, 7, 14, 30, 60 days while you keep getting it right; a miss resets it). "Due for review" mode; history of rounds |
 | Flashcards | Glossary terms and your own trade screenshots ("what's the bias and setup here?") on the same spaced schedule as quizzes. Keyboard: Space = show, 1 = didn't know, 2 = knew it |
+| Chart drills | Train your eye on real candles: click the FVG, the buy-/sell-side liquidity, the order block or the sweep; call premium/discount. The chart then shows what the detector found. Adaptive mixed mode, accuracy per skill, feeds "Chart eye" in concept mastery |
 | My progress | Go-live gates (objective demo → live criteria), "what to work on" (repeated mistakes → the lessons and explainers that fix them), concept mastery (lessons + quiz accuracy + trade expectancy per ICT concept), bias scorecard by market and weekday, and **month-by-month trends** (expectancy, plan followed, bias right, rules kept, drills, study days) |
 | My library | Your own notes (Markdown), links, video links, PDFs, images and files, with tags and search |
 | Trade journal | Full trade log: prices, auto-calculated R, setup, session, emotions, mistakes, checklist score, screenshots (paste with Ctrl+V). Stats include win rate, expectancy, profit factor, max drawdown, equity curve, and breakdowns by setup, session, market, weekday, mistake, emotion, concept and plan-followed. Plan adherence, MAE/MFE ("R left on the table", losers that were +1R first). CSV export. **Import from broker** (MT4/MT5, cTrader or any CSV) with preview; R comes from prices, or from P/L ÷ your planned risk; times are converted to New York (choose the file's clock: broker NY+7, UTC, local or NY) and the session is set from them. **AI coach review** on any saved trade grades the process and reads your screenshots |
+| Edge finder | Where your edge is: weekday × session heatmap, results by New York hour, R distribution, with/against your daily bias, checklist score, every setup × session × bias combination, and your "A+ setups". Every figure has its sample size and a 95% range |
 | Pre-session | Guided routine before you open a chart: check-in → risk state (tilt guard) → HTF bias → levels → news → killzone → rules. Saves into the check-in and Daily log |
 | Daily log | ICT's Month 1 assignment: daily bias, waiting-for levels, when the day's high and low formed, missed trades, process grade. Bias scorecard: call the direction before the session, record what price did after, track your hit rate. **AI bias review** checks the reasoning behind a scored day |
-| Replay trainer | Import OHLC candles (TradingView, MT4/MT5 or any CSV) or generate practice data; start at a random point, call the bias, place an order (click the chart to set prices), step candle by candle (→ / Space), and score the drill in R. Kept separate from the journal. **AI drill review** reads the candles you saw and judges your read |
+| Replay trainer | Import OHLC candles (TradingView, MT4/MT5 or any CSV) or generate practice data; start at a random point, call the bias, place an order (click the chart to set prices), step candle by candle (→ / Space), and score the drill in R. Kept separate from the journal. **Targeted drills** start right after a sweep → displacement, a fresh FVG, a new order block or equal highs/lows (results by drill type). **Show ICT structures** overlays FVGs, order blocks, liquidity, sweeps, swings and premium/discount, drawn from candles up to now only. **AI drill review** reads the candles you saw and judges your read |
 | Playbook | Per setup: your written definition, your stats, and your model trades (winners taken by the plan, checklist 8+, no mistakes) with screenshots |
 | Tools | NY session clock and killzones, setup checklist, position-size calculator (30% allocation and the halving rule), IPDA 20/40/60-day calculator, seasonal calendar |
 | News desk | Market snapshot and news items, each linked to the ICT lessons that apply |
@@ -69,6 +71,9 @@ src/
     stats.ts              journal statistics + tilt guard
     learning.ts           concepts, mastery, mistake → lesson fixes, bias scorecard, spaced repetition, go-live gates
     replay.ts             replay trainer: CSV import, practice data, order simulation
+    detect.ts             ICT structure detector (swings, FVGs, liquidity, sweeps, order blocks, dealing range)
+    exercises.ts          chart drill exercises · scenarios.ts targeted drills · overlay.ts chart overlays
+    edge.ts               edge finder statistics
     importTrades.ts       broker statement import
     tradeMath.ts          R from prices
     ipda.ts, time.ts      IPDA trading-day maths, NY clock and killzones

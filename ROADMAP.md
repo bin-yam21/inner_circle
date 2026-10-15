@@ -91,10 +91,12 @@ These are mechanical approximations of ICT's definitions, good for training the 
 - Moments are chosen only from what is visible at the start, never from what happens next (tested: the same moments are found when later candles don't exist), so practice results aren't inflated
 - Results by drill type; "Bias right" counts random-start drills only
 
-### 5.5 Edge finder ⬜
+### 5.5 Edge finder ✅
 
 - Results by New York hour and weekday heatmap; combinations of setup × session × bias alignment; R-multiple distribution
 - An auto-written "My A+ setup" from your profitable combinations (minimum sample shown), and a flag on trades outside it
+- Every figure shows n and a 95% range; "edge" only when the range is above zero with 8+ trades; under 3 trades shows "too few trades"
+- Chart poles validated with the dataviz palette checker (light and dark surfaces); hover tooltips and a table view on every chart
 
 ### 5.6 Strategy models ⬜
 

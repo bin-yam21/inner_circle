@@ -387,6 +387,20 @@ await step("broker CSV import with preview", async () => {
   }
 });
 
+await step("edge finder: heatmap, hour bars, tooltips, tables", async () => {
+  await go("/edge");
+  await page.getByRole("heading", { name: "Weekday × session" }).waitFor();
+  const cell = page.locator(".heat-c:not(.empty)").first();
+  await cell.hover();
+  await page.locator(".edge-tip").filter({ hasText: /per trade \((.*95%|too few trades to judge)\)/ }).waitFor();
+  if (!(await page.locator(".edge-chart .ebar").count())) throw new Error("no bars drawn");
+  await page.getByRole("heading", { name: "With or against my daily bias" }).waitFor();
+  await page.locator("summary", { hasText: "Table view" }).first().click();
+  await page.getByRole("columnheader", { name: "Day" }).waitFor();
+  await page.waitForTimeout(500);
+  await shot("edge");
+});
+
 await step("dashboard reflects activity", async () => {
   await go("/");
   await page.getByText("1 of 65 lessons").waitFor();

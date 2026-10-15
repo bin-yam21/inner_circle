@@ -30,11 +30,12 @@ import Flashcards from "./pages/Flashcards";
 import Routine from "./pages/Routine";
 import Playbook from "./pages/Playbook";
 import ChartDrills from "./pages/ChartDrills";
+import Edge from "./pages/Edge";
 
 /** Navigation: [path, icon name (see ICONS in components/fx.tsx), label]. To add a page: create it in src/pages, add a route below and an entry here. */
 export const NAV: { group: string; items: [string, string, string][] }[] = [
   { group: "Learn", items: [["/", "layout-dashboard", "Dashboard"], ["/courses", "graduation-cap", "Courses"], ["/explainers", "play", "Explainers"], ["/reference", "book-open", "Reference"], ["/quiz", "circle-help", "Quizzes"], ["/flashcards", "zap", "Flashcards"], ["/chart-drills", "eye", "Chart drills"], ["/progress", "trending-up", "My progress"], ["/library", "library", "My library"]] },
-  { group: "Trade", items: [["/routine", "list-checks", "Pre-session"], ["/journal", "candlestick-chart", "Trade journal"], ["/daily", "sun", "Daily log"], ["/replay", "rewind", "Replay trainer"], ["/playbook", "star", "Playbook"], ["/tools", "wrench", "Tools"], ["/news", "newspaper", "News desk"]] },
+  { group: "Trade", items: [["/routine", "list-checks", "Pre-session"], ["/journal", "candlestick-chart", "Trade journal"], ["/edge", "target", "Edge finder"], ["/daily", "sun", "Daily log"], ["/replay", "rewind", "Replay trainer"], ["/playbook", "star", "Playbook"], ["/tools", "wrench", "Tools"], ["/news", "newspaper", "News desk"]] },
   { group: "Mind", items: [["/psychology", "brain", "Psychology"], ["/plan", "list-checks", "Practice plan"]] },
   { group: "More", items: [["/tutor", "sparkles", "AI tutor"], ["/glossary", "book-a", "Glossary"], ["/settings", "settings", "Settings"]] },
 ];
@@ -112,6 +113,7 @@ export default function App() {
             <Route path="/routine" element={<Routine />} />
             <Route path="/playbook" element={<Playbook />} />
             <Route path="/chart-drills" element={<ChartDrills />} />
+            <Route path="/edge" element={<Edge />} />
             <Route path="*" element={<Dashboard />} />
           </Routes>
           </div>
