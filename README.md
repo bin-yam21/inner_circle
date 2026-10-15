@@ -86,6 +86,7 @@ src/
 tests/
   logic.test.ts           unit tests (npm test)
   e2e.mjs                 browser workflow test (npm run e2e, needs `npm run preview` running)
+  audit.mjs               every page at desktop/light and phone/dark: overflow, console errors, unlabeled fields (npm run audit)
 ```
 
 **To add a feature:** create `src/pages/MyFeature.tsx`, add a `<Route>` and a `NAV` entry in `src/App.tsx`. If it stores data, add a table in `src/lib/db.ts` with a new `this.version(2).stores({...})` block and add its name to `TABLES` so backups include it.
