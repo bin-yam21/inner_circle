@@ -78,6 +78,11 @@ export function byChecklist(trades: Trade[]): Cell[] {
   return [...group(trades, bucket).entries()].map(([k, ts]) => cellOf(k, ts)).sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
 }
 
+/** Results per execution model (trades without a model are left out). */
+export function byModel(trades: Trade[], nameOf: (id: string) => string): Cell[] {
+  return [...group(trades, (t) => t.model ?? null).entries()].map(([k, ts]) => cellOf(nameOf(k), ts)).sort((a, b) => b.expectancy - a.expectancy);
+}
+
 export interface Combo extends Cell { setup: string; session: string; align: Alignment }
 /** Setup × session × bias alignment, with at least `min` trades, best first. */
 export function combos(trades: Trade[], logs: DailyLog[], min = 3): Combo[] {

@@ -24,3 +24,12 @@ export function nextZone(minutes: number): { zone: Zone; inMinutes: number } {
 }
 
 export const fmtMinutes = (m: number) => `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, "0")}m`;
+
+const toMin = (hhmm: string) => { const [h, m] = hhmm.split(":").map(Number); return h * 60 + m; };
+/** Which of these New York windows is open at `minutes`, and how long until the next one opens. */
+export function windowStatus<W extends { start: string; end: string }>(windows: W[], minutes: number): { active: W | null; next: { window: W; inMinutes: number } | null } {
+  const open = (w: W) => { const s = toMin(w.start), e = toMin(w.end); return s <= e ? minutes >= s && minutes < e : minutes >= s || minutes < e; };
+  const active = windows.find(open) ?? null;
+  const next = windows.map((w) => ({ window: w, inMinutes: (toMin(w.start) - minutes + 1440) % 1440 })).filter((x) => x.inMinutes > 0).sort((a, b) => a.inMinutes - b.inMinutes)[0] ?? null;
+  return { active, next };
+}

@@ -11,7 +11,7 @@
  */
 import { parseFrontmatter } from "./frontmatter";
 import type { Explainer } from "./explainer";
-import type { Course, GlossaryTerm, Lesson, NewsItem, Plan, QuizQuestion, RefPage, Snapshot } from "./types";
+import type { Course, GlossaryTerm, Lesson, NewsItem, Plan, QuizQuestion, RefPage, Snapshot, StrategyModel } from "./types";
 
 const courseFiles = import.meta.glob("/content/courses/*/course.json", { eager: true, import: "default" }) as Record<string, Course>;
 const lessonFiles = import.meta.glob("/content/courses/*/lessons/*.md", { eager: true, query: "?raw", import: "default" }) as Record<string, string>;
@@ -21,6 +21,7 @@ const refFiles = import.meta.glob("/content/reference/*.md", { eager: true, quer
 const planFiles = import.meta.glob("/content/plans/*.json", { eager: true, import: "default" }) as Record<string, Plan>;
 const snapFiles = import.meta.glob("/content/market-snapshot.json", { eager: true, import: "default" }) as Record<string, Snapshot>;
 const explainerFiles = import.meta.glob("/content/explainers/*.json", { eager: true, import: "default" }) as Record<string, Explainer>;
+const modelFiles = import.meta.glob("/content/models/*.json", { eager: true, import: "default" }) as Record<string, StrategyModel>;
 const glossFiles = import.meta.glob("/content/glossary.json", { eager: true, import: "default" }) as Record<string, GlossaryTerm[]>;
 
 const folderOf = (path: string) => path.split("/")[3];
@@ -53,6 +54,10 @@ export const reference: RefPage[] = Object.entries(refFiles).map(([p, raw]) => {
 export const plans: Plan[] = Object.values(planFiles);
 export const snapshot: Snapshot | null = Object.values(snapFiles)[0] ?? null;
 export const glossary: GlossaryTerm[] = (Object.values(glossFiles)[0] ?? []).slice().sort((a, b) => a.term.localeCompare(b.term));
+
+/** ICT execution models (content/models/*.json). */
+export const models: StrategyModel[] = Object.entries(modelFiles).map(([p, m]) => ({ ...m, id: m.id || fileId(p) })).sort((a, b) => a.order - b.order);
+export const modelById = (id: string) => models.find((m) => m.id === id);
 
 export const lessonsOf = (courseId: string) => lessons.filter((l) => l.courseId === courseId);
 export const courseById = (id: string) => courses.find((c) => c.id === id);

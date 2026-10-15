@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, markActivity, todayStr, uid } from "../lib/db";
 import type { Trade, TradeImage } from "../lib/types";
 import { EMOTIONS, MISTAKES, SESSIONS, SETUPS, TIMEFRAMES } from "../lib/constants";
 import { CONCEPTS, conceptsOfTrade } from "../lib/learning";
 import { CHECKLIST } from "../lib/constants";
-import { lessons } from "../lib/content";
+import { lessons, modelById, models } from "../lib/content";
 import { fmtR } from "../lib/stats";
 import { Chips, ConfirmButton, Empty, PageHead, toast } from "../components/ui";
 import { AiReview } from "../components/AiReview";
@@ -26,6 +26,7 @@ import { calcRFromPrices as calcR } from "../lib/tradeMath";
 
 export default function TradeEditor() {
   const { tradeId } = useParams();
+  const [params] = useSearchParams();
   const nav = useNavigate();
   const existing = useLiveQuery(async () => (tradeId ? (await db.trades.get(tradeId)) ?? null : null), [tradeId]);
   const [t, setT] = useState<Trade | null>(null);
@@ -37,7 +38,9 @@ export default function TradeEditor() {
   useEffect(() => {
     if (tradeId && existing === undefined) return;
     if (tradeId && existing === null) { setT(null); return; }
-    const base = existing ?? blank();
+    // A new trade can be preset from a link: ?model=<id> (from the Models page or a pre-trade check).
+    const preset = modelById(params.get("model") ?? "");
+    const base = existing ?? { ...blank(), ...(preset ? { model: preset.id, setup: preset.setups[0] ?? SETUPS[0] } : {}) };
     setT(base); setRText(existing ? String(existing.r) : "");
   }, [existing, tradeId]);
 
@@ -99,6 +102,7 @@ export default function TradeEditor() {
           <label className="field"><span>Market</span><input value={t.market} onChange={(e) => set("market", e.target.value)} placeholder="EUR/USD" /></label>
           <label className="field"><span>Direction</span><select value={t.direction} onChange={(e) => set("direction", e.target.value as Trade["direction"])}><option>Long</option><option>Short</option></select></label>
           <label className="field"><span>Setup</span><select value={t.setup} onChange={(e) => set("setup", e.target.value)}>{SETUPS.map((s) => <option key={s}>{s}</option>)}</select></label>
+          <label className="field"><span>Model</span><select value={t.model ?? ""} onChange={(e) => set("model", e.target.value || undefined)}><option value="">None</option>{models.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</select></label>
           <label className="field"><span>Timeframe</span><select value={t.timeframe} onChange={(e) => set("timeframe", e.target.value)}>{TIMEFRAMES.map((s) => <option key={s}>{s}</option>)}</select></label>
           <label className="field"><span>Session</span><select value={t.session} onChange={(e) => set("session", e.target.value)}>{SESSIONS.map((s) => <option key={s}>{s}</option>)}</select></label>
           <label className="field"><span>Account</span><select value={t.account} onChange={(e) => set("account", e.target.value as Trade["account"])}><option>Demo</option><option>Live</option></select></label>
@@ -179,7 +183,7 @@ export function tradeSummary(t: Trade, rules: string[]): string {
   const v = (x: unknown) => (x == null || x === "" ? "—" : String(x));
   return [
     `Trade: ${t.direction} ${t.market} on ${t.date}${t.time ? ` at ${t.time} New York` : ""} (${t.account} account)`,
-    `Setup: ${t.setup} · timeframe ${t.timeframe} · session ${t.session}`,
+    `Setup: ${t.setup} · model ${t.model ? modelById(t.model)?.name ?? t.model : "none"} · timeframe ${t.timeframe} · session ${t.session}`,
     `Prices: entry ${v(t.entry)}, stop ${v(t.stop)}, target ${v(t.target)}, exit ${v(t.exit)} · result ${fmtR(t.r)}`,
     `Checklist score: ${t.checklist == null ? "not scored" : `${t.checklist}/10`} · followed plan: ${t.followedPlan == null ? "not recorded" : t.followedPlan ? "yes" : "no"}`,
     `MAE ${v(t.mae)}R · MFE ${v(t.mfe)}R`,

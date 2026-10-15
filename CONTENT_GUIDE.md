@@ -136,3 +136,24 @@ Two-minute narrated animations live in `content/explainers/*.json`. They appear 
 Colors: `bull`, `bear`, `liq`, `accent`, `muted`, `ink`.
 
 **Check your work:** `npm test` validates every explainer: it runs 75–150 seconds, links to lessons that exist, every `take` has stops on screen, and every element starts inside its scene. To see any moment as a still frame, open `#/explainers/<id>?t=<seconds>` in the app.
+
+## Strategy models
+
+One JSON file per model in `content/models/` (file name order doesn't matter; `order` does). Shown on the **Strategy models** page, used by the trade editor's *Model* field, the edge finder and the pre-trade check.
+
+```json
+{
+  "id": "ote", "order": 1, "name": "Optimal trade entry (OTE)",
+  "source": "Where this comes from (lesson titles, or 'ICT's later teaching')",
+  "summary": "One or two sentences.",
+  "windows": [{ "start": "02:00", "end": "05:00", "label": "London killzone" }],
+  "steps": ["…"], "entry": "…", "stop": "…", "target": "…", "invalidation": "…",
+  "checklist": ["Each item is something you can tick yes/no before entry"],
+  "lessons": ["ict-04"],
+  "setups": ["OTE retracement"],
+  "scenario": "fvg-bull"
+}
+```
+
+- `windows` are New York times; a window may cross midnight (`"22:00"`–`"01:00"`).
+- `lessons` must be lesson ids, `setups` must be names from `SETUPS` in `src/lib/constants.ts`, and `scenario` must be a replay scenario id from `src/lib/scenarios.ts`. `npm test` checks all three.

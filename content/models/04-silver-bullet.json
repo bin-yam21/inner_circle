@@ -1,0 +1,29 @@
+{
+  "id": "silver-bullet",
+  "order": 4,
+  "name": "Silver Bullet (time-based FVG)",
+  "source": "ICT's later public teaching (2022 onward). Not part of the 2016 course in this app: check the details against ICT's own material.",
+  "summary": "Inside one of three one-hour windows, wait for a displacement that leaves a fair value gap in the direction of the draw on liquidity, and enter on the return into that gap.",
+  "windows": [{ "start": "03:00", "end": "04:00", "label": "London Silver Bullet" }, { "start": "10:00", "end": "11:00", "label": "New York AM Silver Bullet" }, { "start": "14:00", "end": "15:00", "label": "New York PM Silver Bullet" }],
+  "steps": [
+    "Before the window, know the draw on liquidity: the nearest obvious high or low price is likely to reach.",
+    "Inside the window, look for a sweep of nearby liquidity, then a displacement toward the draw.",
+    "The displacement must leave a fair value gap.",
+    "Enter on the retracement into the FVG.",
+    "Take profit at the draw on liquidity; skip it if there isn't enough room."
+  ],
+  "entry": "Limit order in the fair value gap formed during the window.",
+  "stop": "Beyond the swing that created the gap.",
+  "target": "The draw on liquidity identified before the window.",
+  "invalidation": "No FVG forms inside the window, or price closes through the gap against you.",
+  "checklist": [
+    "The draw on liquidity was marked before the window",
+    "The FVG formed inside the 03–04, 10–11 or 14–15 New York window",
+    "A displacement created the FVG, in the direction of the draw",
+    "Nearby liquidity was swept first (optional, stronger)",
+    "There's enough room to the target for at least 2:1"
+  ],
+  "lessons": ["ict-33", "ict-34", "ict-03"],
+  "setups": ["FVG / void fill"],
+  "scenario": "fvg-bull"
+}

@@ -210,3 +210,4 @@ b.pos{color:var(--bull)} b.neg{color:var(--bear)}
 .tableview{margin-top:10px}
 .tableview summary{cursor:pointer;color:var(--accent)}
 .aplus{border-left:3px solid var(--liq)} .aplus.confirmed{border-left-color:var(--chart-pos)}
+.model.live{border-left:3px solid var(--chart-pos)} .model-h{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 0 4px} .model th{text-align:left;vertical-align:top;padding-right:10px;white-space:nowrap}

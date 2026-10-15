@@ -1,0 +1,30 @@
+{
+  "id": "turtle-soup",
+  "order": 2,
+  "name": "Turtle soup (stop run)",
+  "source": "2016 Mentorship: Market Maker Traps (False Flags, False Breakouts), Liquidity Pools, Reinforcing Liquidity Concepts",
+  "summary": "Price runs the stops above an old high (or below an old low) and fails to continue. Trade the reversal back into the range, against the breakout traders.",
+  "windows": [{ "start": "02:00", "end": "05:00", "label": "London killzone" }, { "start": "07:00", "end": "10:00", "label": "New York killzone" }],
+  "steps": [
+    "Mark obvious liquidity: old highs and lows, equal highs and equal lows.",
+    "Prefer runs AGAINST your higher-timeframe bias (e.g. in a bullish market, a run below an old low).",
+    "Wait for price to trade through the level, ideally in a killzone.",
+    "Look for failure: price closes back inside the range and displaces away from the extreme.",
+    "Enter on the return into the range, or at the order block / FVG the reversal leaves."
+  ],
+  "entry": "After price closes back inside the old high/low, at the PD array left by the reversal.",
+  "stop": "A few pips beyond the extreme of the stop run.",
+  "target": "The opposite side of the range or the next obvious liquidity.",
+  "invalidation": "Price accepts beyond the level (closes and holds there) instead of failing.",
+  "checklist": [
+    "The level is obvious liquidity (old high/low or equal highs/lows)",
+    "The run is against the higher-timeframe bias",
+    "Price traded through the level and closed back inside",
+    "A displacement away from the extreme followed",
+    "It's inside the London or New York killzone",
+    "Stop is beyond the run's extreme; reward at least 2:1"
+  ],
+  "lessons": ["ict-16", "ict-15", "ict-34", "ict-26"],
+  "setups": ["Turtle soup (stop run)"],
+  "scenario": "ssl-sweep-long"
+}

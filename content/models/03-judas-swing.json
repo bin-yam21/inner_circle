@@ -1,0 +1,30 @@
+{
+  "id": "judas-swing",
+  "order": 3,
+  "name": "Judas swing / Power of 3",
+  "source": "2016 Mentorship: Impulse Price Swings & Market Protraction; time-of-day reference (Power of 3, midnight open)",
+  "summary": "Each day tends to accumulate (Asia), manipulate (a false move after midnight New York: the Judas swing), then distribute in the real direction. On a bullish day, buy the false drop below the midnight open in the London killzone.",
+  "windows": [{ "start": "00:00", "end": "02:00", "label": "After New York midnight (protraction)" }, { "start": "02:00", "end": "05:00", "label": "London killzone" }],
+  "steps": [
+    "Know the daily bias before the session (bullish or bearish day).",
+    "Mark the New York midnight opening price and the Asian range.",
+    "After midnight, expect a false move against the bias (protraction): on a bullish day, a drop below the midnight open, often through the Asian low.",
+    "In the London killzone, wait for the reversal: displacement back in the bias direction.",
+    "Enter at the order block or FVG the reversal leaves, below the midnight open (above it for shorts)."
+  ],
+  "entry": "On a bullish day, at a PD array below the midnight opening price after the Judas swing reverses (mirror for bearish days).",
+  "stop": "Beyond the Judas swing's extreme.",
+  "target": "The day's draw on liquidity in the bias direction (e.g. the previous day's high on a bullish day).",
+  "invalidation": "The 'false' move keeps going with displacement: the bias was wrong for today.",
+  "checklist": [
+    "Daily bias was set before the session",
+    "Price made a move against the bias after midnight New York",
+    "Entry is below the midnight open on a bullish day (above it on a bearish day)",
+    "A displacement back in the bias direction happened in the London killzone",
+    "Entry is at an order block or FVG",
+    "Target is the day's draw on liquidity; reward at least 2:1"
+  ],
+  "lessons": ["ict-08", "ict-02", "ict-03"],
+  "setups": [],
+  "scenario": "ssl-sweep-long"
+}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, markActivity, uid } from "../lib/db";
 import { EXERCISE_KINDS, EXERCISES, VIEW, exerciseStats, grade, makeExercise, type Exercise, type ExerciseKind, type Graded } from "../lib/exercises";
@@ -29,7 +29,8 @@ export default function ChartDrills() {
   const datasets = useLiveQuery(() => db.replayData.orderBy("createdAt").reverse().toArray(), []);
   const answers = useLiveQuery(() => db.spotAnswers.toArray(), [], []);
   const [dsId, setDsId] = useState("");
-  const [mode, setMode] = useState<Mode>("mixed");
+  const [params] = useSearchParams();
+  const [mode, setMode] = useState<Mode>(() => { const k = params.get("kind"); return k && (EXERCISE_KINDS as string[]).includes(k) ? (k as ExerciseKind) : "mixed"; });
   const [cur, setCur] = useState<{ ex: Exercise; click?: { index: number; price: number }; result?: Graded } | null>(null);
   const [session, setSession] = useState({ right: 0, total: 0 });
   const [notFound, setNotFound] = useState(false);

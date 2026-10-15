@@ -2,7 +2,8 @@ import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../lib/db";
-import { aPlusSetups, byAlignment, byChecklist, byHour, combos, heatmap, logsByDate, matchesAPlus, MIN_SAMPLE, rDistribution, cellOf, type Cell } from "../lib/edge";
+import { modelById } from "../lib/content";
+import { aPlusSetups, byModel, byAlignment, byChecklist, byHour, combos, heatmap, logsByDate, matchesAPlus, MIN_SAMPLE, rDistribution, cellOf, type Cell } from "../lib/edge";
 import { fmtR, pct } from "../lib/stats";
 import type { Trade } from "../lib/types";
 import { Empty, PageHead, Stat, Tabs } from "../components/ui";
@@ -83,6 +84,11 @@ export default function Edge() {
           <div className="card"><h3>With or against my daily bias</h3><CellTable cells={byAlignment(trades, logs)} first="Alignment" /></div>
           <div className="card"><h3>By checklist score</h3><CellTable cells={byChecklist(trades)} first="Checklist" /></div>
         </div>
+
+        {trades.some((t) => t.model) && <>
+          <h2 className="section-title">By strategy model</h2>
+          <CellTable cells={byModel(trades, (id) => modelById(id)?.name ?? id)} first="Model" />
+        </>}
 
         <h2 className="section-title">Every combination <span className="small muted">(setup · session · bias, 3+ trades)</span></h2>
         {allCombos.length ? <CellTable cells={allCombos} first="Combination" /> : <Empty>No combination has 3+ trades yet.</Empty>}

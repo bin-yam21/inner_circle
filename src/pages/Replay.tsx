@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, markActivity, uid } from "../lib/db";
 import type { BiasDir, Direction, Drill, ReplayDataset } from "../lib/types";
@@ -40,7 +40,8 @@ export default function Replay() {
   const [showOv, setShowOv] = useState(false);
   const [layers, setLayers] = useState<Set<Layer>>(() => new Set<Layer>(["fvg", "ob", "liquidity", "sweeps"]));
   const [selected, setSelected] = useState("");
-  const [drillType, setDrillType] = useState<DrillType>("random");
+  const [params] = useSearchParams();
+  const [drillType, setDrillType] = useState<DrillType>(() => { const d = params.get("drill"); return d && (SCENARIO_KINDS as string[]).includes(d) ? (d as ScenarioKind) : "random"; });
   const [reviewId, setReviewId] = useState<string | null>(null);
   const reviewDrill = drills.find((d) => d.id === reviewId);
   const reviewData = reviewDrill ? datasets.find((x) => x.id === reviewDrill.datasetId) : undefined;

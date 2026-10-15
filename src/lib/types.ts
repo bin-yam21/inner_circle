@@ -22,6 +22,13 @@ export interface Snapshot { asOf: string; note?: string; items: { k: string; v: 
 export interface Plan { id: string; title: string; course?: string; weeks: { title: string; tasks: string[] }[] }
 export interface RefPage { id: string; title: string; order: number; course?: string; body: string }
 export interface GlossaryTerm { term: string; definition: string }
+/** An ICT execution model (content/models/*.json). Times are New York, "HH:MM". */
+export interface StrategyModel {
+  id: string; order: number; name: string; source: string; summary: string;
+  windows: { start: string; end: string; label: string }[];
+  steps: string[]; entry: string; stop: string; target: string; invalidation: string;
+  checklist: string[]; lessons: string[]; setups: string[]; scenario?: string;
+}
 
 // User data (IndexedDB) ------------------------------------------------------
 export type Direction = "Long" | "Short";
@@ -38,6 +45,8 @@ export interface Trade {
   mae?: number | null; mfe?: number | null;
   /** ICT concepts used in this trade (ids from CONCEPTS in lib/learning.ts). */
   concepts?: string[];
+  /** Execution model used (StrategyModel id). */
+  model?: string;
   /** Last AI coach review of this trade, and when it was written. */
   aiReview?: string; aiReviewAt?: number;
   createdAt: number; updatedAt: number;

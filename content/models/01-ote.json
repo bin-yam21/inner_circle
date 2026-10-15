@@ -1,0 +1,30 @@
+{
+  "id": "ote",
+  "order": 1,
+  "name": "Optimal trade entry (OTE)",
+  "source": "2016 Mentorship: Equilibrium vs Discount / Premium, Framing Low Risk Trade Setups",
+  "summary": "After a displacement leg in the direction of your higher-timeframe bias, buy the retracement into the 62–79% zone of that leg (70.5% is the sweet spot), ideally where an order block or fair value gap sits.",
+  "windows": [{ "start": "02:00", "end": "05:00", "label": "London killzone" }, { "start": "07:00", "end": "10:00", "label": "New York killzone" }],
+  "steps": [
+    "Higher-timeframe bias and draw on liquidity are clear (where is price going?).",
+    "An impulse leg displaces in that direction and the swing is complete (for a high: a lower candle on each side, then a fourth candle lower).",
+    "Draw the Fibonacci from the impulse's start to its end. Discount for longs = below 50%; OTE = 62%–79%.",
+    "Wait for price to retrace into the OTE zone, ideally into an order block or fair value gap inside it.",
+    "Enter at 62–70.5% with a limit order, or on a lower-timeframe shift inside the zone."
+  ],
+  "entry": "Limit order at 62–70.5% of the impulse leg, at the PD array inside the zone.",
+  "stop": "Beyond the start of the impulse leg (the 100% level).",
+  "target": "The impulse's high (low for shorts) first, then the next obvious liquidity beyond it.",
+  "invalidation": "Price trades through the 100% level, or the retracement turns into displacement against you.",
+  "checklist": [
+    "Higher-timeframe bias agrees with the trade direction",
+    "The impulse leg displaced and completed a swing",
+    "Entry is in the 62–79% zone (discount for longs, premium for shorts)",
+    "An order block or FVG sits inside the OTE zone",
+    "It's inside the London or New York killzone",
+    "Reward is at least 2:1 to the first target"
+  ],
+  "lessons": ["ict-04", "ict-05", "ict-10", "ict-54"],
+  "setups": ["OTE retracement"],
+  "scenario": "fvg-bull"
+}
