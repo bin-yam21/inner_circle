@@ -11,6 +11,7 @@ import { CandleHero, CountUp, CourseCover, Icon } from "../components/fx";
 import { useXp } from "../lib/xp";
 import { useNow } from "./Tools";
 import { LessonLink } from "./Progress";
+import { StudyPlanCard } from "../components/StudyPlanCard";
 import { goLiveGates, isDue, prescriptions } from "../lib/learning";
 
 export default function Dashboard() {
@@ -77,6 +78,8 @@ export default function Dashboard() {
           <p className="alert warn small" style={{ margin: 0 }}>Session's over. <Link to="/daily">Record what price actually did</Link> to score today's bias.</p>
         )}
       </section>
+
+      <StudyPlanCard />
 
       <div className="grid g4">
         <Ring value={total ? done.size / total : 0} label="All courses" sub={`${done.size} of ${total} lessons`} />

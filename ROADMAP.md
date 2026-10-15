@@ -98,11 +98,11 @@ These are mechanical approximations of ICT's definitions, good for training the 
 - Every figure shows n and a 95% range; "edge" only when the range is above zero with 8+ trades; under 3 trades shows "too few trades"
 - Chart poles validated with the dataviz palette checker (light and dark surfaces); hover tooltips and a table view on every chart
 
-### 5.6 Strategy models ⬜
+### 5.6 Strategy models ✅
 
 - Playbooks for ICT's execution models (OTE, Turtle soup, Judas swing / Power of 3, Silver Bullet time window) with rules, time windows, checklists and per-model stats; labelled as summaries of ICT's public teaching
 
-### 5.7 Adaptive daily study plan ⬜
+### 5.7 Adaptive daily study plan ✅
 
 - Each day: weakest concept → one lesson → due flashcards → 5 chart exercises → 5 targeted drills
 
