@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseStatement, splitRows, toTrade } from "../src/lib/importTrades";
+import { parseStatement, sessionForNyTime, splitRows, toNewYork, toTrade } from "../src/lib/importTrades";
 
 describe("splitRows", () => {
   it("handles quoted fields with delimiters and quotes", () => {
@@ -34,8 +34,32 @@ describe("parseStatement", () => {
   it("builds a journal trade with notes about what to fill in", () => {
     const row = parseStatement("Symbol,Type,Time,Profit\nUS30,buy,2026-10-05 15:00,-50", 0).rows[0];
     expect(row.r).toBeNull();
-    const t = toTrade(row, "Demo", "x.csv", { setup: "Other", session: "London open", timeframe: "15m" });
+    const t = toTrade(row, "Demo", "x.csv", { setup: "Other", timeframe: "15m" });
     expect(t.r).toBe(0);
     expect(t.notes).toMatch(/enter R yourself/);
+  });
+});
+
+describe("time zones", () => {
+  it("converts broker server time (New York + 7h), crossing midnight", () => {
+    expect(toNewYork(Date.UTC(2026, 9, 1, 15, 15), "ny+7")).toEqual({ date: "2026-10-01", time: "08:15" });
+    expect(toNewYork(Date.UTC(2026, 9, 1, 3, 0), "ny+7")).toEqual({ date: "2026-09-30", time: "20:00" });
+  });
+  it("converts UTC with New York daylight saving", () => {
+    expect(toNewYork(Date.UTC(2026, 9, 1, 12, 0), "utc")).toEqual({ date: "2026-10-01", time: "08:00" }); // EDT
+    expect(toNewYork(Date.UTC(2026, 11, 1, 12, 0), "utc")).toEqual({ date: "2026-12-01", time: "07:00" }); // EST
+  });
+  it("guesses the session from New York time", () => {
+    expect(["01:30", "03:00", "08:30", "11:00", "15:00", "21:00"].map(sessionForNyTime))
+      .toEqual(["Asia", "London open", "New York open", "London close", "London close", "Asia"]);
+  });
+  it("applies the zone when parsing and sets the session on the trade", () => {
+    const row = parseStatement("Symbol,Type,Open Time,Profit\nEURUSD,buy,2026.10.01 15:15,10", 10, "ny+7").rows[0];
+    expect(row.time).toBe("08:15");
+    expect(toTrade(row, "Demo", "x.csv", { setup: "Other", timeframe: "15m" }).session).toBe("New York open");
+  });
+  it("treats unix timestamps as UTC whatever zone is chosen", () => {
+    const row = parseStatement(`Symbol,Type,Time,Profit\nEURUSD,buy,${Date.UTC(2026, 9, 1, 12, 0) / 1000},10`, 10, "ny+7").rows[0];
+    expect(row.time).toBe("08:00");
   });
 });
