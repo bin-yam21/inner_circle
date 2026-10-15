@@ -76,18 +76,32 @@ export function syntheticCandles(n = 3000, seed = Date.now() % 100000, start = 1
   const rand = rng(seed);
   const out: Candle[] = [];
   let price = start, drift = 0, legLeft = 0;
+  /** Direction of a displacement due in the next candle or two (after a stop run), 0 = none. */
+  let pending = 0, pendingIn = 0;
   const vol = start * 0.0009;
   let t = Date.UTC(2026, 0, 5, 0, 0);
   for (let i = 0; i < n; i++) {
     if (legLeft-- <= 0) { drift = (rand() - 0.5) * vol * 0.6; legLeft = 20 + Math.floor(rand() * 60); }
     const hour = new Date(t).getUTCHours();
+    const killzone = (hour >= 7 && hour < 10) || (hour >= 12 && hour < 16);
     const session = hour >= 7 && hour < 10 ? 1.8 : hour >= 12 && hour < 16 ? 1.6 : hour >= 22 || hour < 2 ? 0.6 : 0.9;
     const o = price;
     let c = o + drift + (rand() - 0.5) * vol * session;
     let h = Math.max(o, c) + rand() * vol * 0.6 * session;
     let l = Math.min(o, c) - rand() * vol * 0.6 * session;
-    if (rand() < 0.03) { // stop run: a long wick through recent liquidity, then reversal
-      if (rand() < 0.5) { h += vol * (1.5 + rand() * 2); c = Math.min(c, o); } else { l -= vol * (1.5 + rand() * 2); c = Math.max(c, o); }
+    // Displacement: a strong, full-bodied candle. Mostly right after a stop run (reversing it),
+    // otherwise occasionally in the killzones in the direction of the current leg.
+    const dispDir = pending && --pendingIn <= 0 ? pending : rand() < (killzone ? 0.02 : 0.005) ? (drift >= 0 ? 1 : -1) : 0;
+    if (dispDir) {
+      pending = 0;
+      c = o + dispDir * vol * session * (2 + rand() * 1.5);
+      h = Math.max(o, c) + rand() * vol * 0.15;
+      l = Math.min(o, c) - rand() * vol * 0.15;
+      drift = dispDir * Math.abs(drift || vol * 0.15); legLeft = Math.max(legLeft, 15);
+    } else if (rand() < 0.03) { // stop run: a long wick through recent liquidity, then reversal
+      const up = rand() < 0.5;
+      if (up) { h += vol * (1.5 + rand() * 2); c = Math.min(c, o); } else { l -= vol * (1.5 + rand() * 2); c = Math.max(c, o); }
+      if (rand() < 0.45) { pending = up ? -1 : 1; pendingIn = 1 + Math.floor(rand() * 3); }
     }
     const d = start > 50 ? 2 : 5;
     const r = (x: number) => Number(x.toFixed(d));

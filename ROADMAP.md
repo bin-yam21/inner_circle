@@ -53,6 +53,59 @@ Logic: `src/lib/learning.ts` (mastery, gates, prescriptions, bias, spaced repeti
 | 4.3 | Month-by-month trends on My progress: trades, expectancy, plan followed, bias right, drills, rules kept, study days, with ▲▼ | ✅ |
 | 4.4 | "Today's plan" card on the Dashboard from the pre-session routine, with an after-close reminder to score the bias | ✅ |
 
+## Phase 5: Train the eye, then find the edge
+
+Goal: the app teaches you to *see* ICT structures on a chart (not just read about them), drills the exact situations you trade, and tells you where your real edge is.
+
+### 5.1 Concept detector (`src/lib/detect.ts`) 🚧
+
+Pure functions over candles, never looking past the candle you're "at" (no hindsight):
+
+| Structure | Rule used |
+|---|---|
+| Swing high / low | Fractal: higher high (lower low) than the 2 candles on each side; confirmed only once those candles exist |
+| Fair value gap | 3-candle imbalance: candle 1's high below candle 3's low (bullish) or candle 1's low above candle 3's high (bearish); at least 0.15 ATR; tracks first touch (mitigated) and full fill |
+| Liquidity pools | Buy-side above swing highs, sell-side below swing lows; "equal" when two swings are within 0.15 ATR; tracks when it's swept |
+| Liquidity sweep | A wick through an unswept swing high/low that closes back inside it (turtle soup) |
+| Displacement | Body ≥ 1.2 ATR and ≥ 60% of the candle's range |
+| Order block | Last opposite-colour candle within 3 candles before a displacement candle that leaves a fair value gap |
+| Dealing range | Highest swing high and lowest swing low in the last 60 candles; equilibrium = 50%, ±5% band |
+
+These are mechanical approximations of ICT's definitions, good for training the eye. ICT applies judgement (context, time of day, higher timeframe) that no rule captures.
+
+### 5.2 "Spot it" chart exercises (new page: Chart drills) 🚧
+
+- Exercise types: click an unfilled bullish/bearish FVG · click buy-side/sell-side liquidity · premium, discount or equilibrium? · click the bullish/bearish order block · click the candle that swept liquidity
+- Uses your imported candles, or practice data if you have none
+- After each answer: an overlay draws what the detector found, with a short explanation and a link to the lesson
+- Accuracy per exercise type, a 20-answer rolling score, and a "weakest skill" recommendation
+- Results feed concept mastery as a new "Chart eye" score (knowledge = lessons 40% + quiz 30% + chart eye 30% once you have chart answers)
+
+### 5.3 Replay overlay 🚧
+
+- "Show structures" toggle in replay drills: draws swings, FVGs, order blocks, liquidity and the dealing range, up to the current candle only
+
+### 5.4 Targeted replay drills ⬜
+
+- Pick a scenario (liquidity sweep → displacement, FVG retest, order block retest, equal highs/lows run); the drill starts a few candles before a moment where the detector found it
+
+### 5.5 Edge finder ⬜
+
+- Results by New York hour and weekday heatmap; combinations of setup × session × bias alignment; R-multiple distribution
+- An auto-written "My A+ setup" from your profitable combinations (minimum sample shown), and a flag on trades outside it
+
+### 5.6 Strategy models ⬜
+
+- Playbooks for ICT's execution models (OTE, Turtle soup, Judas swing / Power of 3, Silver Bullet time window) with rules, time windows, checklists and per-model stats; labelled as summaries of ICT's public teaching
+
+### 5.7 Adaptive daily study plan ⬜
+
+- Each day: weakest concept → one lesson → due flashcards → 5 chart exercises → 5 targeted drills
+
+### 5.8 AI pre-trade check ⬜
+
+- Screenshot + plan → Claude checks bias alignment, premium/discount, killzone and room to target against your checklist and playbook; logged with the trade
+
 ## Ideas for later
 
 - Live candle data for replay without CSV export (needs a data provider)
