@@ -54,7 +54,8 @@ export default function Dashboard() {
         <h1>{done.size ? "Keep the streak alive." : "Start your trading journey."}</h1>
         <p className="lede">{next ? <>Up next: <b>{next.title}</b>. Small steps every day beat cramming.</> : "Every lesson is complete. Review, journal and stay sharp."}</p>
         <div className="hero-row">
-          {next && <Link className="btn" to={`/courses/${next.courseId}/${next.id}`}><Icon name="play" size={16} /> Continue learning</Link>}
+          <Link className="btn" to="/today"><Icon name="sun" size={16} /> Today's steps</Link>
+          {next && <Link className="btn ghost" to={`/courses/${next.courseId}/${next.id}`}><Icon name="play" size={16} /> Continue learning</Link>}
           {xp && (
             <div className="xpbox">
               <div className="row"><span>Level {xp.level} · {xp.title}</span><span><CountUp value={xp.xp} /> XP</span></div>

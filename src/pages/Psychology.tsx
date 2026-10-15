@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, markActivity, saveSetting, todayStr, uid } from "../lib/db";
 import type { CheckIn, Rule, WeeklyReview } from "../lib/types";
@@ -18,7 +18,8 @@ export function isoWeek(d = new Date()): string {
 }
 
 export default function Psychology() {
-  const [tab, setTab] = useState<Tab>("checkin");
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<Tab>(() => (["checkin", "tilt", "rules", "review", "insights"].includes(params.get("tab") ?? "") ? (params.get("tab") as Tab) : "checkin"));
   return (
     <div className="stack">
       <PageHead eyebrow="Mind" title="Psychology" lede={<>Daily check-ins, a tilt guard that reads your journal, your personal rules, and weekly reviews. Study the ideas in the <Link to="/courses/trading-psychology">Trading Psychology course</Link>.</>} />

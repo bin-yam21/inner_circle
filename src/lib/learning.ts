@@ -278,3 +278,14 @@ export function monthlyTrends(input: { trades: Trade[]; logs: DailyLog[]; drills
     };
   });
 }
+
+// Today --------------------------------------------------------------------------
+/** What a journal entry is still missing for the coaching features to use it (empty = complete). */
+export function missingDetails(t: Pick<Trade, "followedPlan" | "emotionsBefore" | "mistakes" | "time">): string[] {
+  const out: string[] = [];
+  if (t.followedPlan == null) out.push("plan followed?");
+  if (!t.emotionsBefore.length) out.push("emotions");
+  if (!t.mistakes.length) out.push("mistakes (or None)");
+  if (!t.time) out.push("time");
+  return out;
+}

@@ -225,3 +225,8 @@ b.pos{color:var(--bull)} b.neg{color:var(--bear)}
 .checks li.pass .st{background:var(--bull)} .checks li.fail .st{background:var(--bear)} .checks li.unclear .st{background:var(--muted)}
 .ctx{margin:0;padding-left:18px} .ctx li.neg{color:var(--bear)}
 .backup-alert{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.nav-more summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:6px;user-select:none}
+.nav-more summary::-webkit-details-marker{display:none}
+.nav-more summary::after{content:"▸";font-size:10px;transition:transform .15s}
+.nav-more[open] summary::after{transform:rotate(90deg)}
+.nav-more summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}

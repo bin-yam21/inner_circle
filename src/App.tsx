@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { NavLink, Route, Routes, useLocation } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "./lib/db";
@@ -8,39 +8,43 @@ import { Icon } from "./components/fx";
 import { useXp } from "./lib/xp";
 import { persistStorage, runAutoBackup } from "./lib/autobackup";
 import Dashboard from "./pages/Dashboard";
-import Courses from "./pages/Courses";
-import CoursePage from "./pages/CoursePage";
-import LessonPage from "./pages/LessonPage";
-import Reference from "./pages/Reference";
-import Explainers from "./pages/Explainers";
-import Quiz from "./pages/Quiz";
-import Journal from "./pages/Journal";
-import TradeEditor from "./pages/TradeEditor";
-import Psychology from "./pages/Psychology";
-import DailyLog from "./pages/DailyLog";
-import Library from "./pages/Library";
-import News from "./pages/News";
-import Plan from "./pages/Plan";
-import Tools from "./pages/Tools";
-import Tutor from "./pages/Tutor";
-import Glossary from "./pages/Glossary";
-import Settings from "./pages/Settings";
-import Progress from "./pages/Progress";
-import Replay from "./pages/Replay";
-import Flashcards from "./pages/Flashcards";
-import Routine from "./pages/Routine";
-import Playbook from "./pages/Playbook";
-import ChartDrills from "./pages/ChartDrills";
-import Edge from "./pages/Edge";
-import Models from "./pages/Models";
-import PreTrade from "./pages/PreTrade";
+import Today from "./pages/Today";
+const Courses = lazy(() => import("./pages/Courses"));
+const CoursePage = lazy(() => import("./pages/CoursePage"));
+const LessonPage = lazy(() => import("./pages/LessonPage"));
+const Reference = lazy(() => import("./pages/Reference"));
+const Explainers = lazy(() => import("./pages/Explainers"));
+const Quiz = lazy(() => import("./pages/Quiz"));
+const Journal = lazy(() => import("./pages/Journal"));
+const TradeEditor = lazy(() => import("./pages/TradeEditor"));
+const Psychology = lazy(() => import("./pages/Psychology"));
+const DailyLog = lazy(() => import("./pages/DailyLog"));
+const Library = lazy(() => import("./pages/Library"));
+const News = lazy(() => import("./pages/News"));
+const Plan = lazy(() => import("./pages/Plan"));
+const Tools = lazy(() => import("./pages/Tools"));
+const Tutor = lazy(() => import("./pages/Tutor"));
+const Glossary = lazy(() => import("./pages/Glossary"));
+const Settings = lazy(() => import("./pages/Settings"));
+const Progress = lazy(() => import("./pages/Progress"));
+const Replay = lazy(() => import("./pages/Replay"));
+const Flashcards = lazy(() => import("./pages/Flashcards"));
+const Routine = lazy(() => import("./pages/Routine"));
+const Playbook = lazy(() => import("./pages/Playbook"));
+const ChartDrills = lazy(() => import("./pages/ChartDrills"));
+const Edge = lazy(() => import("./pages/Edge"));
+const Models = lazy(() => import("./pages/Models"));
+const PreTrade = lazy(() => import("./pages/PreTrade"));
 
-/** Navigation: [path, icon name (see ICONS in components/fx.tsx), label]. To add a page: create it in src/pages, add a route below and an entry here. */
-export const NAV: { group: string; items: [string, string, string][] }[] = [
-  { group: "Learn", items: [["/", "layout-dashboard", "Dashboard"], ["/courses", "graduation-cap", "Courses"], ["/explainers", "play", "Explainers"], ["/reference", "book-open", "Reference"], ["/models", "layers", "Strategy models"], ["/quiz", "circle-help", "Quizzes"], ["/flashcards", "zap", "Flashcards"], ["/chart-drills", "eye", "Chart drills"], ["/progress", "trending-up", "My progress"], ["/library", "library", "My library"]] },
-  { group: "Trade", items: [["/routine", "list-checks", "Pre-session"], ["/pretrade", "badge-check", "Pre-trade check"], ["/journal", "candlestick-chart", "Trade journal"], ["/edge", "target", "Edge finder"], ["/daily", "sun", "Daily log"], ["/replay", "rewind", "Replay trainer"], ["/playbook", "star", "Playbook"], ["/tools", "wrench", "Tools"], ["/news", "newspaper", "News desk"]] },
-  { group: "Mind", items: [["/psychology", "brain", "Psychology"], ["/plan", "list-checks", "Practice plan"]] },
-  { group: "More", items: [["/tutor", "sparkles", "AI tutor"], ["/glossary", "book-a", "Glossary"], ["/settings", "settings", "Settings"]] },
+/**
+ * Navigation: [path, icon name (see ICONS in components/fx.tsx), label]. To add a page: create it in
+ * src/pages, add a route below and an entry here. Groups with `collapsed` fold away under "More".
+ */
+export const NAV: { group: string; collapsed?: boolean; items: [string, string, string][] }[] = [
+  { group: "Daily", items: [["/today", "sun", "Today"], ["/", "layout-dashboard", "Dashboard"], ["/pretrade", "badge-check", "Pre-trade check"], ["/journal", "candlestick-chart", "Trade journal"], ["/daily", "notebook-pen", "Daily log"]] },
+  { group: "Learn", items: [["/courses", "graduation-cap", "Courses"], ["/models", "layers", "Strategy models"], ["/chart-drills", "eye", "Chart drills"], ["/flashcards", "zap", "Flashcards"], ["/quiz", "circle-help", "Quizzes"]] },
+  { group: "Practise & review", items: [["/replay", "rewind", "Replay trainer"], ["/edge", "target", "Edge finder"], ["/progress", "trending-up", "My progress"], ["/psychology", "brain", "Psychology"]] },
+  { group: "More", collapsed: true, items: [["/routine", "list-checks", "Pre-session routine"], ["/explainers", "play", "Explainers"], ["/reference", "book-open", "Reference"], ["/playbook", "star", "Playbook"], ["/tools", "wrench", "Tools"], ["/news", "newspaper", "News desk"], ["/library", "library", "My library"], ["/plan", "list-checks", "Practice plan"], ["/tutor", "sparkles", "AI tutor"], ["/glossary", "book-a", "Glossary"], ["/settings", "settings", "Settings"]] },
 ];
 
 export default function App() {
@@ -49,6 +53,7 @@ export default function App() {
   const total = lessons.length;
   const loc = useLocation();
   const xp = useXp();
+  const [moreOpen, setMoreOpen] = useState(() => { try { return localStorage.getItem("navMore") === "1"; } catch { return false; } });
   useEffect(() => { window.scrollTo(0, 0); }, [loc.pathname]);
   // Ask the browser to keep our data, and back up to the chosen folder on start and then hourly (it writes at most once a day).
   useEffect(() => {
@@ -75,14 +80,19 @@ export default function App() {
         )}
         <div className="prog-mini">{doneCount} / {total} lessons · {Math.round(pct * 100)}%<Bar value={pct} /></div>
         <nav className="nav">
-          {NAV.map((g) => (
-            <div key={g.group}>
-              <p className="sep">{g.group}</p>
-              {g.items.map(([to, ic, label]) => (
-                <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => (isActive ? "active" : "")}><span className="ic"><Icon name={ic} /></span>{label}</NavLink>
-              ))}
-            </div>
-          ))}
+          {NAV.map((g) => {
+            const links = g.items.map(([to, ic, label]) => (
+              <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => (isActive ? "active" : "")}><span className="ic"><Icon name={ic} /></span>{label}</NavLink>
+            ));
+            if (!g.collapsed) return <div key={g.group}><p className="sep">{g.group}</p>{links}</div>;
+            const here = g.items.some(([to]) => loc.pathname === to || loc.pathname.startsWith(to + "/"));
+            return (
+              <details key={g.group} className="nav-more" open={moreOpen || here} onToggle={(e) => { const o = (e.currentTarget as HTMLDetailsElement).open; if (!here) { setMoreOpen(o); try { localStorage.setItem("navMore", o ? "1" : "0"); } catch { /* storage blocked */ } } }}>
+                <summary className="sep">{g.group}</summary>
+                {links}
+              </details>
+            );
+          })}
         </nav>
         <div className="foot"><span className="store ok">Saved on this device</span></div>
       </aside>
@@ -95,8 +105,10 @@ export default function App() {
         </div>
         <main className="view">
           <div className="page-anim" key={loc.pathname}>
+          <Suspense fallback={<p className="muted">Loading…</p>}>
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/today" element={<Today />} />
             <Route path="/courses" element={<Courses />} />
             <Route path="/courses/:courseId" element={<CoursePage />} />
             <Route path="/courses/:courseId/:lessonId" element={<LessonPage />} />
@@ -128,6 +140,7 @@ export default function App() {
             <Route path="/pretrade" element={<PreTrade />} />
             <Route path="*" element={<Dashboard />} />
           </Routes>
+          </Suspense>
           </div>
         </main>
       </div>

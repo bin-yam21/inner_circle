@@ -20,19 +20,18 @@ export function StudyPlanCard() {
     return { progress, answers, trades, drills, spots, cardsDue, stored: stored?.value as StoredFocus | undefined };
   }, [today]);
   const mastery = data ? conceptMastery(data.progress, data.answers, quiz, data.trades, data.drills, data.spots) : null;
-  const fresh = data && data.stored?.date === today ? data.stored : null;
+  const stored = data && data.stored?.date === today ? data.stored : null;
+  // Render with today's stored focus, or pick one now; the effect saves a new pick for the rest of the day.
+  const focus = stored ?? (mastery ? { date: today, ...pickFocus(mastery) } : null);
 
   useEffect(() => {
-    if (data && mastery && !fresh) {
-      const f = pickFocus(mastery);
-      db.settings.put({ key: "studyFocus", value: { date: today, ...f } satisfies StoredFocus });
-    }
-  }, [data, mastery, fresh, today]);
-  if (!data || !mastery || !fresh) return null;
+    if (data && focus && !stored) db.settings.put({ key: "studyFocus", value: focus satisfies StoredFocus });
+  }, [data, focus?.id, stored, today]); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!data || !mastery || !focus) return null;
 
   const dayOf = (ms: number) => todayStr(new Date(ms));
   const plan = buildStudyPlan({
-    focus: fresh, mastery,
+    focus, mastery,
     lessonsDone: new Set(data.progress.filter((p) => p.done).map((p) => p.lessonId)),
     lessonsDoneToday: new Set(data.progress.filter((p) => p.done && p.doneAt && dayOf(p.doneAt) === today).map((p) => p.lessonId)),
     dueQuiz: data.answers.filter((a) => isDue(a, today)).length, dueCards: data.cardsDue,

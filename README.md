@@ -21,6 +21,7 @@ In Chrome or Edge you can **install it as an app**: use the install icon in the 
 
 | Area | What it does |
 |---|---|
+| Today | The trading day in order on one page: pre-session routine → study plan → during the session (tilt status, killzone, pre-trade check, log a trade) → after the close (score the bias, finish journal entries) → weekly review at week's end. The menu groups everything else (Daily · Learn · Practise & review · More) |
 | Dashboard | Animated hero with your level and XP, achievements, course progress, quiz accuracy, study streak, journal totals, today's mindset and tilt status, NY session, latest news. **Today's study plan** (one focus concept a day: lesson, reviews, flashcards, chart drills, targeted replay drills, ticking off automatically) and **Today's plan** card (bias, levels, intention, risk) from the pre-session routine, with an after-close reminder to score the bias |
 | Explainers | 10 two-minute motion-graphics videos with narration, captions, chapters, speed control and fullscreen (liquidity, premium/discount & OTE, order blocks, fair value gaps, killzones, IPDA ranges, risk & the halving rule, false breakouts, tilt, process over outcome). Each is embedded in its lessons |
 | Courses | ICT Mentorship Core Content (55 lessons from the video transcripts) and Trading Psychology (10 lessons). Mark lessons complete, write notes, quiz per lesson |
@@ -48,7 +49,7 @@ In Chrome or Edge you can **install it as an app**: use the install icon in the 
 ## Your data
 
 - Everything is stored in your browser's IndexedDB **on this computer** (database `trading-academy`).
-- **Back up regularly** from Settings → Download backup. The file includes screenshots and attachments. Clearing browser data deletes the local database.
+- **Automatic backups:** Settings → Automatic backups → choose a folder (ideally one synced by OneDrive, Google Drive or Dropbox). Chrome and Edge then write one backup a day while the app is open and keep the newest 14; after a browser restart, click "Resume backups" on the Dashboard. Other browsers: use Download backup; the Dashboard reminds you after 7 days. Backups include screenshots and attachments but **never your API key**. Clearing browser data deletes the local database, so keep backups.
 - The AI features send data to `api.anthropic.com` only when you click them, using the key you enter: the tutor sends your question and the relevant lesson notes; a trade review sends that trade, your active rules and up to 4 of its screenshots; the weekly coach sends that week's trades, check-ins, daily logs, rule check-ins and replay drills; a drill review sends that drill's candles, call, order and notes; a bias review sends that one day of the Daily log. A pre-trade check sends that plan, the model's rules and your ticks, the computed context, your active rules and up to 2 screenshots. Nothing else leaves your machine.
 
 ## Adding things

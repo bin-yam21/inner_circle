@@ -110,6 +110,17 @@ These are mechanical approximations of ICT's definitions, good for training the 
 
 - Screenshot + plan → Claude checks bias alignment, premium/discount, killzone and room to target against your checklist and playbook; logged with the trade
 
+## Phase 6: Protect the data, simplify the day
+
+| # | Feature | Status |
+|---|---|---|
+| 6.1 | Automatic daily backups to a chosen folder (keep 14), resume after browser restart, 7-day stale-backup warning, persistent storage | ✅ |
+| 6.2 | Backups never contain the API key; replace-restore keeps it on the device | ✅ |
+| 6.3 | Today page: the trading day in order (before → study → during → after → weekly) | ✅ |
+| 6.4 | Menu regrouped (Daily · Learn · Practise & review · collapsible More); pages load on demand | ✅ |
+
+Note: the main bundle stays ~700 KB (~235 KB gzipped) because course content is bundled for instant access; served locally, that loads in well under a second.
+
 ## Ideas for later
 
 - Live candle data for replay without CSV export (needs a data provider)

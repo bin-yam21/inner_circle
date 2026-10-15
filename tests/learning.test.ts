@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { addDays, biasStats, cardQueue, conceptMastery, monthlyTrends, conceptsOfTrade, executionStats, goLiveGates, isDue, prescriptions, scheduleReview } from "../src/lib/learning";
+import { addDays, biasStats, cardQueue, conceptMastery, missingDetails, monthlyTrends, conceptsOfTrade, executionStats, goLiveGates, isDue, prescriptions, scheduleReview } from "../src/lib/learning";
 import type { DailyLog, LessonProgress, QuizAnswer, QuizQuestion, Trade } from "../src/lib/types";
 
 const mk = (date: string, r: number, extra: Partial<Trade> = {}): Trade => ({
@@ -169,5 +169,12 @@ describe("chart eye in mastery", () => {
     expect(m.chartAccuracy).toBe(0.75);
     expect(m.knowledge).toBe(0.38); // lessons 0 × 0.5 + chart 0.75 × 0.5
     expect(conceptMastery([], [], [], [], [], spots).find((x) => x.concept.id === "liquidity")!.chartAccuracy).toBeNull();
+  });
+});
+
+describe("missingDetails", () => {
+  it("lists what a trade still needs, and nothing once complete", () => {
+    expect(missingDetails({ followedPlan: null, emotionsBefore: [], mistakes: [], time: "" })).toEqual(["plan followed?", "emotions", "mistakes (or None)", "time"]);
+    expect(missingDetails({ followedPlan: false, emotionsBefore: ["Calm"], mistakes: ["None"], time: "08:30" })).toEqual([]);
   });
 });

@@ -1,12 +1,15 @@
 // End-to-end smoke test: drives your installed Chrome against `npm run preview` (http://localhost:4173).
 // Run: npm run build && npm run preview  (in one terminal), then: node tests/e2e.mjs
 import { chromium } from "playwright-core";
+import { readFile } from "node:fs/promises";
 
 const BASE = process.env.BASE_URL ?? "http://localhost:4173";
 const SHOTS = process.env.SHOTS_DIR ?? "";
 const browser = await chromium.launch({ channel: "chrome", headless: true });
 const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
 const page = await ctx.newPage();
+// Web fonts are cosmetic and the font CDN can hang; skip them so results don't depend on the network.
+await page.route(/fonts\.(googleapis|gstatic)\.com/, (r) => r.fulfill({ status: 200, contentType: "text/css", body: "" }));
 const errors = [];
 page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
 page.on("console", (m) => { if (m.type() === "error" && !/sw\.js|CacheStorage|favicon/i.test(m.text())) errors.push("console: " + m.text()); });
@@ -120,6 +123,7 @@ await step("tools: IPDA + position size + seasonals", async () => {
 
 await step("reference diagrams drawn", async () => {
   await go("/reference/concepts");
+  await page.locator("svg#c1 rect").first().waitFor(); // pages load on demand
   const n = await page.locator("svg#c1 rect").count();
   if (n < 10) throw new Error("diagram not drawn");
 });
@@ -128,6 +132,8 @@ await step("backup export produces a file", async () => {
   await go("/settings");
   const [dl] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download backup" }).click()]);
   if (!(await dl.suggestedFilename()).startsWith("trading-academy-backup")) throw new Error("bad filename");
+  await page.getByText(/Last backup: .*(download)/).waitFor();
+  await page.getByRole("heading", { name: "Automatic backups" }).waitFor();
 });
 
 await step("explainer video plays, captions, seek, completes", async () => {
@@ -445,6 +451,35 @@ await step("edge finder: heatmap, hour bars, tooltips, tables", async () => {
   await page.getByRole("columnheader", { name: "Day" }).waitFor();
   await page.waitForTimeout(500);
   await shot("edge");
+});
+
+await step("today page walks the day", async () => {
+  await go("/today");
+  for (const h of ["Before the session", "During the session", "After the close"]) await page.getByRole("heading", { name: h }).waitFor();
+  await page.locator(".study h3").filter({ hasText: "Today's study plan" }).waitFor();
+  await page.getByRole("link", { name: "Check a plan before entry" }).waitFor();
+});
+
+await step("menu: 'More' folds away and opens", async () => {
+  await go("/today");
+  const side = page.locator("aside.side");
+  if (await side.getByRole("link", { name: "Settings" }).isVisible()) throw new Error("More should start closed");
+  await side.locator("summary", { hasText: "More" }).click();
+  await side.getByRole("link", { name: "Settings" }).waitFor();
+  await go("/tools");
+  await side.getByRole("link", { name: "Tools" }).waitFor(); // auto-opens on a page inside More
+});
+
+await step("stale-backup banner, and backups never contain the API key", async () => {
+  // Forget the last backup time directly in IndexedDB so the banner shows.
+  await page.evaluate(() => new Promise((res, rej) => { const r = indexedDB.open("trading-academy"); r.onsuccess = () => { const tx = r.result.transaction("settings", "readwrite"); tx.objectStore("settings").delete("lastBackupAt"); tx.oncomplete = () => { r.result.close(); res(); }; tx.onerror = rej; }; r.onerror = rej; }));
+  await go("/");
+  await page.getByText("You've never backed up.").waitFor();
+  const [dl] = await Promise.all([page.waitForEvent("download"), page.locator(".backup-alert").getByRole("button", { name: "Back up now" }).click()]);
+  const json = await readFile(await dl.path(), "utf8");
+  if (json.includes("sk-ant-test-key")) throw new Error("API key leaked into the backup file");
+  if (!JSON.parse(json).data.trades.length) throw new Error("backup has no trades");
+  await page.locator(".backup-alert").waitFor({ state: "detached" });
 });
 
 await step("dashboard reflects activity", async () => {
