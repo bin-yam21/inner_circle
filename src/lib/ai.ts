@@ -154,3 +154,21 @@ export async function draftWeeklyReview(apiKey: string, weekData: string, signal
   if (final.stop_reason === "max_tokens") throw new Error("The draft was cut off. Try again.");
   return JSON.parse(text) as WeeklyDraft;
 }
+
+const DRILL_SYSTEM = `You are a trading coach reviewing one chart-replay practice drill by a student of the ICT (Inner Circle Trader) 2016–17 Mentorship.
+You get the candles as text (index 0 = the candle where the student made their call; negative = history they could see; positive = what happened next), their bias call, the order they planned (if any) and their notes.
+Judge the READ, not the luck. Using only the candles given, identify what was visible at index 0: recent swing highs/lows and obvious liquidity (equal highs/lows), the dealing range and whether price was in premium or discount, displacement and any fair value gaps or order blocks. Quote prices and candle indexes.
+Then say whether the bias was justified by that context, whether the entry/stop/target were placed at sensible PD arrays and liquidity, and what the student should have looked for. If the data is too ambiguous to judge, say so.
+Use short headings: Context at the call · The bias · The order · What to look for next time. Plain text, under about 300 words. Education only, not financial advice.`;
+
+const BIAS_SYSTEM = `You are a trading coach reviewing one day of a student's ICT (Inner Circle Trader) daily-bias practice.
+You get the bias they called before the session and why, the levels they were waiting for, what price actually did (direction, the day's high and low and when they formed), whether price reached their level, and their notes.
+Assess the REASONING: was it based on the draw on liquidity, premium/discount, higher-timeframe PD arrays and time of day? Was the call wrong because the reasoning was weak, or reasonable but the market did something else? Use the timing of the high and low (e.g. a London-session low on a bullish day is the classic pattern) where it helps.
+Use short headings: Verdict · What the reasoning got right · What it missed · One question to ask tomorrow. Plain text, under about 220 words. Only use ICT ideas you are confident about. Education only, not financial advice.`;
+
+export async function reviewDrill(apiKey: string, drillText: string, onText: (t: string) => void, signal?: AbortSignal): Promise<string> {
+  return (await streamClaude(apiKey, DRILL_SYSTEM, [{ type: "text", text: drillText }], { effort: "medium", onText, signal })).text;
+}
+export async function reviewBias(apiKey: string, dayText: string, onText: (t: string) => void, signal?: AbortSignal): Promise<string> {
+  return (await streamClaude(apiKey, BIAS_SYSTEM, [{ type: "text", text: dayText }], { effort: "medium", onText, signal })).text;
+}

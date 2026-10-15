@@ -3,7 +3,8 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db, markActivity, todayStr } from "../lib/db";
 import type { BiasDir, DailyLog as Log } from "../lib/types";
 import { biasStats } from "../lib/learning";
-import { pct } from "../lib/stats";
+import { pct, weekday } from "../lib/stats";
+import { AiReview } from "../components/AiReview";
 import { Empty, PageHead, Stat, toast } from "../components/ui";
 
 const DIRS: BiasDir[] = ["Bullish", "Bearish", "Range"];
@@ -62,6 +63,13 @@ export default function DailyLog() {
         </div>
         <div><button type="button" className="btn" onClick={save} disabled={!log}>Save day</button></div>
       </section>
+      {saved?.biasDir && saved.actualDir && (
+        <AiReview key={saved.date} title="AI review of my bias" saved={saved.aiReview} savedAt={saved.aiReviewAt}
+          intro="Claude checks the reasoning behind your call (draw on liquidity, premium/discount, PD arrays, time of day) against what price did, and whether a wrong call came from weak reasoning or just the market. Sends this saved day only."
+          run={async (key, onText, signal) => (await import("../lib/ai")).reviewBias(key, dayAsText(saved), onText, signal)}
+          onDone={(text) => db.dailyLogs.update(saved.date, { aiReview: text, aiReviewAt: Date.now() })} />
+      )}
+
       <h2 className="section-title">Recent days</h2>
       {recent.length ? (
         <div className="tw"><table className="wide"><thead><tr><th>Date</th><th>Markets</th><th>Call</th><th>Actual</th><th>Bias notes</th><th>High (time)</th><th>Low (time)</th><th>Grade</th><th>Notes</th></tr></thead>
@@ -72,4 +80,19 @@ export default function DailyLog() {
       ) : <Empty>Your logged days will appear here. Click a row to reopen it.</Empty>}
     </div>
   );
+}
+
+/** One saved day as text for the AI bias review. */
+export function dayAsText(l: Log): string {
+  const v = (x?: string) => (x && x.trim()) || "—";
+  return [
+    `Date: ${l.date} (${weekday(l.date)}) · markets: ${v(l.markets)}`,
+    `Bias called before the session: ${v(l.biasDir)} · why: ${v(l.bias)}`,
+    `Levels I was waiting for: ${v(l.waitingFor)}`,
+    `What price actually did: ${v(l.actualDir)} · price reached my level: ${l.levelHit === "yes" ? "yes" : l.levelHit === "no" ? "no" : "not checked"}`,
+    `Day's high ${v(l.dailyHigh)} at ${v(l.dailyHighTime)} New York · low ${v(l.dailyLow)} at ${v(l.dailyLowTime)} New York`,
+    `What happened: ${v(l.notes)}`,
+    `Missed or skipped trades: ${v(l.missed)}`,
+    `My process grade: ${v(l.processGrade)}`,
+  ].join("\n");
 }

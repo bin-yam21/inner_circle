@@ -2,7 +2,7 @@
  * Chart replay trainer logic: CSV import, synthetic practice data and order simulation.
  * Pure functions; tested in tests/replay.test.ts.
  */
-import type { BiasDir, Candle, Direction } from "./types";
+import type { BiasDir, Candle, Direction, Drill } from "./types";
 
 // CSV import ------------------------------------------------------------------
 export interface ParseResult { candles: Candle[]; skipped: number }
@@ -161,4 +161,23 @@ export function actualDirection(candles: Candle[], start: number, end: number): 
 export function decimalsFor(candles: Candle[]): number {
   const p = candles[0]?.c ?? 1;
   return p >= 1000 ? 1 : p >= 50 ? 3 : 5;
+}
+
+/** A drill as text for the AI coach: the setup the student saw, their call, and what happened after. */
+export function drillAsText(d: Drill, candles: Candle[], context = 80): string {
+  const dec = decimalsFor(candles);
+  const from = Math.max(0, d.startIndex - context), to = Math.min(candles.length - 1, d.endIndex);
+  const iso = (t: number) => new Date(t).toISOString().slice(0, 16).replace("T", " ");
+  const f = (x: number | null | undefined) => (x == null ? "–" : x.toFixed(dec));
+  const rows = [];
+  for (let i = from; i <= to; i++) { const k = candles[i]; rows.push(`${i - d.startIndex},${iso(k.t)},${f(k.o)},${f(k.h)},${f(k.l)},${f(k.c)}`); }
+  return [
+    `Market: ${d.market} · timeframe ${d.timeframe || "unknown"} · times UTC`,
+    `Bias called at index 0: ${d.bias || "none"}${d.biasCorrect == null ? "" : ` (scored ${d.biasCorrect ? "right" : "wrong"} over ${d.endIndex - d.startIndex} candles)`}`,
+    d.direction ? `Order: ${d.direction} ${d.setup ?? ""} · entry ${f(d.entry)} · stop ${f(d.stop)} · target ${f(d.target)} · outcome ${d.outcome}${d.outcome === "win" || d.outcome === "loss" || d.outcome === "open" ? ` ${d.r}R` : ""}` : "Order: none placed",
+    `Student's notes: ${d.notes || "(none)"}`,
+    "",
+    "Candles (index,time,open,high,low,close):",
+    ...rows,
+  ].join("\n");
 }

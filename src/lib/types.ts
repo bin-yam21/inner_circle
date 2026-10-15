@@ -58,6 +58,8 @@ export interface DailyLog {
   biasDir?: BiasDir; actualDir?: BiasDir; levelHit?: "" | "yes" | "no";
   /** Pre-session routine: news calendar checked, and when the routine was completed. */
   newsChecked?: boolean; routineDoneAt?: number;
+  /** Last AI review of this day's bias reasoning. */
+  aiReview?: string; aiReviewAt?: number;
 }
 export type BiasDir = "" | "Bullish" | "Bearish" | "Range";
 export interface CheckIn {
@@ -92,6 +94,8 @@ export interface Drill {
   direction?: Direction; entry?: number | null; stop?: number | null; target?: number | null;
   outcome: "no-trade" | "not-filled" | "win" | "loss" | "open"; r: number;
   setup?: string; notes: string; at: number;
+  /** Last AI review of this drill. */
+  aiReview?: string; aiReviewAt?: number;
 }
 
 /** Spaced-repetition state of one flashcard. key: "g:<term>" (glossary) or "t:<tradeId>" (trade screenshot). */

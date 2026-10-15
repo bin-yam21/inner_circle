@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actualDirection, parseCandlesCsv, parseTime, simulate, syntheticCandles, validateOrder, type Order } from "../src/lib/replay";
+import { actualDirection, drillAsText, parseCandlesCsv, parseTime, simulate, syntheticCandles, validateOrder, type Order } from "../src/lib/replay";
 import type { Candle } from "../src/lib/types";
 
 describe("CSV import", () => {
@@ -72,5 +72,20 @@ describe("actual direction", () => {
     expect(actualDirection(flat, 15, 29)).toBe("Range");
     const up = Array.from({ length: 30 }, (_, i) => c(10 + i * 0.1, 10.15 + i * 0.1, 9.95 + i * 0.1, 10.1 + i * 0.1, i));
     expect(actualDirection(up, 15, 29)).toBe("Bullish");
+  });
+});
+
+describe("drillAsText", () => {
+  it("indexes candles relative to the call and includes the order", () => {
+    const cs = syntheticCandles(300, 7);
+    const text = drillAsText({ id: "d", datasetId: "x", datasetName: "x", market: "EUR/USD", timeframe: "15m", startIndex: 150, endIndex: 170, startTime: cs[150].t,
+      bias: "Bullish", biasCorrect: true, direction: "Long", entry: 1.1, stop: 1.09, target: 1.12, outcome: "win", r: 2, setup: "Order block", notes: "swept lows", at: 0 }, cs, 80);
+    const lines = text.split("\n");
+    const candleLines = lines.slice(lines.indexOf("Candles (index,time,open,high,low,close):") + 1);
+    expect(candleLines).toHaveLength(80 + 21);
+    expect(candleLines[0].startsWith("-80,")).toBe(true);
+    expect(candleLines.at(-1)!.startsWith("20,")).toBe(true);
+    expect(text).toContain("Order: Long Order block · entry 1.10000");
+    expect(text).toContain("Student's notes: swept lows");
   });
 });

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, markActivity, todayStr, uid } from "../lib/db";
@@ -8,7 +8,8 @@ import { CONCEPTS, conceptsOfTrade } from "../lib/learning";
 import { CHECKLIST } from "../lib/constants";
 import { lessons } from "../lib/content";
 import { fmtR } from "../lib/stats";
-import { Chips, ConfirmButton, Empty, PageHead, toast, useSettings } from "../components/ui";
+import { Chips, ConfirmButton, Empty, PageHead, toast } from "../components/ui";
+import { AiReview } from "../components/AiReview";
 
 const conceptName = (id: string) => CONCEPTS.find((c) => c.id === id)?.name ?? id;
 const conceptId = (name: string) => CONCEPTS.find((c) => c.name === name)?.id ?? name;
@@ -31,11 +32,7 @@ export default function TradeEditor() {
   const [rText, setRText] = useState("");
   const images = useLiveQuery(() => (t ? db.images.where("tradeId").equals(t.id).toArray() : []), [t?.id], []);
   const [zoom, setZoom] = useState<string | null>(null);
-  const settings = useSettings();
   const rules = useLiveQuery(() => db.rules.toArray(), [], []);
-  const [review, setReview] = useState<string | null>(null);
-  const [reviewErr, setReviewErr] = useState("");
-  const ctl = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (tradeId && existing === undefined) return;
@@ -84,23 +81,6 @@ export default function TradeEditor() {
     await db.images.where("tradeId").equals(t.id).delete();
     await db.trades.delete(t.id);
     toast("Trade deleted"); nav("/journal");
-  }
-  async function runReview() {
-    if (!t || !existing) return;
-    setReviewErr(""); setReview("");
-    ctl.current = new AbortController();
-    try {
-      const { reviewTrade } = await import("../lib/ai");
-      const text = await reviewTrade(settings.apiKey, {
-        summary: tradeSummary(existing, rules.filter((r) => r.active).map((r) => r.text)),
-        images: images.map((im) => ({ kind: im.kind, blob: im.blob })),
-        lessonTitles: lessons.map((l) => l.title),
-      }, (s) => setReview(s), ctl.current.signal);
-      await db.trades.update(existing.id, { aiReview: text, aiReviewAt: Date.now() });
-    } catch (e) {
-      const { tutorErrorMessage } = await import("../lib/ai");
-      setReviewErr(tutorErrorMessage(e));
-    } finally { setReview(null); }
   }
   const numField = (label: string, k: "entry" | "stop" | "target" | "exit" | "size" | "pnl" | "mae" | "mfe") => (
     <label className="field"><span>{label}</span><input type="number" step="any" value={t[k] ?? ""} onChange={(e) => set(k, num(e.target.value))} /></label>
@@ -178,18 +158,14 @@ export default function TradeEditor() {
       </section>
 
       {existing && (
-        <section className="card stack">
-          <div className="spread"><h3 style={{ margin: 0 }}>AI coach review</h3>
-            {settings.apiKey && (review === null
-              ? <button type="button" className="btn ghost sm" onClick={runReview}>{existing.aiReview ? "Review again" : "Review this trade"}</button>
-              : <button type="button" className="btn ghost sm" onClick={() => ctl.current?.abort()}>Stop</button>)}
-          </div>
-          {!settings.apiKey ? <p className="small muted">Add your Anthropic API key in <Link to="/settings">Settings</Link> to get a process review of this trade (fields, notes and up to 4 screenshots are sent to Claude).</p>
-            : review !== null ? <div className="review">{review || "Looking at the trade and screenshots…"}</div>
-            : existing.aiReview ? <><div className="review">{existing.aiReview}</div><p className="small muted" style={{ margin: 0 }}>Reviewed {new Date(existing.aiReviewAt ?? 0).toLocaleString()}. Save the trade first if you changed it.</p></>
-            : <p className="small muted">Claude grades the process (not the result) against your checklist and rules, reads your screenshots, and names the lessons to restudy. Sends the saved trade, your active rules and up to 4 screenshots.</p>}
-          {reviewErr && <p className="alert stop small" style={{ margin: 0 }}>{reviewErr}</p>}
-        </section>
+        <AiReview saved={existing.aiReview} savedAt={existing.aiReviewAt}
+          intro="Claude grades the process (not the result) against your checklist and rules, reads your screenshots, and names the lessons to restudy. Sends the saved trade, your active rules and up to 4 screenshots. Save the trade first if you changed it."
+          run={async (key, onText, signal) => (await import("../lib/ai")).reviewTrade(key, {
+            summary: tradeSummary(existing, rules.filter((r) => r.active).map((r) => r.text)),
+            images: images.map((im) => ({ kind: im.kind, blob: im.blob })),
+            lessonTitles: lessons.map((l) => l.title),
+          }, onText, signal)}
+          onDone={(text) => db.trades.update(existing.id, { aiReview: text, aiReviewAt: Date.now() })} />
       )}
 
       <div className="row"><button type="button" className="btn" onClick={save}>Save trade</button><Link className="btn ghost" to="/journal">Cancel</Link></div>

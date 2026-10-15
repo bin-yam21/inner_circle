@@ -4,7 +4,8 @@ import { useLiveQuery } from "dexie-react-hooks";
 import { db, markActivity, uid } from "../lib/db";
 import type { BiasDir, Direction, Drill, ReplayDataset } from "../lib/types";
 import { SETUPS } from "../lib/constants";
-import { actualDirection, decimalsFor, parseCandlesCsv, rewardRisk, simulate, syntheticCandles, validateOrder, type Order } from "../lib/replay";
+import { AiReview } from "../components/AiReview";
+import { actualDirection, decimalsFor, drillAsText, parseCandlesCsv, rewardRisk, simulate, syntheticCandles, validateOrder, type Order } from "../lib/replay";
 import { fmtR, pct, round } from "../lib/stats";
 import { CandleChart } from "../components/Charts";
 import { ConfirmButton, Empty, PageHead, Stat, toast } from "../components/ui";
@@ -33,6 +34,9 @@ export default function Replay() {
   const [picking, setPicking] = useState<Field | null>(null);
   const [playing, setPlaying] = useState(false);
   const [selected, setSelected] = useState("");
+  const [reviewId, setReviewId] = useState<string | null>(null);
+  const reviewDrill = drills.find((d) => d.id === reviewId);
+  const reviewData = reviewDrill ? datasets.find((x) => x.id === reviewDrill.datasetId) : undefined;
   const ds = datasets.find((d) => d.id === (s?.datasetId ?? selected)) ?? datasets[0];
   const dec = ds ? decimalsFor(ds.candles) : 5;
 
@@ -241,9 +245,17 @@ export default function Replay() {
               <td className="small">{d.direction ? `${d.direction} · ${d.setup ?? ""}` : "No trade"}</td>
               <td className={`n ${d.r > 0 ? "pos" : d.r < 0 ? "neg" : ""}`}>{d.outcome === "no-trade" ? "–" : d.outcome === "not-filled" ? "not filled" : `${fmtR(d.r)}${d.outcome === "open" ? " (open)" : ""}`}</td>
               <td className="small">{d.notes.slice(0, 100)}</td>
-              <td><ConfirmButton onConfirm={() => db.drills.delete(d.id)}>Delete</ConfirmButton></td>
+              <td><div className="row" style={{ flexWrap: "nowrap" }}><button type="button" className="btn ghost sm" aria-pressed={reviewId === d.id} onClick={() => setReviewId(reviewId === d.id ? null : d.id)}>{d.aiReview ? "Review ✓" : "Review"}</button><ConfirmButton onConfirm={() => db.drills.delete(d.id)}>Delete</ConfirmButton></div></td>
             </tr>))}</tbody></table></div>
-      ) : <Empty>Finished drills appear here. Practice results are kept separate from your <Link to="/journal">trade journal</Link>.</Empty>}
+      ) : null}
+      {reviewDrill && (
+        <AiReview key={reviewDrill.id} title={`AI review · ${reviewDrill.market} drill, ${new Date(reviewDrill.at).toLocaleDateString()}`} saved={reviewDrill.aiReview} savedAt={reviewDrill.aiReviewAt}
+          disabledReason={reviewData ? undefined : "The candle data for this drill was deleted, so it can't be reviewed."}
+          intro="Claude reads the candles you saw (80 before your call) and what came after, and checks whether your bias and order were justified by liquidity, premium/discount and PD arrays. Sends the candles, your call, order and notes."
+          run={async (key, onText, signal) => (await import("../lib/ai")).reviewDrill(key, drillAsText(reviewDrill, reviewData!.candles), onText, signal)}
+          onDone={(text) => db.drills.update(reviewDrill.id, { aiReview: text, aiReviewAt: Date.now() })} />
+      )}
+      {drills.length ? null : <Empty>Finished drills appear here. Practice results are kept separate from your <Link to="/journal">trade journal</Link>.</Empty>}
     </div>
   );
 }
