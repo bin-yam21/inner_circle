@@ -6,6 +6,7 @@ import { lessons } from "./lib/content";
 import { Bar, useSettings } from "./components/ui";
 import { Icon } from "./components/fx";
 import { useXp } from "./lib/xp";
+import { persistStorage, runAutoBackup } from "./lib/autobackup";
 import Dashboard from "./pages/Dashboard";
 import Courses from "./pages/Courses";
 import CoursePage from "./pages/CoursePage";
@@ -49,6 +50,13 @@ export default function App() {
   const loc = useLocation();
   const xp = useXp();
   useEffect(() => { window.scrollTo(0, 0); }, [loc.pathname]);
+  // Ask the browser to keep our data, and back up to the chosen folder on start and then hourly (it writes at most once a day).
+  useEffect(() => {
+    persistStorage();
+    runAutoBackup();
+    const t = setInterval(() => runAutoBackup(), 3_600_000);
+    return () => clearInterval(t);
+  }, []);
   useEffect(() => {
     const root = document.documentElement;
     if (settings.theme === "system") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", settings.theme);

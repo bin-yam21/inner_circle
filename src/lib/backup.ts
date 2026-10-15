@@ -1,10 +1,14 @@
 import { db, TABLES } from "./db";
 
-/** Full export of every table. Blobs (screenshots, attached files) are embedded as base64 data URLs. */
+/** Settings never written to a backup file: backups may sit in a synced cloud folder. */
+export const SECRET_SETTINGS = ["apiKey"];
+
+/** Full export of every table. Blobs (screenshots, attached files) are embedded as base64 data URLs. The API key is left out. */
 export async function exportAll(): Promise<string> {
   const out: Record<string, unknown[]> = {};
   for (const name of TABLES) {
-    const rows = await (db as unknown as Record<string, { toArray(): Promise<Record<string, unknown>[]> }>)[name].toArray();
+    let rows = await (db as unknown as Record<string, { toArray(): Promise<Record<string, unknown>[]> }>)[name].toArray();
+    if (name === "settings") rows = rows.filter((r) => !SECRET_SETTINGS.includes(String(r.key)));
     out[name] = await Promise.all(rows.map(encodeRow));
   }
   return JSON.stringify({ app: "trading-academy", version: 1, exportedAt: new Date().toISOString(), data: out });
@@ -18,7 +22,8 @@ export async function importAll(json: string, mode: "merge" | "replace"): Promis
     for (const name of TABLES) {
       const rows = (parsed.data[name] ?? []) as Record<string, unknown>[];
       const table = db.table(name);
-      if (mode === "replace") await table.clear();
+      // Replacing keeps this device's secrets (the API key), which backups never contain.
+      if (mode === "replace") await (name === "settings" ? table.filter((r: { key: string }) => !SECRET_SETTINGS.includes(r.key)).delete() : table.clear());
       const decoded = await Promise.all(rows.map(decodeRow));
       await table.bulkPut(decoded);
       count += decoded.length;

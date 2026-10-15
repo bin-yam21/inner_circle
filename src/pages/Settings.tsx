@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useLocation } from "react-router-dom";
+import { chooseFolder, forgetFolder, getFolder, persistStorage, recordBackup, runAutoBackup, supported, KEEP } from "../lib/autobackup";
 import { db, saveSetting, TABLES, type AppSettings } from "../lib/db";
 import { downloadText, exportAll, importAll } from "../lib/backup";
 import { TUTOR_MODEL } from "../lib/constants";
@@ -15,7 +18,28 @@ export default function Settings() {
   async function doExport() {
     const json = await exportAll();
     downloadText(`trading-academy-backup-${new Date().toISOString().slice(0, 10)}.json`, json);
+    await recordBackup("download");
     toast("Backup downloaded");
+  }
+  const last = useLiveQuery(async () => ({ at: (await db.settings.get("lastBackupAt"))?.value as number | undefined, where: (await db.settings.get("lastBackupWhere"))?.value as string | undefined }), []);
+  const folderRow = useLiveQuery(() => db.handles.get("backupDir"), []);
+  const [folderName, setFolderName] = useState<string | null>(null);
+  const [persisted, setPersisted] = useState<boolean | null>(null);
+  useEffect(() => { getFolder().then((d) => setFolderName(d?.name ?? null)); }, [folderRow]);
+  useEffect(() => { persistStorage().then(setPersisted); }, []);
+  const loc = useLocation();
+  useEffect(() => { if (loc.hash === "#backups") setTimeout(() => document.getElementById("backups")?.scrollIntoView({ behavior: "smooth" }), 300); }, [loc.hash]);
+  async function pickFolder() {
+    try {
+      const name = await chooseFolder();
+      setFolderName(name);
+      const r = await runAutoBackup(true);
+      toast(r === "done" ? `Backed up to "${name}"` : "Folder saved");
+    } catch { /* picker cancelled */ }
+  }
+  async function backupNow() {
+    const r = await runAutoBackup(true);
+    toast(r === "done" ? "Backed up" : r === "needs-permission" ? "Allow access to the folder first (see the banner on the Dashboard)" : "Couldn't write the backup");
   }
   async function doImport(file: File) {
     try { const n = await importAll(await file.text(), mode); setMsg(`Restored ${n} records.`); toast("Backup restored"); }
@@ -54,9 +78,23 @@ export default function Settings() {
           <div className="field"><span>&nbsp;</span><button type="button" className="btn ghost" disabled={!s.apiKey} onClick={async () => { await saveSetting("apiKey", ""); toast("API key removed"); }}>Remove</button></div>
         </div>
       </section>
+      <section className="card stack" id="backups">
+        <h3 style={{ margin: 0 }}>Automatic backups</h3>
+        {supported() ? (
+          <>
+            <p className="small" style={{ margin: 0 }}>Pick a folder once (ideally one that syncs to OneDrive, Google Drive or Dropbox). The app writes a full backup there once a day while it's open and keeps the newest {KEEP}. Your API key is never included.</p>
+            <div className="row">
+              <button type="button" className="btn" onClick={pickFolder}>{folderName ? "Change folder" : "Choose backup folder"}</button>
+              {folderName && <><button type="button" className="btn ghost" onClick={backupNow}>Back up now</button><ConfirmButton onConfirm={async () => { await forgetFolder(); setFolderName(null); toast("Automatic backups stopped"); }}>Stop automatic backups</ConfirmButton></>}
+            </div>
+            <p className="small" style={{ margin: 0 }}>{folderName ? <>Backing up to <b>{folderName}</b>.</> : "No folder chosen yet."} Last backup: {last?.at ? `${new Date(last.at).toLocaleString()} (${last.where})` : "never"}.</p>
+          </>
+        ) : <p className="small" style={{ margin: 0 }}>Automatic folder backups need Chrome or Edge. In this browser, use "Download backup" below regularly; the Dashboard reminds you after 7 days.</p>}
+        <p className="small muted" style={{ margin: 0 }}>Browser storage protection: {persisted == null ? "checking…" : persisted ? "on (the browser won't clear this data to free space)" : "not granted (the browser may clear data when the disk is full; backups matter even more)"}.</p>
+      </section>
       <section className="card stack">
         <h3 style={{ margin: 0 }}>Backup &amp; restore</h3>
-        <p className="small">Download everything (progress, notes, journal with screenshots, check-ins, rules, library files) as one file. Back up regularly: clearing browser data deletes the local database.</p>
+        <p className="small">Download everything (progress, notes, journal with screenshots, check-ins, rules, library files) as one file. Back up regularly: clearing browser data deletes the local database. Backups don't include your API key; restoring keeps the key saved on this device.</p>
         <div className="row">
           <button type="button" className="btn" onClick={doExport}>Download backup</button>
           <select className="input" style={{ width: "auto" }} value={mode} onChange={(e) => setMode(e.target.value as typeof mode)} aria-label="Restore mode"><option value="merge">Restore: merge with current data</option><option value="replace">Restore: replace current data</option></select>

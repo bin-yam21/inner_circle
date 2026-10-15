@@ -12,6 +12,7 @@ import { useXp } from "../lib/xp";
 import { useNow } from "./Tools";
 import { LessonLink } from "./Progress";
 import { StudyPlanCard } from "../components/StudyPlanCard";
+import { BackupStatus } from "../components/BackupStatus";
 import { goLiveGates, isDue, prescriptions } from "../lib/learning";
 
 export default function Dashboard() {
@@ -79,6 +80,7 @@ export default function Dashboard() {
         )}
       </section>
 
+      <BackupStatus />
       <StudyPlanCard />
 
       <div className="grid g4">

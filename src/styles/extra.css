@@ -224,3 +224,4 @@ b.pos{color:var(--bull)} b.neg{color:var(--bear)}
 .checks .st{flex:none;width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:12px;color:var(--sheet)}
 .checks li.pass .st{background:var(--bull)} .checks li.fail .st{background:var(--bear)} .checks li.unclear .st{background:var(--muted)}
 .ctx{margin:0;padding-left:18px} .ctx li.neg{color:var(--bear)}
+.backup-alert{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}

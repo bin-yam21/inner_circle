@@ -31,6 +31,8 @@ export class AcademyDB extends Dexie {
   cards!: Table<CardState, string>;
   spotAnswers!: Table<SpotAnswer, number>;
   preChecks!: Table<PreCheck, string>;
+  /** Browser objects that can't be exported (the backup folder handle). Not in TABLES, so never backed up. */
+  handles!: Table<{ key: string; handle: unknown }, string>;
 
   constructor(name = "trading-academy") {
     super(name);
@@ -56,6 +58,7 @@ export class AcademyDB extends Dexie {
     this.version(4).stores({ cards: "key, due" });
     this.version(5).stores({ spotAnswers: "++id, kind, at" });
     this.version(6).stores({ preChecks: "id, at, date" });
+    this.version(7).stores({ handles: "key" });
   }
 }
 
