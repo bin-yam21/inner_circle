@@ -94,6 +94,8 @@ export interface Drill {
   direction?: Direction; entry?: number | null; stop?: number | null; target?: number | null;
   outcome: "no-trade" | "not-filled" | "win" | "loss" | "open"; r: number;
   setup?: string; notes: string; at: number;
+  /** Targeted drill type (ScenarioKind from lib/scenarios.ts); absent for a random start. */
+  scenario?: string;
   /** Last AI review of this drill. */
   aiReview?: string; aiReviewAt?: number;
 }

@@ -27,7 +27,7 @@ describe("fair value gaps", () => {
   it("finds a bearish gap and ignores gaps below the minimum size", () => {
     const c = series([[12, 12.2, 11.5, 11.6], [11.6, 11.7, 9.5, 9.6], [9.6, 10.5, 9, 9.2]]);
     expect(fvgs(c, 0, 2, 0.1)[0]).toMatchObject({ kind: "bear", top: 11.5, bottom: 10.5, mitigatedAt: null });
-    expect(fvgs(c, 0, 2, 2)).toEqual([]);
+    expect(fvgs(c, 0, 2, 2)).toEqual([]); // 2 × ATR (0.7 here) is bigger than the 1.0 gap
   });
   it("never looks past `end`", () => {
     const c = series([[10, 10.5, 9.8, 10.2], [10.2, 12, 10.1, 11.9], [11.9, 12.5, 11, 12.4], [12.4, 12.6, 10.8, 11], [11, 11.2, 10.3, 10.4]]);

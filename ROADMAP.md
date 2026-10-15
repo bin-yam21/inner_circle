@@ -57,7 +57,7 @@ Logic: `src/lib/learning.ts` (mastery, gates, prescriptions, bias, spaced repeti
 
 Goal: the app teaches you to *see* ICT structures on a chart (not just read about them), drills the exact situations you trade, and tells you where your real edge is.
 
-### 5.1 Concept detector (`src/lib/detect.ts`) 🚧
+### 5.1 Concept detector (`src/lib/detect.ts`) ✅
 
 Pure functions over candles, never looking past the candle you're "at" (no hindsight):
 
@@ -73,7 +73,7 @@ Pure functions over candles, never looking past the candle you're "at" (no hinds
 
 These are mechanical approximations of ICT's definitions, good for training the eye. ICT applies judgement (context, time of day, higher timeframe) that no rule captures.
 
-### 5.2 "Spot it" chart exercises (new page: Chart drills) 🚧
+### 5.2 "Spot it" chart exercises (new page: Chart drills) ✅
 
 - Exercise types: click an unfilled bullish/bearish FVG · click buy-side/sell-side liquidity · premium, discount or equilibrium? · click the bullish/bearish order block · click the candle that swept liquidity
 - Uses your imported candles, or practice data if you have none
@@ -81,13 +81,15 @@ These are mechanical approximations of ICT's definitions, good for training the 
 - Accuracy per exercise type, a 20-answer rolling score, and a "weakest skill" recommendation
 - Results feed concept mastery as a new "Chart eye" score (knowledge = lessons 40% + quiz 30% + chart eye 30% once you have chart answers)
 
-### 5.3 Replay overlay 🚧
+### 5.3 Replay overlay ✅
 
 - "Show structures" toggle in replay drills: draws swings, FVGs, order blocks, liquidity and the dealing range, up to the current candle only
 
-### 5.4 Targeted replay drills ⬜
+### 5.4 Targeted replay drills ✅
 
-- Pick a scenario (liquidity sweep → displacement, FVG retest, order block retest, equal highs/lows run); the drill starts a few candles before a moment where the detector found it
+- Pick a scenario (sell-side/buy-side sweep → displacement, fresh FVG, new order block, equal highs/lows); the drill starts on the candle after it forms
+- Moments are chosen only from what is visible at the start, never from what happens next (tested: the same moments are found when later candles don't exist), so practice results aren't inflated
+- Results by drill type; "Bias right" counts random-start drills only
 
 ### 5.5 Edge finder ⬜
 

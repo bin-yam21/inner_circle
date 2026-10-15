@@ -13,17 +13,19 @@ import { Icon, floatXp } from "../components/fx";
 import { XP } from "../lib/xp";
 import { analyze } from "../lib/detect";
 import { analysisOverlay, LAYERS, type Layer } from "../lib/overlay";
+import { findScenarios, LEAD, SCENARIO_KINDS, SCENARIOS, TAIL, type ScenarioKind } from "../lib/scenarios";
+import { LessonLink } from "./Progress";
 
 const WINDOW = 90;
-/** Candles of history shown before the drill starts, and kept free after it. */
-const LEAD = 120, TAIL = 60;
 type Field = "entry" | "stop" | "target";
-interface Session { datasetId: string; start: number; cursor: number; bias: BiasDir; order: Order | null; draft: { direction: Direction; entry: string; stop: string; target: string }; setup: string; notes: string }
+type DrillType = "random" | ScenarioKind;
+interface Session { datasetId: string; start: number; cursor: number; bias: BiasDir; order: Order | null; draft: { direction: Direction; entry: string; stop: string; target: string }; setup: string; notes: string; scenario?: ScenarioKind }
 
-const newSession = (ds: ReplayDataset): Session => {
+/** A drill at a random point, or at a random moment of the chosen scenario. */
+const newSession = (ds: ReplayDataset, type: DrillType, starts: number[]): Session => {
   const max = Math.max(LEAD, ds.candles.length - TAIL);
-  const start = LEAD + Math.floor(Math.random() * Math.max(1, max - LEAD));
-  return { datasetId: ds.id, start, cursor: start, bias: "", order: null, draft: { direction: "Long", entry: "", stop: "", target: "" }, setup: SETUPS[0], notes: "" };
+  const start = type === "random" || !starts.length ? LEAD + Math.floor(Math.random() * Math.max(1, max - LEAD)) : starts[Math.floor(Math.random() * starts.length)];
+  return { datasetId: ds.id, start, cursor: start, bias: "", order: null, draft: { direction: "Long", entry: "", stop: "", target: "" }, setup: SETUPS[0], notes: "", scenario: type === "random" ? undefined : type };
 };
 const nameFromFile = (f: string) => f.replace(/\.(csv|txt)$/i, "");
 const guessMarket = (name: string) => (name.toUpperCase().match(/[A-Z]{3}[/_-]?[A-Z]{3}|US30|NAS100|SPX500|XAUUSD|DXY/)?.[0] ?? name).replace(/[_-]/, "/");
@@ -38,11 +40,13 @@ export default function Replay() {
   const [showOv, setShowOv] = useState(false);
   const [layers, setLayers] = useState<Set<Layer>>(() => new Set<Layer>(["fvg", "ob", "liquidity", "sweeps"]));
   const [selected, setSelected] = useState("");
+  const [drillType, setDrillType] = useState<DrillType>("random");
   const [reviewId, setReviewId] = useState<string | null>(null);
   const reviewDrill = drills.find((d) => d.id === reviewId);
   const reviewData = reviewDrill ? datasets.find((x) => x.id === reviewDrill.datasetId) : undefined;
   const ds = datasets.find((d) => d.id === (s?.datasetId ?? selected)) ?? datasets[0];
   const dec = ds ? decimalsFor(ds.candles) : 5;
+  const scenarios = useMemo(() => (ds ? findScenarios(ds.candles) : null), [ds]);
 
   const state = useMemo(() => (s?.order && ds ? simulate(s.order, ds.candles, s.cursor) : null), [s?.order, s?.cursor, ds]);
   const atEnd = !!(s && ds && s.cursor >= ds.candles.length - 1);
@@ -112,7 +116,7 @@ export default function Replay() {
       startIndex: s.start, endIndex: s.cursor, startTime: ds.candles[s.start].t,
       bias: s.bias, biasCorrect: actual ? actual === s.bias : null,
       direction: s.order?.direction, entry: s.order?.entry ?? null, stop: s.order?.stop ?? null, target: s.order?.target ?? null,
-      outcome, r: state && state.status !== "pending" ? state.r : 0, setup: s.order ? s.setup : undefined, notes: s.notes, at: Date.now(),
+      outcome, r: state && state.status !== "pending" ? state.r : 0, setup: s.order ? s.setup : undefined, notes: s.notes, at: Date.now(), scenario: s.scenario,
     };
     await db.drills.put(d);
     await markActivity();
@@ -122,10 +126,20 @@ export default function Replay() {
   }
 
   const st = useMemo(() => {
-    const scored = drills.filter((d) => d.biasCorrect != null);
+    // Targeted drills tell you the context, so only random-start drills measure your bias read.
+    const scored = drills.filter((d) => d.biasCorrect != null && !d.scenario);
     const taken = drills.filter((d) => d.outcome === "win" || d.outcome === "loss" || d.outcome === "open");
     const totalR = round(taken.reduce((a, d) => a + d.r, 0));
     return { scored: scored.length, biasRate: scored.length ? scored.filter((d) => d.biasCorrect).length / scored.length : 0, taken: taken.length, wins: taken.filter((d) => d.r > 0).length, totalR, expectancy: taken.length ? round(totalR / taken.length) : 0 };
+  }, [drills]);
+  const byType = useMemo(() => {
+    const rows = (["random", ...SCENARIO_KINDS] as DrillType[]).map((k) => {
+      const ds = drills.filter((d) => (k === "random" ? !d.scenario : d.scenario === k));
+      const taken = ds.filter((d) => d.outcome === "win" || d.outcome === "loss" || d.outcome === "open");
+      const totalR = taken.reduce((a, d) => a + d.r, 0);
+      return { k, n: ds.length, taken: taken.length, wins: taken.filter((d) => d.r > 0).length, expectancy: taken.length ? round(totalR / taken.length) : null };
+    });
+    return rows.filter((r) => r.n > 0);
   }, [drills]);
 
   const view = s && ds ? ds.candles.slice(Math.max(0, s.cursor - WINDOW + 1), s.cursor + 1) : [];
@@ -144,7 +158,7 @@ export default function Replay() {
 
       <div className="grid g4">
         <Stat icon="rewind" k="Drills" v={drills.length} s={`${st.taken} with a trade`} />
-        <Stat icon="target" k="Bias right" v={st.scored ? pct(st.biasRate) : "–"} s={st.scored ? `${st.scored} scored drills` : "Step 8+ candles to score a bias"} />
+        <Stat icon="target" k="Bias right" v={st.scored ? pct(st.biasRate) : "–"} s={st.scored ? `${st.scored} random-start drills` : "Random-start drills, 8+ candles"} />
         <Stat k="Practice result" v={st.taken ? fmtR(st.totalR) : "–"} s={st.taken ? `${pct(st.wins / st.taken)} wins · ${fmtR(st.expectancy)}/trade` : "Place orders in drills"} />
         <div className="card stat"><div className="k">Data</div>
           <div className="row" style={{ marginTop: 8 }}>
@@ -171,15 +185,30 @@ export default function Replay() {
             <label className="field"><span>Data set</span>
               <select value={ds?.id ?? ""} onChange={(e) => setSelected(e.target.value)}>{datasets.map((d) => <option key={d.id} value={d.id}>{d.name} · {d.candles.length} candles</option>)}</select>
             </label>
+            <label className="field"><span>Drill type</span>
+              <select value={drillType} onChange={(e) => setDrillType(e.target.value as DrillType)}>
+                <option value="random">Random point (test your read)</option>
+                {SCENARIO_KINDS.map((k) => <option key={k} value={k} disabled={!scenarios?.[k].length}>{SCENARIOS[k].title} ({scenarios?.[k].length ?? 0})</option>)}
+              </select>
+            </label>
             <div className="field"><span>{ds && `${ds.market}${ds.timeframe ? ` · ${ds.timeframe}` : ""} · ${new Date(ds.candles[0].t).toISOString().slice(0, 10)} → ${new Date(ds.candles[ds.candles.length - 1].t).toISOString().slice(0, 10)}`}</span>
-              <div className="row"><button type="button" className="btn" onClick={() => ds && setS(newSession(ds))}><Icon name="shuffle" size={16} /> Start a drill at a random point</button></div>
+              <div className="row">
+                <button type="button" className="btn" onClick={() => ds && setS(newSession(ds, drillType, drillType === "random" ? [] : scenarios?.[drillType] ?? []))}><Icon name="shuffle" size={16} /> Start a drill</button>
+                {ds && <ConfirmButton onConfirm={() => db.replayData.delete(ds.id)}>Delete data set</ConfirmButton>}
+              </div>
             </div>
-            <div className="field"><span>&nbsp;</span><div className="row">{ds && <ConfirmButton onConfirm={() => db.replayData.delete(ds.id)}>Delete data set</ConfirmButton>}</div></div>
           </div>
+          {drillType !== "random" && <p className="small" style={{ margin: 0 }}><b>{SCENARIOS[drillType].title}:</b> {SCENARIOS[drillType].desc} Drills start right after it forms; what happens next is not known in advance, so some will fail. That's the point: learn which ones work.</p>}
           <p className="small muted" style={{ margin: 0 }}>How a drill works: 1. read the chart and call the bias · 2. optionally plan an order (click the chart to set prices) · 3. step forward with → or Space (Shift+→ = 10 candles) · 4. finish to score it.</p>
         </div>
       ) : ds && cur && (
         <>
+          {s.scenario && (
+            <div className="card drill-q">
+              <div className="spread"><b>{SCENARIOS[s.scenario].title}</b><span className="small">Study: <LessonLink id={SCENARIOS[s.scenario].lesson} /></span></div>
+              <p className="small" style={{ margin: "6px 0 0" }}>{SCENARIOS[s.scenario].desc}</p>
+            </div>
+          )}
           <div className="replay-bar card">
             <div className="small"><b>{ds.market}</b> {ds.timeframe} · <span className="muted">{new Date(cur.t).toISOString().slice(0, 16).replace("T", " ")} UTC · candle {s.cursor - s.start} of drill</span></div>
             <div className="row">
@@ -246,6 +275,18 @@ export default function Replay() {
         </>
       )}
 
+      {byType.length > 1 || byType[0]?.k !== "random" ? (
+        <>
+          <h2 className="section-title">Results by drill type</h2>
+          <div className="tw"><table><thead><tr><th>Drill type</th><th>Drills</th><th>With a trade</th><th>Win rate</th><th>Expectancy</th></tr></thead>
+            <tbody>{byType.map((r) => (
+              <tr key={r.k}><td>{r.k === "random" ? "Random point" : SCENARIOS[r.k].title}</td><td className="n">{r.n}</td><td className="n">{r.taken}</td>
+                <td className="n">{r.taken ? pct(r.wins / r.taken) : "–"}</td><td className={`n ${r.expectancy == null ? "" : r.expectancy >= 0 ? "pos" : "neg"}`}>{r.expectancy == null ? "–" : fmtR(r.expectancy)}</td></tr>
+            ))}</tbody></table></div>
+          <p className="small muted" style={{ marginTop: -6 }}>Which situations do you trade well? Keep drilling the ones with positive expectancy until they're automatic, and restudy the rest.</p>
+        </>
+      ) : null}
+
       <h2 className="section-title">Drill history</h2>
       {drills.length ? (
         <div className="tw"><table className="wide"><thead><tr><th>When</th><th>Data</th><th>Bias</th><th>Trade</th><th>Result</th><th>Notes</th><th></th></tr></thead>
@@ -254,7 +295,7 @@ export default function Replay() {
               <td className="n">{new Date(d.at).toLocaleDateString()}</td>
               <td className="small">{d.datasetName}<br /><span className="muted">{new Date(d.startTime).toISOString().slice(0, 10)} · {d.endIndex - d.startIndex} candles</span></td>
               <td className={d.biasCorrect == null ? "" : d.biasCorrect ? "pos" : "neg"}>{d.bias || "–"}{d.biasCorrect != null && (d.biasCorrect ? " ✓" : " ✗")}</td>
-              <td className="small">{d.direction ? `${d.direction} · ${d.setup ?? ""}` : "No trade"}</td>
+              <td className="small">{d.direction ? `${d.direction} · ${d.setup ?? ""}` : "No trade"}{d.scenario && <><br /><span className="muted">{SCENARIOS[d.scenario as ScenarioKind]?.title}</span></>}</td>
               <td className={`n ${d.r > 0 ? "pos" : d.r < 0 ? "neg" : ""}`}>{d.outcome === "no-trade" ? "–" : d.outcome === "not-filled" ? "not filled" : `${fmtR(d.r)}${d.outcome === "open" ? " (open)" : ""}`}</td>
               <td className="small">{d.notes.slice(0, 100)}</td>
               <td><div className="row" style={{ flexWrap: "nowrap" }}><button type="button" className="btn ghost sm" aria-pressed={reviewId === d.id} onClick={() => setReviewId(reviewId === d.id ? null : d.id)}>{d.aiReview ? "Review ✓" : "Review"}</button><ConfirmButton onConfirm={() => db.drills.delete(d.id)}>Delete</ConfirmButton></div></td>

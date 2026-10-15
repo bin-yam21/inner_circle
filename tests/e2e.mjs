@@ -218,6 +218,19 @@ await step("replay trainer: generate data, run and score a drill", async () => {
   await page.locator(".stat", { hasText: "Drills" }).getByText("1", { exact: true }).waitFor();
 });
 
+await step("targeted replay drill: scenario briefing and results by type", async () => {
+  await go("/replay");
+  await page.getByLabel("Drill type").selectOption("fvg-bull");
+  await page.getByText(/Drills start right after it forms/).waitFor();
+  await page.getByRole("button", { name: "Start a drill" }).click();
+  await page.locator(".drill-q").getByText("Fresh bullish FVG").waitFor();
+  await page.getByRole("button", { name: "Bullish", exact: true }).click();
+  await page.getByRole("button", { name: "+10" }).click();
+  await page.getByRole("button", { name: "Finish & score" }).click();
+  await page.getByRole("heading", { name: "Results by drill type" }).waitFor();
+  await page.getByRole("cell", { name: "Fresh bullish FVG", exact: true }).waitFor();
+});
+
 await step("chart drills: answer, see feedback, stats update", async () => {
   await go("/chart-drills");
   await page.getByRole("button", { name: "Premium or discount", exact: true }).click();

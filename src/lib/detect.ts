@@ -41,11 +41,19 @@ export function swings(c: Candle[], from: number, end: number, n = 2): Swing[] {
   return out;
 }
 
-/** Three-candle imbalances of at least `minSize`, with when price first traded into them and when they were filled. */
-export function fvgs(c: Candle[], from: number, end: number, minSize: number): Gap[] {
+/**
+ * Average range at candle `i` (the candle's own range when there's no history yet).
+ * Thresholds use the ATR where the structure formed, never at the end of the data,
+ * so whether something counts can't depend on later volatility.
+ */
+const localAtr = (c: Candle[], i: number) => atr(c, i) || c[i].h - c[i].l;
+
+/** Three-candle imbalances of at least `minAtr` × the local ATR, with when price first traded into them and when they were filled. */
+export function fvgs(c: Candle[], from: number, end: number, minAtr: number): Gap[] {
   const out: Gap[] = [];
   for (let i = Math.max(from, 1); i <= end - 1; i++) {
     const a = c[i - 1], b = c[i + 1];
+    const minSize = minAtr * localAtr(c, i - 1);
     let g: Gap | null = null;
     if (b.l > a.h && b.l - a.h >= minSize) g = { kind: "bull", index: i, bottom: a.h, top: b.l, mitigatedAt: null, filledAt: null };
     else if (b.h < a.l && a.l - b.h >= minSize) g = { kind: "bear", index: i, top: a.l, bottom: b.h, mitigatedAt: null, filledAt: null };
@@ -69,10 +77,10 @@ function sweptAfter(c: Candle[], kind: Pool["kind"], price: number, after: numbe
 }
 
 /**
- * Liquidity pools from swings. Two swings within `tol` of each other, with the first
+ * Liquidity pools from swings. Two swings within `tolAtr` × the local ATR of each other, with the first
  * still intact when the second forms, make one "equal highs/lows" pool (the most obvious liquidity).
  */
-export function liquidityPools(c: Candle[], sw: Swing[], end: number, tol: number): Pool[] {
+export function liquidityPools(c: Candle[], sw: Swing[], end: number, tolAtr: number): Pool[] {
   const out: Pool[] = [];
   for (const side of ["high", "low"] as const) {
     const kind: Pool["kind"] = side === "high" ? "BSL" : "SSL";
@@ -86,7 +94,7 @@ export function liquidityPools(c: Candle[], sw: Swing[], end: number, tol: numbe
       for (let b = a + 1; b < list.length; b++) {
         const second = list[b];
         if (aSwept != null && aSwept < second.index) break;
-        if (Math.abs(second.price - first.price) <= tol) { pair = b; break; }
+        if (Math.abs(second.price - first.price) <= tolAtr * localAtr(c, second.index)) { pair = b; break; }
       }
       if (pair >= 0) {
         const second = list[pair];
@@ -166,7 +174,7 @@ export function analyze(c: Candle[], end: number, lookback = 150): Analysis {
   const from = Math.max(0, end - lookback);
   const a = atr(c, end);
   const sw = swings(c, from, end);
-  const gaps = fvgs(c, from, end, 0.15 * a);
-  const pools = liquidityPools(c, sw, end, 0.15 * a);
+  const gaps = fvgs(c, from, end, 0.15);
+  const pools = liquidityPools(c, sw, end, 0.15);
   return { end, atr: a, swings: sw, gaps, pools, sweeps: sweeps(c, pools), orderBlocks: orderBlocks(c, gaps, end), range: dealingRange(sw, end) };
 }
