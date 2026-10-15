@@ -7,7 +7,7 @@ import { CHECKLIST, EMOTIONS } from "../lib/constants";
 import { tiltAdvice } from "../lib/stats";
 import { activeZone, fmtMinutes, nextZone, nyNow } from "../lib/time";
 import { news } from "../lib/content";
-import { Bar, Chips, PageHead, Scale, toast, useSettings } from "../components/ui";
+import { Bar, Chips, PageHead, SavedNote, Scale, toast, useAutosave, useSettings } from "../components/ui";
 import { celebrate } from "../components/fx";
 import { emptyCheckIn } from "./Psychology";
 import { useNow } from "./Tools";
@@ -26,6 +26,11 @@ export default function Routine() {
   const [c, setC] = useState<CheckIn | null>(null);
   const [log, setLog] = useState<DailyLog | null>(null);
   const [rulesRead, setRulesRead] = useState(false);
+  const [logDirty, setLogDirty] = useState(false);
+  const [checkDirty, setCheckDirty] = useState(false);
+  // Every field saves on its own, so leaving half-way through loses nothing.
+  const logSaved = useAutosave(log, logDirty, (l) => (l ? db.dailyLogs.put({ ...l, updatedAt: Date.now() }) : undefined));
+  const checkSaved = useAutosave(c, checkDirty, (v) => (v ? db.checkins.put({ ...v, updatedAt: Date.now() }) : undefined));
   const now = useNow(15000);
   useEffect(() => { if (savedCheckin !== undefined && !c) setC(savedCheckin ?? emptyCheckIn(date)); }, [savedCheckin, c, date]);
   useEffect(() => { if (savedLog !== undefined && !log) setLog(savedLog ?? emptyLog(date)); }, [savedLog, log, date]);
@@ -46,8 +51,8 @@ export default function Routine() {
     { id: "rules", done: rulesRead || !!savedLog?.routineDoneAt },
   ];
   const doneCount = steps.filter((s) => s.done).length;
-  const setLogField = <K extends keyof DailyLog>(k: K, v: DailyLog[K]) => setLog({ ...log, [k]: v });
-  const setC2 = <K extends keyof CheckIn>(k: K, v: CheckIn[K]) => setC({ ...c, [k]: v });
+  const setLogField = <K extends keyof DailyLog>(k: K, v: DailyLog[K]) => { setLog({ ...log, [k]: v }); setLogDirty(true); };
+  const setC2 = <K extends keyof CheckIn>(k: K, v: CheckIn[K]) => { setC({ ...c, [k]: v }); setCheckDirty(true); };
 
   async function saveCheckin() { await db.checkins.put({ ...c!, updatedAt: Date.now() }); await markActivity(); toast("Check-in saved"); }
   async function saveLog(extra: Partial<DailyLog> = {}) { await db.dailyLogs.put({ ...log!, ...extra, updatedAt: Date.now() }); }
@@ -66,7 +71,7 @@ export default function Routine() {
     <div className="stack">
       <PageHead eyebrow="Trade" title="Pre-session routine" lede="Do this before you open a chart. Every step saves into your check-in and Daily log, so your bias gets scored and your coach sees it." />
       <div className="card">
-        <div className="spread"><b>{savedLog?.routineDoneAt ? `Done today at ${new Date(savedLog.routineDoneAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : `${doneCount} of ${steps.length} steps`}</b><span className="small muted">{date} · New York {ny.label}</span></div>
+        <div className="spread"><b>{savedLog?.routineDoneAt ? `Done today at ${new Date(savedLog.routineDoneAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}` : `${doneCount} of ${steps.length} steps`}</b><span className="small muted">{date} · New York {ny.label} · <SavedNote at={Math.max(logSaved ?? 0, checkSaved ?? 0) || null} /></span></div>
         <Bar value={doneCount / steps.length} />
       </div>
 

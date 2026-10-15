@@ -453,6 +453,33 @@ await step("edge finder: heatmap, hour bars, tooltips, tables", async () => {
   await shot("edge");
 });
 
+await step("daily log autosaves, even when leaving right after typing", async () => {
+  await go("/daily");
+  await page.getByLabel("What happened / notes").fill("Autosaved note: London swept the Asian low");
+  await go("/today"); // leave immediately, before the autosave delay
+  await go("/daily");
+  // The log loads from the database a moment after the page renders; wait for it rather than reading too early.
+  await page.waitForFunction(() => [...document.querySelectorAll("label.field")].some((l) => l.textContent.startsWith("What happened") && l.querySelector("textarea")?.value === "Autosaved note: London swept the Asian low"), null, { timeout: 5000 })
+    .catch(() => { throw new Error("daily log edit was lost"); });
+});
+
+await step("an unsaved new trade is restored as a draft and can be discarded", async () => {
+  await go("/journal/new");
+  await page.getByLabel("Market").fill("XAU/USD");
+  await page.getByLabel(/Why I took it/).fill("Draft notes");
+  await page.waitForTimeout(800);
+  await go("/today");
+  await go("/journal/new");
+  await page.getByText(/Restored your unsaved trade/).waitFor();
+  if ((await page.getByLabel("Market").inputValue()) !== "XAU/USD") throw new Error("draft not restored");
+  await page.getByRole("button", { name: "Discard draft" }).click();
+  await page.getByText(/Restored your unsaved trade/).waitFor({ state: "detached" });
+  if ((await page.getByLabel("Market").inputValue()) !== "") throw new Error("draft not discarded");
+  await go("/today");
+  await go("/journal/new");
+  if (await page.getByText(/Restored your unsaved trade/).count()) throw new Error("discarded draft came back");
+});
+
 await step("today page walks the day", async () => {
   await go("/today");
   for (const h of ["Before the session", "During the session", "After the close"]) await page.getByRole("heading", { name: h }).waitFor();

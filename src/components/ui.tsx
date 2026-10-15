@@ -114,3 +114,33 @@ export function useDebounced<T>(value: T, ms = 600): T {
   useEffect(() => { const t = setTimeout(() => setV(value), ms); return () => clearTimeout(t); }, [value, ms]);
   return v;
 }
+
+/**
+ * Saves `value` once it stops changing for `ms`, but only after the user has edited it (`dirty`),
+ * so loading a record never writes it back. Anything still pending is saved when the component
+ * unmounts, so leaving the page right after typing doesn't lose the last edit.
+ * Returns when it last saved (for a "Saved" indicator).
+ */
+export function useAutosave<T>(value: T, dirty: boolean, save: (v: T) => unknown, ms = 800): number | null {
+  const [savedAt, setSavedAt] = useState<number | null>(null);
+  const pending = useRef<{ v: T } | null>(null);
+  const saveRef = useRef(save);
+  saveRef.current = save;
+  const alive = useRef(true);
+  useEffect(() => {
+    if (!dirty) return;
+    pending.current = { v: value };
+    const t = setTimeout(async () => {
+      pending.current = null;
+      await saveRef.current(value);
+      if (alive.current) setSavedAt(Date.now());
+    }, ms);
+    return () => clearTimeout(t);
+  }, [value, dirty, ms]);
+  useEffect(() => () => { alive.current = false; if (pending.current) saveRef.current(pending.current.v); }, []);
+  return savedAt;
+}
+
+export function SavedNote({ at }: { at: number | null }) {
+  return <span className="saved" aria-live="polite">{at ? `Saved ${new Date(at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}` : ""}</span>;
+}

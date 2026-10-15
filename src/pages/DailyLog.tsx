@@ -5,7 +5,7 @@ import type { BiasDir, DailyLog as Log } from "../lib/types";
 import { biasStats } from "../lib/learning";
 import { pct, weekday } from "../lib/stats";
 import { AiReview } from "../components/AiReview";
-import { Empty, PageHead, Stat, toast } from "../components/ui";
+import { Empty, PageHead, SavedNote, Stat, toast, useAutosave } from "../components/ui";
 
 const DIRS: BiasDir[] = ["Bullish", "Bearish", "Range"];
 
@@ -18,10 +18,15 @@ export default function DailyLog() {
   const recent = all.slice().sort((a, b) => b.date.localeCompare(a.date)).slice(0, 30);
   const bs = biasStats(all);
   const [log, setLog] = useState<Log | null>(null);
+  const [dirty, setDirty] = useState(false);
   useEffect(() => { setLog(null); }, [date]);
   useEffect(() => { if (saved !== undefined && !log) setLog(saved ?? empty(date)); }, [saved, log, date]);
+  // Typing saves on its own; switching days saves the current one first.
+  const persist = (l: Log | null) => (l ? db.dailyLogs.put({ ...l, updatedAt: Date.now() }) : undefined);
+  const savedAt = useAutosave(log, dirty, persist);
+  async function changeDate(d: string) { if (dirty) await persist(log); setDirty(false); setDate(d); }
 
-  const set = (k: keyof Log, v: string) => log && setLog({ ...log, [k]: v });
+  const set = (k: keyof Log, v: string) => { if (log) { setLog({ ...log, [k]: v }); setDirty(true); } };
   const dirSelect = (k: "biasDir" | "actualDir", label: string, blank: string) => (
     <label className="field"><span>{label}</span><select value={log?.[k] ?? ""} onChange={(e) => set(k, e.target.value)}><option value="">{blank}</option>{DIRS.map((d) => <option key={d}>{d}</option>)}</select></label>
   );
@@ -43,7 +48,7 @@ export default function DailyLog() {
       </div>
       <section className="card stack">
         <div className="form">
-          <label className="field"><span>Date</span><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></label>
+          <label className="field"><span>Date</span><input type="date" value={date} onChange={(e) => changeDate(e.target.value)} /></label>
           {f("markets", "Markets studied", "EUR/USD, DXY")}
           {dirSelect("biasDir", "My bias (before the session)", "Choose…")}
           {f("bias", "Why (draw on liquidity, PD array)", "Daily OB held, draw = equal highs")}
@@ -61,7 +66,7 @@ export default function DailyLog() {
           <label className="field"><span>What happened / notes</span><textarea value={log?.notes ?? ""} onChange={(e) => set("notes", e.target.value)} placeholder="Judas swing at 02:40 swept Asian low, London ran to…" /></label>
           <label className="field"><span>Missed or skipped trades</span><textarea value={log?.missed ?? ""} onChange={(e) => set("missed", e.target.value)} placeholder="Setups that worked without me, and why I didn't take them" /></label>
         </div>
-        <div><button type="button" className="btn" onClick={save} disabled={!log}>Save day</button></div>
+        <div className="row"><button type="button" className="btn" onClick={save} disabled={!log}>Save day</button><SavedNote at={savedAt} /><span className="small muted">Changes save automatically.</span></div>
       </section>
       {saved?.biasDir && saved.actualDir && (
         <AiReview key={saved.date} title="AI review of my bias" saved={saved.aiReview} savedAt={saved.aiReviewAt}
@@ -74,7 +79,7 @@ export default function DailyLog() {
       {recent.length ? (
         <div className="tw"><table className="wide"><thead><tr><th>Date</th><th>Markets</th><th>Call</th><th>Actual</th><th>Bias notes</th><th>High (time)</th><th>Low (time)</th><th>Grade</th><th>Notes</th></tr></thead>
           <tbody>{recent.map((l) => (
-            <tr key={l.date} className="click" tabIndex={0} onClick={() => setDate(l.date)} onKeyDown={(e) => e.key === "Enter" && setDate(l.date)}>
+            <tr key={l.date} className="click" tabIndex={0} onClick={() => changeDate(l.date)} onKeyDown={(e) => e.key === "Enter" && changeDate(l.date)}>
               <td className="n">{l.date}</td><td>{l.markets}</td><td>{l.biasDir || "–"}</td><td className={l.biasDir && l.actualDir ? (l.biasDir === l.actualDir ? "pos" : "neg") : ""}>{l.actualDir || "–"}</td><td className="small">{l.bias}</td><td className="n">{l.dailyHigh} {l.dailyHighTime && `(${l.dailyHighTime})`}</td><td className="n">{l.dailyLow} {l.dailyLowTime && `(${l.dailyLowTime})`}</td><td className="n">{l.processGrade}</td><td className="small">{l.notes.slice(0, 120)}</td>
             </tr>))}</tbody></table></div>
       ) : <Empty>Your logged days will appear here. Click a row to reopen it.</Empty>}

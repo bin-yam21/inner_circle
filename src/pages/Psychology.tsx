@@ -5,7 +5,7 @@ import { db, markActivity, saveSetting, todayStr, uid } from "../lib/db";
 import type { CheckIn, Rule, WeeklyReview } from "../lib/types";
 import { DEFAULT_RULES, EMOTIONS, RULE_CATEGORIES } from "../lib/constants";
 import { fmtR, groupBy, pct, tiltAdvice } from "../lib/stats";
-import { Chips, ConfirmButton, Empty, PageHead, SavedCheckbox, Scale, Tabs, toast, useSettings } from "../components/ui";
+import { Chips, ConfirmButton, Empty, PageHead, SavedCheckbox, SavedNote, Scale, Tabs, toast, useAutosave, useSettings } from "../components/ui";
 
 type Tab = "checkin" | "tilt" | "rules" | "review" | "insights";
 
@@ -134,12 +134,14 @@ function ReviewPanel() {
   const settings = useSettings();
   const [r, setR] = useState<WeeklyReview | null>(null);
   const [drafting, setDrafting] = useState(false);
+  const [dirty, setDirty] = useState(false);
+  const savedAt = useAutosave(r, dirty, (v) => (v ? db.reviews.put({ ...v, updatedAt: Date.now() }) : undefined));
   const [draftErr, setDraftErr] = useState("");
   const ctl = useRef<AbortController | null>(null);
   useEffect(() => { if (saved !== undefined && !r) setR(saved ?? { week, best: "", worst: "", mistakes: "", lessons: "", nextFocus: "", updatedAt: 0 }); }, [saved, r, week]);
   if (!r) return null;
   const weekTrades = trades.filter((t) => isoWeek(new Date(t.date + "T12:00:00")) === week);
-  const set = (k: keyof WeeklyReview, v: string) => setR({ ...r, [k]: v });
+  const set = (k: keyof WeeklyReview, v: string) => { setR({ ...r, [k]: v }); setDirty(true); };
   async function save() { await db.reviews.put({ ...r!, updatedAt: Date.now() }); await markActivity(); toast("Review saved"); }
   async function draft() {
     setDraftErr(""); setDrafting(true);
@@ -149,6 +151,7 @@ function ReviewPanel() {
       const { draftWeeklyReview } = await import("../lib/ai");
       const d = await draftWeeklyReview(settings.apiKey, data, ctl.current.signal);
       setR((cur) => cur && { ...cur, ...d });
+      setDirty(true);
       toast("Draft ready. Edit it, then save.");
     } catch (e) {
       const { tutorErrorMessage } = await import("../lib/ai");
@@ -167,6 +170,7 @@ function ReviewPanel() {
         </div>
         <div className="row">
           <button type="button" className="btn" onClick={save}>Save review</button>
+          <SavedNote at={savedAt} />
           {settings.apiKey
             ? (drafting ? <button type="button" className="btn ghost" onClick={() => ctl.current?.abort()}>Drafting… (stop)</button>
               : <button type="button" className="btn ghost" onClick={draft}>Draft with AI coach</button>)

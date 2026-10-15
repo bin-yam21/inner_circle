@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, markActivity, todayStr, uid } from "../lib/db";
@@ -8,7 +8,18 @@ import { CONCEPTS, conceptsOfTrade } from "../lib/learning";
 import { CHECKLIST } from "../lib/constants";
 import { lessons, modelById, models } from "../lib/content";
 import { fmtR } from "../lib/stats";
-import { Chips, ConfirmButton, Empty, PageHead, toast } from "../components/ui";
+import { Chips, ConfirmButton, Empty, PageHead, toast, useAutosave } from "../components/ui";
+
+/** An unsaved new trade is kept here (this browser only) so leaving the page doesn't lose it. */
+const DRAFT_KEY = "trade-draft";
+interface Draft { t: Trade; rText: string; at: number }
+function readDraft(): Draft | null {
+  try {
+    const d = JSON.parse(localStorage.getItem(DRAFT_KEY) ?? "null") as Draft | null;
+    return d && Date.now() - d.at < 3 * 86_400_000 ? d : null;
+  } catch { return null; }
+}
+const clearDraft = () => { try { localStorage.removeItem(DRAFT_KEY); } catch { /* storage blocked */ } };
 import { AiReview } from "../components/AiReview";
 
 const conceptName = (id: string) => CONCEPTS.find((c) => c.id === id)?.name ?? id;
@@ -36,6 +47,15 @@ export default function TradeEditor() {
   const images = useLiveQuery(() => (t ? db.images.where("tradeId").equals(t.id).toArray() : []), [t?.id], []);
   const [zoom, setZoom] = useState<string | null>(null);
   const rules = useLiveQuery(() => db.rules.toArray(), [], []);
+  const [touched, setTouched] = useState(false);
+  const [restoredAt, setRestoredAt] = useState<number | null>(null);
+  // Once the trade is saved, cancelled or discarded, no pending draft write may run (it would resurrect the trade as a draft).
+  const finished = useRef(false);
+  useAutosave(!tradeId && t ? { t, rText } : null, touched && !tradeId, (d) => {
+    if (!d || finished.current) return;
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...d, at: Date.now() })); } catch { /* storage full or blocked */ }
+  }, 500);
+  const endDraft = () => { finished.current = true; clearDraft(); };
 
   useEffect(() => {
     if (tradeId && existing === undefined) return;
@@ -47,6 +67,9 @@ export default function TradeEditor() {
       market: pre.market, direction: pre.direction, timeframe: pre.timeframe, entry: pre.entry, stop: pre.stop, target: pre.target, notes: pre.notes,
       preCheckId: pre.id, preCheckDecision: pre.verdict?.decision ?? "manual", checklist: preset ? Math.round((preset.checklist.filter((c) => pre.ticks[c]).length / preset.checklist.length) * 10) : null,
     } : {};
+    // A plain new trade picks up where an unsaved draft left off.
+    const draft = !existing && !pre && !preset ? readDraft() : null;
+    if (draft) { setT(draft.t); setRText(draft.rText); setRestoredAt(draft.at); return; }
     const base = existing ?? { ...blank(), ...(preset ? { model: preset.id, setup: preset.setups[0] ?? SETUPS[0] } : {}), ...fromCheck };
     setT(base); setRText(existing ? String(existing.r) : "");
   }, [existing, tradeId, pre]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -68,12 +91,21 @@ export default function TradeEditor() {
   if (tradeId && existing === null) return <Empty>Trade not found. <Link to="/journal">Back to journal</Link></Empty>;
   if (!t) return <p className="muted">Loading…</p>;
 
-  const set = <K extends keyof Trade>(k: K, v: Trade[K]) => setT({ ...t, [k]: v });
+  const set = <K extends keyof Trade>(k: K, v: Trade[K]) => { setT({ ...t, [k]: v }); setTouched(true); };
+  function discardDraft() {
+    if (!t) return;
+    clearDraft();
+    const oldId = t.id;
+    // Discarding starts a fresh trade (which may be drafted again); the draft's screenshots go in the background.
+    setT(blank()); setRText(""); setRestoredAt(null); setTouched(false);
+    db.images.where("tradeId").equals(oldId).delete();
+  }
   const auto = calcR(t);
 
   async function addImages(files: File[] | FileList, kind: TradeImage["kind"]) {
     if (!t) return;
     for (const f of [...files]) if (f.type.startsWith("image/")) await db.images.add({ tradeId: t.id, kind, blob: f, caption: f.name });
+    setTouched(true);
     toast("Screenshot added");
   }
   async function save() {
@@ -88,6 +120,7 @@ export default function TradeEditor() {
       await db.preChecks.update(pre.id, { outcome: "taken", tradeId: t.id });
     }
     await markActivity();
+    if (!existing) endDraft();
     toast("Trade saved");
     nav("/journal");
   }
@@ -107,6 +140,7 @@ export default function TradeEditor() {
     <div className="stack">
       <p className="crumb"><Link to="/journal">Journal</Link> · {existing ? "Edit trade" : "New trade"}</p>
       <PageHead eyebrow="Trade" title={existing ? `${t.market || "Trade"} · ${t.date}` : "Log a trade"} actions={existing ? <ConfirmButton onConfirm={remove}>Delete trade</ConfirmButton> : undefined} />
+      {restoredAt && !existing && <div className="alert warn small backup-alert"><span>Restored your unsaved trade from {new Date(restoredAt).toLocaleString()}.</span><button type="button" className="btn ghost sm" onClick={discardDraft}>Discard draft</button></div>}
 
       <section className="card">
         <h3>Trade</h3>
@@ -128,7 +162,7 @@ export default function TradeEditor() {
         <div className="form">
           {numField("Entry", "entry")}{numField("Stop", "stop")}{numField("Target", "target")}{numField("Exit", "exit")}
           {numField("Size (lots)", "size")}{numField("P/L (money)", "pnl")}
-          <label className="field"><span>Result (R){auto != null ? ` · calculated ${auto}R` : ""}</span><input type="number" step="0.01" value={rText} onChange={(e) => setRText(e.target.value)} placeholder={auto != null ? String(auto) : "e.g. 3 or -1"} /></label>
+          <label className="field"><span>Result (R){auto != null ? ` · calculated ${auto}R` : ""}</span><input type="number" step="0.01" value={rText} onChange={(e) => { setRText(e.target.value); setTouched(true); }} placeholder={auto != null ? String(auto) : "e.g. 3 or -1"} /></label>
           <label className="field"><span>Checklist score (0–10)</span><input type="number" min={0} max={10} value={t.checklist ?? ""} onChange={(e) => set("checklist", num(e.target.value))} /></label>
         </div>
         <p className="keynote">Leave Result empty to use the value calculated from entry, stop and exit.</p>
@@ -186,7 +220,7 @@ export default function TradeEditor() {
           onDone={(text) => db.trades.update(existing.id, { aiReview: text, aiReviewAt: Date.now() })} />
       )}
 
-      <div className="row"><button type="button" className="btn" onClick={save}>Save trade</button><Link className="btn ghost" to="/journal">Cancel</Link></div>
+      <div className="row"><button type="button" className="btn" onClick={save}>Save trade</button><Link className="btn ghost" to="/journal" onClick={() => { if (!existing) endDraft(); }}>Cancel</Link></div>
       {zoom && <div className="lightbox" onClick={() => setZoom(null)} role="button" tabIndex={0} onKeyDown={() => setZoom(null)}><img src={zoom} alt="Screenshot full size" /></div>}
     </div>
   );
