@@ -44,8 +44,17 @@ Status: ✅ done · 🚧 in progress · ⬜ planned
 
 Logic: `src/lib/learning.ts` (mastery, gates, prescriptions, bias, spaced repetition, flashcard queue), `src/lib/replay.ts` (replay trainer), `src/lib/importTrades.ts` (broker import), `src/lib/ai.ts` (tutor, trade review, weekly coach). Unit tests in `tests/`; the browser test (`tests/e2e.mjs`) intercepts api.anthropic.com, so it checks the AI requests without a key.
 
+## Phase 4: Sharper feedback
+
+| # | Feature | Status |
+|---|---|---|
+| 4.1 | Broker import converts times to New York (NY+7 server time, UTC, local, NY) with daylight saving, and sets the session from that time | ✅ |
+| 4.2 | AI review of replay drills (80 candles before the call + what followed) and of the Daily log's bias reasoning; shared `AiReview` panel | ✅ |
+| 4.3 | Month-by-month trends on My progress: trades, expectancy, plan followed, bias right, drills, rules kept, study days, with ▲▼ | ✅ |
+| 4.4 | "Today's plan" card on the Dashboard from the pre-session routine, with an after-close reminder to score the bias | ✅ |
+
 ## Ideas for later
 
 - Live candle data for replay without CSV export (needs a data provider)
-- AI review of replay drills, and of the Daily log's bias reasoning
-- Session-time correction for imported trades (broker server time → New York)
+- Chart image of the drill sent alongside the candle text in drill reviews
+- A "coach memory": recurring themes across AI reviews summarised monthly

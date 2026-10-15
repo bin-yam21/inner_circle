@@ -253,7 +253,7 @@ await step("AI trade review sends screenshots and saves the review", async () =>
   await page.getByRole("button", { name: "Save trade" }).click();
   await page.waitForURL(/#\/journal$/);
   await page.getByRole("cell", { name: "NZD/USD" }).click();
-  await page.getByRole("button", { name: "Review this trade" }).click();
+  await page.getByRole("button", { name: "Get a review" }).click();
   await page.getByText("Verdict — B: clean entry").waitFor();
   await page.getByText(/^Reviewed /).waitFor();
   const b = aiBodies.at(-1);
@@ -262,6 +262,24 @@ await step("AI trade review sends screenshots and saves the review", async () =>
   if (!blocks.some((x) => x.type === "image" && x.source.media_type === "image/jpeg" && x.source.data.length > 20)) throw new Error("no screenshot sent");
   if (!blocks.at(-1).text.includes("Trade: Long NZD/USD")) throw new Error("trade summary missing");
   if (b.fallbacks !== "default") throw new Error("fallbacks not set");
+});
+
+await step("AI review of a replay drill sends the candles", async () => {
+  await go("/replay");
+  await page.getByRole("button", { name: "Review", exact: true }).first().click();
+  await page.getByRole("button", { name: "Get a review" }).click();
+  await page.getByText("Verdict — B: clean entry").waitFor();
+  const text = aiBodies.at(-1).messages[0].content[0].text;
+  if (!text.includes("Candles (index,time,open,high,low,close):") || !/\n-80,/.test(text)) throw new Error("candles missing from drill review");
+  await page.getByRole("button", { name: "Review ✓" }).waitFor();
+});
+
+await step("AI review of the daily bias", async () => {
+  await go("/daily");
+  await page.getByRole("heading", { name: "AI review of my bias" }).waitFor();
+  await page.getByRole("button", { name: "Get a review" }).click();
+  await page.getByText("Verdict — B: clean entry").waitFor();
+  if (!aiBodies.at(-1).messages[0].content[0].text.includes("Bias called before the session: Bullish")) throw new Error("bias call missing");
 });
 
 await step("AI weekly coach fills the review from structured output", async () => {
@@ -326,6 +344,14 @@ await step("broker CSV import with preview", async () => {
   await page.getByRole("button", { name: "Import from broker" }).click();
   await page.getByLabel("Statement file (.csv)").setInputFiles({ name: "history.csv", mimeType: "text/csv", buffer: Buffer.from(csv) });
   await page.getByText(/2 already in your journal/).waitFor();
+  // 08:15 on a New York + 7h server is 01:15 in New York: Asian session, previous-day rollover not involved.
+  // 09:00 server → 02:00 New York → London open.
+  const journal = page.locator("table").filter({ hasText: "Checklist" });
+  for (const [when, session] of [["2026-10-06 01:15", "Asia"], ["2026-10-07 02:00", "London open"]]) {
+    const row = journal.getByRole("row", { name: new RegExp(`${when}.*AUD/CAD`) });
+    await row.waitFor();
+    if (!(await row.innerText()).includes(session)) throw new Error(`${when}: expected ${session}, got ${await row.innerText()}`);
+  }
 });
 
 await step("dashboard reflects activity", async () => {
@@ -333,7 +359,17 @@ await step("dashboard reflects activity", async () => {
   await page.getByText("1 of 65 lessons").waitFor();
   await page.getByRole("heading", { name: "Your coach" }).waitFor();
   await page.getByRole("heading", { name: /Go-live gates · \d\/7/ }).waitFor();
+  const plan = page.locator(".today");
+  await plan.getByText("Bearish").first().waitFor();
+  await plan.getByText("Only the NY open").waitFor();
+  await page.waitForTimeout(800);
   await shot("dashboard");
+  await go("/progress");
+  const trends = page.locator("table").filter({ hasText: "Study days" });
+  await trends.locator("tbody tr").first().waitFor();
+  await trends.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(800);
+  await shot("trends");
 });
 
 await browser.close();

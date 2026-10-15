@@ -42,6 +42,7 @@ export default function Dashboard() {
   const fix = prescriptions(trades, todayStr())[0];
   const gates = goLiveGates(trades, logs, rules, checks, drills);
   const nextGate = gates.find((g) => !g.met);
+  const todayLog = logs.find((l) => l.date === todayStr());
 
   return (
     <div className="stack">
@@ -60,6 +61,23 @@ export default function Dashboard() {
           )}
         </div>
       </section>
+
+      <section className={`card today ${todayLog?.routineDoneAt ? "ready" : ""}`}>
+        <div className="spread"><h3 style={{ margin: 0 }}>Today's plan</h3>
+          <Link className={todayLog?.routineDoneAt ? "btn ghost sm" : "btn sm"} to="/routine">{todayLog?.routineDoneAt ? "Edit routine" : "Do the pre-session routine"}</Link>
+        </div>
+        {todayLog?.biasDir || checkin?.intention ? (
+          <div className="grid g3 today-grid">
+            <div><div className="k">Bias</div><b className={todayLog?.biasDir === "Bullish" ? "pos" : todayLog?.biasDir === "Bearish" ? "neg" : ""}>{todayLog?.biasDir || "not set"}</b>{todayLog?.markets && <span className="muted"> · {todayLog.markets}</span>}{todayLog?.bias && <div className="small">{todayLog.bias}</div>}</div>
+            <div><div className="k">Waiting for</div><div className="small">{todayLog?.waitingFor || "—"}</div></div>
+            <div><div className="k">Intention · risk</div><div className="small">{checkin?.intention || "—"}</div><div className="small muted">Risk ×{tilt.riskFactor} · {zone ? `${zone.name}: in the killzone now` : `${nz.zone.name} in ${fmtMinutes(nz.inMinutes)}`}</div></div>
+          </div>
+        ) : <p className="small muted" style={{ margin: 0 }}>No plan yet. Two minutes of routine before the chart: check-in, bias, levels, news, rules.</p>}
+        {todayLog?.biasDir && !todayLog.actualDir && ny.minutes >= 17 * 60 && (
+          <p className="alert warn small" style={{ margin: 0 }}>Session's over. <Link to="/daily">Record what price actually did</Link> to score today's bias.</p>
+        )}
+      </section>
+
       <div className="grid g4">
         <Ring value={total ? done.size / total : 0} label="All courses" sub={`${done.size} of ${total} lessons`} />
         <Stat icon="target" k="Quiz accuracy" v={answers.length ? <CountUp value={(right / answers.length) * 100} suffix="%" /> : "–"} s={answers.length ? `${right}/${answers.length} correct · ${answers.filter((a) => !a.correct).length} to review` : "No questions answered yet"} />
