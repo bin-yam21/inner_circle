@@ -40,7 +40,7 @@ export default function Journal() {
 
       {importing && <ImportTrades onClose={() => setImporting(false)} />}
 
-      <div className="card form">
+      <div className="card form filters">
         <label className="field"><span>Account</span><select value={account} onChange={(e) => setAccount(e.target.value as typeof account)}><option>All</option><option>Demo</option><option>Live</option></select></label>
         <label className="field"><span>Setup</span><select value={setup} onChange={(e) => setSetup(e.target.value)}><option value="">All setups</option>{SETUPS.map((s) => <option key={s}>{s}</option>)}</select></label>
         <label className="field"><span>Session</span><select value={session} onChange={(e) => setSession(e.target.value)}><option value="">All sessions</option>{SESSIONS.map((s) => <option key={s}>{s}</option>)}</select></label>

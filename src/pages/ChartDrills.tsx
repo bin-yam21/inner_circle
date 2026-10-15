@@ -89,7 +89,7 @@ export default function ChartDrills() {
         <Stat k="All time" v={total ? pct(right / total) : "–"} s={`${total} answers`} />
         <Stat k="Weakest skill" v={stats.weakest ? EXERCISES[stats.weakest].title : "–"} s={stats.weakest ? <button type="button" className="linkbtn" onClick={() => { setMode(stats.weakest!); next(stats.weakest!); }}>Practise it</button> : "Needs 3+ answers per type"} />
         <div className="card stat"><div className="k">Chart data</div>
-          <select value={ds.id} onChange={(e) => { setDsId(e.target.value); setCur(null); setNotFound(false); }} style={{ marginTop: 8 }}>{datasets.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
+          <select aria-label="Chart data set" value={ds.id} onChange={(e) => { setDsId(e.target.value); setCur(null); setNotFound(false); }} style={{ marginTop: 8 }}>{datasets.map((d) => <option key={d.id} value={d.id}>{d.name}</option>)}</select>
           <div className="s"><Link to="/replay">Import real candles</Link> in the Replay trainer</div>
         </div>
       </div>

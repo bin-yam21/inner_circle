@@ -10,6 +10,8 @@ import { findLessonAnywhere } from "./content";
 export interface StudyTask {
   id: "lesson" | "review" | "cards" | "chart" | "replay";
   title: string; detail: string; link: string; done: boolean;
+  /** Nothing to do today (e.g. no reviews due): shown, but not counted as progress. */
+  idle?: boolean;
   /** For count-based tasks: [done, target]. */
   progress?: [number, number];
 }
@@ -39,6 +41,8 @@ export function buildStudyPlan(input: {
   /** Lesson ids you've completed (all time) and today. */
   lessonsDone: Set<string>; lessonsDoneToday: Set<string>;
   dueQuiz: number; dueCards: number;
+  /** Quiz questions answered and flashcards reviewed today (so clearing the queue counts as done). */
+  quizToday?: number; cardsToday?: number;
   chartToday: { kind: string }[]; drillsToday: { scenario?: string }[];
 }): StudyPlan {
   const m = input.mastery.find((x) => x.concept.id === input.focus.id) ?? input.mastery[0];
@@ -55,8 +59,8 @@ export function buildStudyPlan(input: {
     nextLesson || doneToday
       ? { id: "lesson", title: `Lesson: ${lesson?.title ?? lessonId}`, detail: doneToday ? "Completed today." : "Watch or read it, take notes, and mark it complete.", link: lesson ? `/courses/${lesson.courseId}/${lesson.id}` : "/courses", done: !!doneToday }
       : { id: "lesson", title: `All ${c.name} lessons done`, detail: "Reread your notes on the first one if anything feels shaky.", link: lesson ? `/courses/${lesson.courseId}/${lesson.id}` : "/courses", done: true },
-    { id: "review", title: input.dueQuiz ? `Review ${input.dueQuiz} due quiz question${input.dueQuiz === 1 ? "" : "s"}` : "Quiz reviews", detail: input.dueQuiz ? "Spaced repetition: a few minutes keeps concepts from fading." : "Nothing due today.", link: "/quiz?due=1", done: input.dueQuiz === 0 },
-    { id: "cards", title: input.dueCards ? `Study ${input.dueCards} due flashcard${input.dueCards === 1 ? "" : "s"}` : "Flashcards", detail: input.dueCards ? "Glossary terms and your own chart screenshots." : "Nothing due today.", link: "/flashcards", done: input.dueCards === 0 },
+    { id: "review", title: input.dueQuiz ? `Review ${input.dueQuiz} due quiz question${input.dueQuiz === 1 ? "" : "s"}` : "Quiz reviews", detail: input.dueQuiz ? "Spaced repetition: a few minutes keeps concepts from fading." : "Nothing due today.", link: "/quiz?due=1", done: input.dueQuiz === 0 && (input.quizToday ?? 0) > 0, idle: input.dueQuiz === 0 && !input.quizToday },
+    { id: "cards", title: input.dueCards ? `Study ${input.dueCards} due flashcard${input.dueCards === 1 ? "" : "s"}` : "Flashcards", detail: input.dueCards ? "Glossary terms and your own chart screenshots." : "Nothing due today.", link: "/flashcards", done: input.dueCards === 0 && (input.cardsToday ?? 0) > 0, idle: input.dueCards === 0 && !input.cardsToday },
     { id: "chart", title: kinds ? `${CHART_TARGET} chart drills on ${c.name.toLowerCase()}` : `${CHART_TARGET} mixed chart drills`, detail: "Find it on the chart, then compare with the detector.", link: kinds ? `/chart-drills?kind=${kinds[0]}` : "/chart-drills", done: chartDone >= CHART_TARGET, progress: [Math.min(chartDone, CHART_TARGET), CHART_TARGET] },
     { id: "replay", title: scenario ? `${REPLAY_TARGET} targeted replay drills` : `${REPLAY_TARGET} replay drills from a random point`, detail: scenario ? "Plan the entry, stop and target, then step it forward." : "Call the bias before you step forward.", link: scenario ? `/replay?drill=${scenario}` : "/replay", done: replayDone >= REPLAY_TARGET, progress: [Math.min(replayDone, REPLAY_TARGET), REPLAY_TARGET] },
   ];

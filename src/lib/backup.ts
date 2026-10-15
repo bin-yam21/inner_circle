@@ -52,7 +52,8 @@ export function downloadText(filename: string, text: string, type = "application
 
 export function tradesToCsv(rows: Record<string, unknown>[]): string {
   if (!rows.length) return "";
-  const cols = Object.keys(rows[0]);
+  // Union of every row's fields, in first-seen order: optional fields (model, MAE/MFE, …) may be missing from the first row.
+  const cols = [...new Set(rows.flatMap((r) => Object.keys(r)))];
   const cell = (v: unknown) => { const s = Array.isArray(v) ? v.join("; ") : v == null ? "" : String(v); return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   return [cols.join(","), ...rows.map((r) => cols.map((c) => cell(r[c])).join(","))].join("\n");
 }

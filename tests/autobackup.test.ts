@@ -40,3 +40,21 @@ describe("backups never contain the API key", () => {
     expect((await db.settings.get("apiKey"))?.value).toBe("sk-ant-secret");
   });
 });
+
+describe("no empty automatic backups", () => {
+  it("knows when there's nothing worth backing up", async () => {
+    const { isEmpty } = await import("../src/lib/autobackup");
+    await db.trades.clear(); await db.progress.clear(); await db.dailyLogs.clear(); await db.quizAnswers.clear(); await db.drills.clear();
+    expect(await isEmpty()).toBe(true);
+    await db.dailyLogs.put({ date: "2026-10-15", markets: "", bias: "", waitingFor: "", dailyHigh: "", dailyHighTime: "", dailyLow: "", dailyLowTime: "", notes: "", processGrade: "", missed: "", updatedAt: 0 });
+    expect(await isEmpty()).toBe(false);
+  });
+});
+
+describe("CSV export", () => {
+  it("includes fields that only later rows have", async () => {
+    const { tradesToCsv } = await import("../src/lib/backup");
+    const csv = tradesToCsv([{ id: "a", r: 1 }, { id: "b", r: -1, model: "ote", concepts: ["fvg", "time"] }]);
+    expect(csv.split("\n")).toEqual(["id,r,model,concepts", "a,1,,", "b,-1,ote,fvg; time"]);
+  });
+});

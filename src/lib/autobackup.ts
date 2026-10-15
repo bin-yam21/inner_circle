@@ -62,7 +62,12 @@ export async function recordBackup(where: string) {
   await db.settings.put({ key: "lastBackupWhere", value: where });
 }
 
-export type AutoResult = "done" | "not-due" | "no-folder" | "needs-permission" | "unsupported" | "error";
+export type AutoResult = "done" | "not-due" | "empty" | "no-folder" | "needs-permission" | "unsupported" | "error";
+
+/** Nothing worth backing up (after "Erase all data", or a fresh install). */
+export async function isEmpty() {
+  return (await db.trades.count()) + (await db.progress.count()) + (await db.dailyLogs.count()) + (await db.quizAnswers.count()) + (await db.drills.count()) === 0;
+}
 /**
  * Back up if a folder is set and the last backup is a day old. Browsers forget folder
  * permission after a restart; then this returns "needs-permission" and the UI asks for a click
@@ -74,6 +79,8 @@ export async function runAutoBackup(force = false): Promise<AutoResult> {
   if (!dir) return "no-folder";
   const last = (await db.settings.get("lastBackupAt"))?.value as number | undefined;
   if (!force && !isDue(last, Date.now())) return "not-due";
+  // Never write an empty backup automatically: daily empty files would push your good backups out of the 14 kept.
+  if (!force && (await isEmpty())) return "empty";
   try {
     if ((await dir.queryPermission({ mode: "readwrite" })) !== "granted") return "needs-permission";
     await writeBackup(dir);

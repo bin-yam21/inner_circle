@@ -95,6 +95,8 @@ export default function TradeEditor() {
     if (!t) return;
     await db.images.where("tradeId").equals(t.id).delete();
     await db.trades.delete(t.id);
+    // A pre-trade check that led to this trade goes back to "open" instead of pointing at a deleted trade.
+    if (t.preCheckId) await db.preChecks.update(t.preCheckId, { outcome: "open", tradeId: undefined });
     toast("Trade deleted"); nav("/journal");
   }
   const numField = (label: string, k: "entry" | "stop" | "target" | "exit" | "size" | "pnl" | "mae" | "mfe") => (

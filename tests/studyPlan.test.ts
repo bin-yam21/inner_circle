@@ -31,7 +31,7 @@ describe("buildStudyPlan", () => {
     expect(p.tasks.map((t) => t.id)).toEqual(["lesson", "review", "cards", "chart", "replay"]);
     expect(p.tasks[0]).toMatchObject({ title: "Lesson: ICT Fair Value Gaps", done: false, link: "/courses/ict-mentorship-2016/ict-33" });
     expect(p.tasks[1]).toMatchObject({ done: false });
-    expect(p.tasks[2]).toMatchObject({ done: true, detail: "Nothing due today." });
+    expect(p.tasks[2]).toMatchObject({ done: false, idle: true, detail: "Nothing due today." }); // nothing due isn't progress
     expect(p.tasks[3]).toMatchObject({ link: "/chart-drills?kind=fvg-bull", progress: [0, CHART_TARGET] });
     expect(p.tasks[4].link).toBe("/replay?drill=fvg-bull");
   });
@@ -40,7 +40,9 @@ describe("buildStudyPlan", () => {
       chartToday: [...Array(4).fill({ kind: "fvg-bull" }), { kind: "fvg-bear" }, { kind: "pd" }],
       drillsToday: [{ scenario: "fvg-bull" }, { scenario: "fvg-bull" }, {}, { scenario: "ob-bull" }] });
     expect(p.tasks[0]).toMatchObject({ done: true, detail: "Completed today." });
-    expect(p.tasks[1].done).toBe(true);
+    expect(p.tasks[1]).toMatchObject({ done: false, idle: true });
+    // Clearing the queue today counts as done.
+    expect(buildStudyPlan({ ...base, dueQuiz: 0, quizToday: 4 }).tasks[1]).toMatchObject({ done: true, idle: false });
     expect(p.tasks[3]).toMatchObject({ done: true, progress: [5, 5] });
     expect(p.tasks[4]).toMatchObject({ done: false, progress: [2, 3] });
   });

@@ -230,3 +230,12 @@ b.pos{color:var(--bull)} b.neg{color:var(--bear)}
 .nav-more summary::after{content:"▸";font-size:10px;transition:transform .15s}
 .nav-more[open] summary::after{transform:rotate(90deg)}
 .nav-more summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+/* Tables inside grid cards (e.g. model rules, bias by market) fit the card; wide data tables keep their scroll container. */
+.grid .card table:not(.wide),.model table{min-width:0}
+/* Phones: intros shouldn't push the page's working area below the fold. */
+@media (max-width:520px){
+  .lede{font-size:15.5px;line-height:1.45;margin-top:6px}
+  .form.filters{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+.tasks li.idle .tick{border-style:dashed}
+.tasks li.idle a{color:var(--muted)}
