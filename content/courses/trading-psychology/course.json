@@ -1,0 +1,31 @@
+{
+  "id": "trading-psychology",
+  "title": "Trading Psychology",
+  "subtitle": "Mindset, discipline and recovery",
+  "description": "Ten practical lessons on the mental side of trading. They are built on ICT's own psychology lessons (No Fear of Losing, Mitigating Losing Trades, Growing Small Accounts, the Secrets to Selecting Setups, patience and time), plus widely used trading-psychology practice. Each lesson ends with exercises that connect to the app's check-in, rules and journal tools.",
+  "author": "Trading Academy",
+  "tags": [
+    "psychology",
+    "discipline",
+    "risk"
+  ],
+  "modules": [
+    {
+      "id": "p1",
+      "title": "Foundations"
+    },
+    {
+      "id": "p2",
+      "title": "Emotions under risk"
+    },
+    {
+      "id": "p3",
+      "title": "Discipline & routine"
+    },
+    {
+      "id": "p4",
+      "title": "Recovery & growth"
+    }
+  ],
+  "icon": "brain"
+}

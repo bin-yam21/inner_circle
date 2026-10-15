@@ -1,0 +1,35 @@
+{
+  "id": "ict-mentorship-2016",
+  "title": "ICT Mentorship Core Content",
+  "subtitle": "2016–17 Mentorship · Months 1–5",
+  "description": "55 lessons rebuilt from the full transcripts of the Inner Circle Trader 2016–17 Mentorship core content: price delivery, liquidity, PD arrays, IPDA data ranges, macro, seasonals, entries and trade management.",
+  "author": "Notes from ICT video transcripts",
+  "tags": [
+    "ICT",
+    "price action",
+    "forex"
+  ],
+  "modules": [
+    {
+      "id": "m1",
+      "title": "Month 1 · Foundations"
+    },
+    {
+      "id": "m2",
+      "title": "Month 2 · Risk & mindset"
+    },
+    {
+      "id": "m3",
+      "title": "Month 3 · Order flow"
+    },
+    {
+      "id": "m4",
+      "title": "Month 4 · PD arrays"
+    },
+    {
+      "id": "m5",
+      "title": "Month 5 · Long-term model"
+    }
+  ],
+  "icon": "candlestick-chart"
+}

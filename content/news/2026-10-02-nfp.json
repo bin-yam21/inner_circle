@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-02",
+  "tag": "Data",
+  "markets": [
+    "USD",
+    "EUR/USD"
+  ],
+  "title": "September payrolls: just +29K jobs, unemployment 4.2%",
+  "summary": "Payrolls rose 29,000 against forecasts of roughly 84–89K, with July and August revised down by 60,000. The dollar dipped at first, then strengthened: EUR/USD finished 0.65% lower.",
+  "ict": "Classic protraction: the first move went against the day’s eventual direction. An 8:30 a.m. NFP spike can leave a vacuum block that tends to fill the same session. Study it on a 15-minute chart.",
+  "lessons": [
+    "ict-08",
+    "ict-31",
+    "ict-34"
+  ],
+  "source": "CNBC · First Trust",
+  "url": "https://www.cnbc.com/2026/10/02/jobs-report-september-2026.html"
+}

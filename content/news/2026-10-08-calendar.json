@@ -1,0 +1,20 @@
+{
+  "date": "2026-10-08",
+  "tag": "Calendar",
+  "markets": [
+    "USD",
+    "EUR",
+    "JPY",
+    "GBP"
+  ],
+  "title": "The month ahead: CPI 14 Oct, FOMC 28 Oct, ECB 29 Oct, BoJ 30 Oct, BoE 5 Nov",
+  "summary": "US September CPI comes out on 14 October. The Fed decides on 28 October after September’s hike. The ECB (deposit rate 2.00%) meets on 29 October, the Bank of Japan (0.75%) on 30 October, and the Bank of England on 5 November.",
+  "ict": "ICT’s Month 1 assignment: put every high-impact release on your chart and log how price behaves around it. These are the moments of manipulation and expansion. October also opens Q4: anchor your IPDA look-back on 1 September and cast forward 20/40/60 trading days to see where the next quarterly shift may fall.",
+  "lessons": [
+    "ict-03",
+    "ict-38",
+    "ict-40"
+  ],
+  "source": "FinanceCalendar · FXStreet",
+  "url": "https://www.financecalendar.com/ecb-rate-decisions/"
+}

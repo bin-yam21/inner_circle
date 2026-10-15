@@ -1,0 +1,138 @@
+[
+  {
+    "term": "Market efficiency paradigm",
+    "definition": "ICT's view that price is delivered to serve smart money; retail stops and orders are its liquidity."
+  },
+  {
+    "term": "IPDA",
+    "definition": "Interbank Price Delivery Algorithm: ICT's term for the price engine that references 20/40/60-day data ranges."
+  },
+  {
+    "term": "BSL / SSL",
+    "definition": "Buy-side liquidity (buy stops above highs) and sell-side liquidity (sell stops below lows)."
+  },
+  {
+    "term": "Internal / external range liquidity",
+    "definition": "Inside the range: OBs, FVGs and voids (entries). Outside the range: stops beyond its high or low (exits)."
+  },
+  {
+    "term": "Equilibrium",
+    "definition": "50% of the current dealing range: fair value."
+  },
+  {
+    "term": "OTE",
+    "definition": "Optimal trade entry: the 62–79% retracement, with 70.5% as the sweet spot."
+  },
+  {
+    "term": "Premium / discount",
+    "definition": "Above / below equilibrium. Sell in premium, buy in discount."
+  },
+  {
+    "term": "PD array",
+    "definition": "Premium/discount array: any institutional reference level (OB, FVG, breaker, void, rejection block, old high or low)."
+  },
+  {
+    "term": "Order block",
+    "definition": "The last opposite-close candle before a displacement, validated when price trades through its high (bullish) or low (bearish)."
+  },
+  {
+    "term": "Mean threshold",
+    "definition": "50% of an order block's body."
+  },
+  {
+    "term": "Breaker",
+    "definition": "An order block that failed after a stop run and structure break; it flips role."
+  },
+  {
+    "term": "Mitigation block",
+    "definition": "A level where trapped smart-money positions are closed at break-even, often followed by an explosive move."
+  },
+  {
+    "term": "Reclaimed order block",
+    "definition": "An OB used during the decline (market maker buy model) that gets bought again as the market rises."
+  },
+  {
+    "term": "Fair value gap",
+    "definition": "A three-candle range where only one side was offered: the left candle's low to the right candle's high (bearish case)."
+  },
+  {
+    "term": "Liquidity void",
+    "definition": "Long one-sided candles with little overlap; price tends to come back and fill them."
+  },
+  {
+    "term": "Rejection block",
+    "definition": "Wick zone at a swing extreme, from the highest (or lowest) body to the wick."
+  },
+  {
+    "term": "Propulsion block",
+    "definition": "A candle that re-tests an OB and propels price; very sensitive, with tight stops."
+  },
+  {
+    "term": "Vacuum block",
+    "definition": "A gap from news or a session open; price usually returns to fill it."
+  },
+  {
+    "term": "Turtle soup",
+    "definition": "A false break of an old high or low (named after the Turtle traders' 20-day breakouts)."
+  },
+  {
+    "term": "Judas swing / protraction",
+    "definition": "A time-of-day false move against the day's direction, after midnight NY or after 7:00 NY."
+  },
+  {
+    "term": "Power of 3",
+    "definition": "The daily candle's open, high, low and close: buy below the open on a bullish day and exit near the close."
+  },
+  {
+    "term": "Killzone",
+    "definition": "A high-probability session window: London open, New York open, London close."
+  },
+  {
+    "term": "SMT divergence",
+    "definition": "Smart money technique: correlated markets fail to confirm each other (DXY vs a pair, EUR/USD vs GBP/USD, notes vs DXY)."
+  },
+  {
+    "term": "Open float",
+    "definition": "Pending orders in the 60-day look-back and 60-day forward window; fund-level stops."
+  },
+  {
+    "term": "Quarterly shift",
+    "definition": "The major change in direction or condition that ICT says happens every 3–4 months."
+  },
+  {
+    "term": "Interest rate triad",
+    "definition": "30-year bond, 10-year note and 5-year note futures; a failure swing in one marks a shift."
+  },
+  {
+    "term": "Institutional sponsorship",
+    "definition": "Big money defending a swing: immediate reaction at its order blocks, with displacement on the higher timeframe."
+  },
+  {
+    "term": "Low / high resistance liquidity run",
+    "definition": "A move with the higher-timeframe flow through easy stops / a move against defended levels."
+  },
+  {
+    "term": "Market maker buy/sell model",
+    "definition": "The sell side of the curve into a higher-timeframe level, then the buy side back up (or the reverse)."
+  },
+  {
+    "term": "Displacement",
+    "definition": "A strong, energetic move that leaves imbalances, showing large-player participation."
+  },
+  {
+    "term": "Failure swing",
+    "definition": "A retest that fails to make a new high or low; one of ICT's two ways the market turns."
+  },
+  {
+    "term": "Open interest",
+    "definition": "Total open futures contracts. ICT reads a ≥15% drop at support as the liquidity provider covering (bullish)."
+  },
+  {
+    "term": "Seasonal tendency",
+    "definition": "40- and 15-year futures averages by month; a roadmap, not a signal."
+  },
+  {
+    "term": "R multiple",
+    "definition": "Profit or loss measured in units of initial risk (3R = three times what you risked)."
+  }
+]

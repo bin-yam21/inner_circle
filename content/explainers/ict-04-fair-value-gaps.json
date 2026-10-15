@@ -1,0 +1,282 @@
+{
+  "id": "fair-value-gaps",
+  "order": 4,
+  "course": "ict-mentorship-2016",
+  "lessons": [
+    "ict-33",
+    "ict-35"
+  ],
+  "title": "Fair value gaps",
+  "subtitle": "Imbalances that price comes back to fill",
+  "scenes": [
+    {
+      "layout": "title",
+      "say": "When price moves so fast that only one side gets filled, it leaves a gap. ICT calls it a fair value gap, and price often comes back to fill it."
+    },
+    {
+      "title": "Three candles",
+      "say": "Look at three candles in a row during a fast drop. The middle candle is the big one. Now compare the low of the candle on the left with the high of the candle on the right.",
+      "els": [
+        {
+          "type": "candles",
+          "stagger": 0.5,
+          "ohlc": [
+            [
+              66,
+              67,
+              63,
+              64
+            ],
+            [
+              64,
+              65,
+              60,
+              61
+            ],
+            [
+              61,
+              62,
+              57,
+              58
+            ],
+            [
+              58,
+              58.5,
+              42,
+              43
+            ],
+            [
+              43,
+              46,
+              40,
+              41
+            ],
+            [
+              41,
+              43,
+              37,
+              38
+            ],
+            [
+              38,
+              40,
+              35,
+              39
+            ]
+          ]
+        },
+        {
+          "type": "focus",
+          "at": 4,
+          "x1": 2,
+          "x2": 4,
+          "label": "Three candles",
+          "color": "accent"
+        },
+        {
+          "type": "marker",
+          "at": 8,
+          "x": 2,
+          "y": 57,
+          "label": "Left candle low",
+          "color": "liq",
+          "dx": -90
+        },
+        {
+          "type": "marker",
+          "at": 10,
+          "x": 4,
+          "y": 46,
+          "label": "Right candle high",
+          "color": "liq",
+          "dx": 110
+        }
+      ]
+    },
+    {
+      "title": "The gap",
+      "carry": "chart",
+      "say": "The space between them was only offered to sellers. Buyers never got a chance to trade there. That imbalance is the fair value gap, and the market tends to return to rebalance it.",
+      "els": [
+        {
+          "type": "zone",
+          "at": 0.5,
+          "y1": 46,
+          "y2": 57,
+          "x1": 2,
+          "x2": 16,
+          "label": "Fair value gap",
+          "color": "accent"
+        }
+      ]
+    },
+    {
+      "title": "The fill",
+      "carry": true,
+      "say": "Here price rallies back up, fills the gap, and runs out of steam. That's a short entry with a stop above the gap, aiming for the sell stops below the lows. Bullish gaps work the same way, upside down.",
+      "els": [
+        {
+          "type": "candles",
+          "at": 0.5,
+          "stagger": 0.45,
+          "walk": [
+            [
+              7,
+              40
+            ],
+            [
+              9,
+              37
+            ],
+            [
+              11,
+              45
+            ],
+            [
+              13,
+              52
+            ],
+            [
+              14,
+              55
+            ],
+            [
+              16,
+              47
+            ],
+            [
+              19,
+              31
+            ]
+          ]
+        },
+        {
+          "type": "marker",
+          "at": 3.8,
+          "x": 14,
+          "y": 56,
+          "label": "Gap filled: sell",
+          "color": "bear"
+        },
+        {
+          "type": "level",
+          "at": 5,
+          "y": 58.5,
+          "x1": 12,
+          "x2": 17,
+          "label": "Stop",
+          "color": "bear"
+        },
+        {
+          "type": "arrow",
+          "at": 6.5,
+          "from": [
+            14.5,
+            53
+          ],
+          "to": [
+            19,
+            33
+          ],
+          "label": "Run to the lows",
+          "color": "bear"
+        }
+      ]
+    },
+    {
+      "title": "Liquidity voids",
+      "say": "Zoom out and you'll often see a liquidity void: several candles moving one way with almost no pullbacks. On lower timeframes, a daily gap usually looks like this. Expect price to return into it.",
+      "points": [
+        "A void is a big one-sided move over several candles",
+        "Lower timeframes show daily gaps as voids",
+        "Price tends to come back and fill them"
+      ],
+      "els": [
+        {
+          "type": "candles",
+          "stagger": 0.25,
+          "walk": [
+            [
+              0,
+              20
+            ],
+            [
+              2,
+              23
+            ],
+            [
+              6,
+              76
+            ],
+            [
+              8,
+              72
+            ],
+            [
+              10,
+              66
+            ],
+            [
+              11,
+              60
+            ]
+          ]
+        },
+        {
+          "type": "zone",
+          "at": 3.5,
+          "y1": 26,
+          "y2": 70,
+          "x1": 3,
+          "x2": 13,
+          "label": "Liquidity void",
+          "color": "accent"
+        }
+      ]
+    },
+    {
+      "title": "Using gaps",
+      "say": "Putting it together: find displacement, mark the gap from the left candle's wick to the right candle's wick, wait for price to return, and target liquidity on the other side.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.6,
+          "stagger": 2.4,
+          "items": [
+            {
+              "label": "Find displacement",
+              "sub": "A fast, one-sided move"
+            },
+            {
+              "label": "Mark the gap",
+              "sub": "Left candle's wick to right candle's wick"
+            },
+            {
+              "label": "Wait for the return",
+              "sub": "Enter as price fills it",
+              "color": "liq"
+            },
+            {
+              "label": "Target liquidity",
+              "sub": "Old highs or lows beyond",
+              "color": "bull"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Recap",
+      "say": "Remember: markets seek efficiency. A gap where only one side traded is an imbalance, and price is often drawn back to rebalance it.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Imbalance gets rebalanced",
+          "sub": "A fair value gap is where only one side traded. Price often returns to fill it, offering an entry.",
+          "color": "accent"
+        }
+      ]
+    }
+  ]
+}

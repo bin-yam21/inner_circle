@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-07",
+  "tag": "Dollar & yields",
+  "markets": [
+    "DXY",
+    "US10Y"
+  ],
+  "title": "Dollar firm near 102 as the 10-year yield holds above 5.3%",
+  "summary": "The Dollar Index held near 102.00 as the US 10-year yield recovered above 5.3%, around 24-year highs, ahead of a 10-year note auction. Danske Bank warned 10- and 30-year Treasuries risk hitting 6% on heavy supply.",
+  "ict": "Note prices are falling (yields rising) while DXY rises, so they move in opposite directions: ICT calls that a trending environment. But yields are at a 24-year high while DXY is only near a 2-month high, so watch for a crack in correlation (SMT) before assuming the dollar trend continues.",
+  "lessons": [
+    "ict-43",
+    "ict-44",
+    "ict-21"
+  ],
+  "source": "FXStreet – Forex Today",
+  "url": "https://www.fxstreet.com/news/forex-today-us-dollar-stabilizes-as-bond-yields-recover-ahead-of-fomc-minutes-202610070655"
+}

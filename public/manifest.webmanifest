@@ -1,0 +1,10 @@
+{
+  "name": "Trading Academy",
+  "short_name": "Trading Academy",
+  "description": "Courses, trade journal, psychology and tools for learning to trade.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#11161c",
+  "theme_color": "#11161c",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

@@ -1,0 +1,281 @@
+{
+  "id": "liquidity",
+  "order": 1,
+  "course": "ict-mentorship-2016",
+  "lessons": [
+    "ict-07",
+    "ict-34",
+    "ict-26"
+  ],
+  "title": "Liquidity: where the stops are",
+  "subtitle": "Why price runs old highs and lows",
+  "scenes": [
+    {
+      "layout": "title",
+      "say": "Every move in price is a hunt for liquidity. In the next two minutes you'll learn where that liquidity sits, and how to use it."
+    },
+    {
+      "title": "Liquidity = resting orders",
+      "say": "Liquidity is simply resting orders. Traders who sold short protect themselves with buy stops just above an old high. Traders who bought protect themselves with sell stops just below an old low.",
+      "els": [
+        {
+          "type": "candles",
+          "walk": [
+            [
+              0,
+              50
+            ],
+            [
+              4,
+              68
+            ],
+            [
+              8,
+              52
+            ],
+            [
+              12,
+              66
+            ],
+            [
+              16,
+              40
+            ],
+            [
+              20,
+              55
+            ]
+          ],
+          "stagger": 0.12
+        },
+        {
+          "type": "level",
+          "at": 4,
+          "y": 70,
+          "x1": 4,
+          "label": "Old high"
+        },
+        {
+          "type": "stops",
+          "id": "bsl",
+          "at": 5.5,
+          "x1": 3,
+          "x2": 9,
+          "y": 70,
+          "side": "buy"
+        },
+        {
+          "type": "level",
+          "at": 9,
+          "y": 38,
+          "x1": 16,
+          "label": "Old low"
+        },
+        {
+          "type": "stops",
+          "id": "ssl",
+          "at": 10.5,
+          "x1": 13,
+          "x2": 19,
+          "y": 38,
+          "side": "sell"
+        }
+      ]
+    },
+    {
+      "title": "Buy-side and sell-side",
+      "carry": true,
+      "say": "ICT calls the orders above highs buy-side liquidity, and the orders below lows sell-side liquidity. Smart money needs that liquidity to fill big orders. To buy a lot, they need sellers, and a pool of sell stops is exactly that.",
+      "points": [
+        "Above old highs: buy stops, called buy-side liquidity",
+        "Below old lows: sell stops, called sell-side liquidity",
+        "Big buyers need sellers, so they buy into sell stops"
+      ]
+    },
+    {
+      "title": "The stop run",
+      "carry": "chart",
+      "say": "Watch what happens. Price drops through the old low, triggers those sell stops, and smart money buys them. Then price reverses and runs toward the buy stops above the old high. That is a stop run, also called a liquidity raid.",
+      "els": [
+        {
+          "type": "candles",
+          "at": 0.3,
+          "stagger": 0.5,
+          "walk": [
+            [
+              21,
+              52
+            ],
+            [
+              23,
+              45
+            ],
+            [
+              25,
+              34
+            ],
+            [
+              27,
+              50
+            ],
+            [
+              31,
+              64
+            ],
+            [
+              35,
+              74
+            ]
+          ]
+        },
+        {
+          "type": "take",
+          "id": "ssl",
+          "at": 2.4
+        },
+        {
+          "type": "marker",
+          "at": 2.6,
+          "x": 25,
+          "y": 34,
+          "label": "Raid on sell stops",
+          "below": true
+        },
+        {
+          "type": "arrow",
+          "at": 4.2,
+          "from": [
+            25,
+            37
+          ],
+          "to": [
+            33,
+            69
+          ],
+          "label": "Run to buy stops",
+          "color": "bull",
+          "dur": 1.6
+        },
+        {
+          "type": "take",
+          "id": "bsl",
+          "at": 7.2
+        }
+      ]
+    },
+    {
+      "title": "How to use it",
+      "say": "Here's how to use it. First decide the higher-timeframe bias. Then mark the obvious old highs and lows. In a bullish market, wait for price to raid an old low, buy there, and target the buy stops above the old highs. Bearish is the mirror.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 1,
+          "stagger": 3.6,
+          "items": [
+            {
+              "label": "Find the bias",
+              "sub": "Higher timeframe: bullish or bearish?"
+            },
+            {
+              "label": "Mark the pools",
+              "sub": "Obvious old highs and old lows"
+            },
+            {
+              "label": "Wait for the raid",
+              "sub": "Bullish: buy the run below an old low",
+              "color": "liq"
+            },
+            {
+              "label": "Target the other side",
+              "sub": "Exit at the buy stops above old highs",
+              "color": "bull"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "\"Too clean\" is a target",
+      "say": "One more tip. Equal highs or equal lows look like strong resistance or support to retail traders. ICT calls them too clean. They hold a pile of stops, so expect price to run them.",
+      "els": [
+        {
+          "type": "candles",
+          "walk": [
+            [
+              0,
+              40
+            ],
+            [
+              3,
+              62
+            ],
+            [
+              6,
+              50
+            ],
+            [
+              9,
+              62
+            ],
+            [
+              12,
+              48
+            ],
+            [
+              15,
+              62
+            ],
+            [
+              18,
+              52
+            ]
+          ],
+          "stagger": 0.12
+        },
+        {
+          "type": "level",
+          "at": 3,
+          "y": 63.3,
+          "label": "Equal highs: too clean",
+          "color": "liq"
+        },
+        {
+          "type": "stops",
+          "at": 4.5,
+          "x1": 2,
+          "x2": 16,
+          "y": 63.3,
+          "side": "buy"
+        },
+        {
+          "type": "arrow",
+          "at": 8,
+          "from": [
+            18,
+            53
+          ],
+          "to": [
+            20.5,
+            61.5
+          ],
+          "label": "Likely target",
+          "color": "bull",
+          "bend": 0.3
+        }
+      ]
+    },
+    {
+      "title": "Recap",
+      "say": "Remember: price is drawn to liquidity. Stops rest above old highs and below old lows. Buy after a raid on the sell stops, and aim for the buy stops above.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Price seeks liquidity",
+          "sub": "Stops rest above old highs and below old lows. Buy after a raid on sell stops; target the buy stops above.",
+          "color": "bull"
+        }
+      ]
+    }
+  ]
+}

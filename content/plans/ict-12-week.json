@@ -1,0 +1,59 @@
+{
+  "id": "ict-12-week",
+  "title": "12-week ICT practice plan",
+  "course": "ict-mentorship-2016",
+  "weeks": [
+    {
+      "title": "Weeks 1–2 · Month 1",
+      "tasks": [
+        "Watch all 8 Month 1 lessons in order",
+        "Pick one pair ICT doesn't use (not EUR or GBP) for your daily log",
+        "Set up the charts: daily (9–12 months), 4-hour (3 months), 1-hour (3 weeks), 15-minute (3–4 days)",
+        "Each day for 10 days: mark fast moves, untested highs/lows and equal highs/lows",
+        "Record when each day's high and low formed, and which day and session made the weekly high and low",
+        "Find 5 past examples of a 62–79% OTE buy in discount"
+      ]
+    },
+    {
+      "title": "Weeks 3–4 · Month 2",
+      "tasks": [
+        "Watch all 8 Month 2 lessons",
+        "Write your binary trade plan: when to buy, sell, or stay out",
+        "Write your risk rules: ≤1–2% per trade, halve after a loss",
+        "Open a demo account and calculate your break-even win rate for 3:1",
+        "Find 3 false-flag or false-breakout traps on your pair"
+      ]
+    },
+    {
+      "title": "Weeks 5–6 · Month 3",
+      "tasks": [
+        "Watch all 8 Month 3 lessons",
+        "Choose your style and timeframe pair (position / swing / short-term / day)",
+        "Every Saturday: write the big-picture and intermediate view (2 of 4, 2 of 3)",
+        "Overlay DXY on your pair and log 3 SMT divergences",
+        "Mark the monthly range (last down and up candles) on 3 pairs"
+      ]
+    },
+    {
+      "title": "Weeks 7–9 · Month 4",
+      "tasks": [
+        "Watch all 13 Month 4 lessons",
+        "Screenshot 5 examples of each: order block, breaker, FVG, rejection block, void",
+        "Label internal vs external range liquidity on every chart you study",
+        "Take demo trades: one setup per week with ≥40 pips of room",
+        "Log 10 demo trades in the Journal with screenshots"
+      ]
+    },
+    {
+      "title": "Weeks 10–12 · Month 5",
+      "tasks": [
+        "Watch all 18 Month 5 lessons (IPDA Data Ranges twice)",
+        "On the 1st of the month: 20/40/60-day look-back and cast-forward on 3 pairs",
+        "Track the 10-year yield vs DXY: same direction or opposite?",
+        "Add the seasonal table to your calendar (this month and next)",
+        "Hold one demo position trade with 40/20-day trailing stops",
+        "Review the journal: is your expectancy positive after 30+ trades?"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,204 @@
+{
+  "id": "ipda-data-ranges",
+  "order": 6,
+  "course": "ict-mentorship-2016",
+  "lessons": [
+    "ict-38",
+    "ict-40"
+  ],
+  "title": "IPDA data ranges",
+  "subtitle": "Finding the levels price will reach for",
+  "scenes": [
+    {
+      "layout": "title",
+      "say": "Where is price going next? ICT's IPDA data ranges give you a simple way to find the levels the market is likely to reach for."
+    },
+    {
+      "title": "Look back 20, 40 and 60 days",
+      "say": "IPDA stands for interbank price delivery algorithm. ICT says the market looks back over the last twenty, forty and sixty trading days, and the highs and lows inside those windows are the likely targets.",
+      "els": [
+        {
+          "type": "bars",
+          "at": 1,
+          "stagger": 1.5,
+          "max": 60,
+          "items": [
+            {
+              "label": "Short-term",
+              "value": 20,
+              "text": "20 trading days",
+              "color": "bull"
+            },
+            {
+              "label": "Medium-term",
+              "value": 40,
+              "text": "40 days",
+              "color": "accent"
+            },
+            {
+              "label": "Long-term",
+              "value": 60,
+              "text": "60 days",
+              "color": "liq"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Mark the highs and lows",
+      "say": "On a daily chart, count back twenty, forty and sixty trading days, and mark the highest high and lowest low in each window. Those are the pools of liquidity the market is most likely to reach for next.",
+      "els": [
+        {
+          "type": "candles",
+          "stagger": 0.06,
+          "walk": [
+            [
+              0,
+              50
+            ],
+            [
+              10,
+              70
+            ],
+            [
+              20,
+              45
+            ],
+            [
+              30,
+              62
+            ],
+            [
+              40,
+              35
+            ],
+            [
+              50,
+              58
+            ],
+            [
+              60,
+              52
+            ]
+          ]
+        },
+        {
+          "type": "level",
+          "at": 5,
+          "y": 72,
+          "x1": 10,
+          "label": "60-day high",
+          "color": "liq"
+        },
+        {
+          "type": "level",
+          "at": 6.5,
+          "y": 64,
+          "x1": 30,
+          "label": "40-day high",
+          "color": "accent"
+        },
+        {
+          "type": "level",
+          "at": 8,
+          "y": 60,
+          "x1": 50,
+          "label": "20-day high",
+          "color": "bull"
+        },
+        {
+          "type": "level",
+          "at": 9.5,
+          "y": 33,
+          "x1": 40,
+          "label": "20/40/60-day low",
+          "color": "bear"
+        }
+      ]
+    },
+    {
+      "title": "Bias from the ranges",
+      "carry": true,
+      "say": "Then ask which pool price is closer to, and which side has already been swept. If the sixty-day low was just taken and price is rising, the forty and sixty-day highs become the targets.",
+      "els": [
+        {
+          "type": "marker",
+          "at": 1.5,
+          "x": 40,
+          "y": 34,
+          "label": "Low swept",
+          "below": true,
+          "color": "bull"
+        },
+        {
+          "type": "arrow",
+          "at": 4,
+          "from": [
+            60,
+            53
+          ],
+          "to": [
+            64,
+            70
+          ],
+          "label": "Draw on liquidity",
+          "color": "bull"
+        }
+      ]
+    },
+    {
+      "title": "Quarterly shifts",
+      "say": "ICT also notes that markets tend to make a big shift every three to four months, a quarterly shift. Looking forward sixty days from a key turning point helps you anticipate when the next one may come.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.6,
+          "stagger": 3.5,
+          "items": [
+            {
+              "label": "Every 3–4 months",
+              "sub": "Markets tend to shift direction"
+            },
+            {
+              "label": "Look forward 60 days",
+              "sub": "Project the range ahead from a turning point",
+              "color": "liq"
+            },
+            {
+              "label": "Prepare for the shift",
+              "sub": "Big moves often start there",
+              "color": "bull"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Let the app count",
+      "say": "You don't have to count by hand. The IPDA calculator in the Tools section works out the twenty, forty and sixty trading-day dates for you.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Tools → IPDA calculator",
+          "sub": "Counts the trading days and gives you the 20, 40 and 60-day dates",
+          "color": "accent"
+        }
+      ]
+    },
+    {
+      "title": "Recap",
+      "say": "Recap: look back twenty, forty and sixty trading days, mark the highs and lows, and use them as the targets that guide your bias.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Look back. Mark. Target.",
+          "sub": "The highs and lows of the last 20, 40 and 60 trading days are likely targets.",
+          "color": "bull"
+        }
+      ]
+    }
+  ]
+}

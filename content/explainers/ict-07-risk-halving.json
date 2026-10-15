@@ -1,0 +1,153 @@
+{
+  "id": "risk-halving",
+  "order": 7,
+  "course": "ict-mentorship-2016",
+  "lessons": [
+    "ict-50",
+    "ict-13",
+    "ict-09"
+  ],
+  "title": "Risk & the halving rule",
+  "subtitle": "How ICT protects the account",
+  "scenes": [
+    {
+      "layout": "title",
+      "say": "Great setups mean nothing if a losing streak wipes you out. Here's how ICT protects his account."
+    },
+    {
+      "title": "Size from risk, not hope",
+      "say": "Every position starts with risk, not with a target. Decide what percent you'll risk, measure the distance to your stop, and size the position so a stop-out costs exactly that amount.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.6,
+          "stagger": 3.5,
+          "items": [
+            {
+              "label": "Pick the risk",
+              "sub": "A fixed percent, e.g. 1%"
+            },
+            {
+              "label": "Measure the stop",
+              "sub": "Entry to stop, in pips",
+              "color": "liq"
+            },
+            {
+              "label": "Calculate size",
+              "sub": "Risk ÷ (stop pips × pip value)",
+              "color": "bull"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Only 30% is in play",
+      "say": "ICT adds a twist: only allocate thirty percent of your equity to trading. A ten-thousand-dollar account trades as if it were three thousand. One percent of that is thirty dollars. No margin calls, and cash in reserve.",
+      "els": [
+        {
+          "type": "bars",
+          "at": 1,
+          "stagger": 2.5,
+          "max": 10000,
+          "items": [
+            {
+              "label": "Account",
+              "value": 10000,
+              "text": "$10,000",
+              "color": "muted"
+            },
+            {
+              "label": "Trading capital",
+              "value": 3000,
+              "text": "$3,000 (30%)",
+              "color": "accent"
+            },
+            {
+              "label": "Risk per trade",
+              "value": 30,
+              "text": "$30 (1%)",
+              "color": "bull"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "The halving rule",
+      "say": "Now the key rule. After a loss, the next trade uses half the risk. Lose one percent, and the next trade risks half a percent. With half risk, a two-to-one winner gets you back to even, and a three-to-one puts you at a new high.",
+      "els": [
+        {
+          "type": "bars",
+          "at": 1.5,
+          "stagger": 2.2,
+          "max": 1,
+          "items": [
+            {
+              "label": "Normal",
+              "value": 1,
+              "text": "1.00%",
+              "color": "bull"
+            },
+            {
+              "label": "After a loss",
+              "value": 0.5,
+              "text": "0.50%",
+              "color": "liq"
+            },
+            {
+              "label": "After two losses",
+              "value": 0.25,
+              "text": "0.25%",
+              "color": "bear"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Why it works",
+      "say": "Why does it work? Three losses at full size cost three percent. With halving they cost one and three quarters. Smaller size also makes it much harder to revenge trade. Many traders, and this app's tilt guard, also stop for the day after three losses.",
+      "points": [
+        "Losses shrink as the streak grows",
+        "You can't revenge-trade at full size",
+        "Stop for the day after three losses"
+      ],
+      "els": [
+        {
+          "type": "big",
+          "at": 0.5,
+          "text": "1 + ½ + ¼",
+          "sub": "Three losses cost 1.75% instead of 3%",
+          "color": "liq"
+        }
+      ]
+    },
+    {
+      "title": "Let the app help",
+      "say": "The app does this math for you. The position-size tool in Tools applies the thirty percent rule and the halving rule, and the tilt guard reads your journal to tell you today's risk.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Tools + Tilt guard",
+          "sub": "Position size with the 30% and halving rules · today's risk from your journal",
+          "color": "accent"
+        }
+      ]
+    },
+    {
+      "title": "Recap",
+      "say": "Protect the account first. Trade only thirty percent of it, risk a small fixed percent, and halve it after each loss. You'll still be here when the good setups come.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Protect the account first",
+          "sub": "30% allocation · 1% risk · halve after each loss",
+          "color": "bull"
+        }
+      ]
+    }
+  ]
+}

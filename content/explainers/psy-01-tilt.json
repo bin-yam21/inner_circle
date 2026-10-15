@@ -1,0 +1,129 @@
+{
+  "id": "tilt",
+  "order": 1,
+  "course": "trading-psychology",
+  "lessons": [
+    "psy-04",
+    "psy-02",
+    "psy-09"
+  ],
+  "title": "Tilt & revenge trading",
+  "subtitle": "Breaking the loop before it breaks your account",
+  "scenes": [
+    {
+      "layout": "title",
+      "say": "One bad loss, then another, then a reckless trade to win it back. That's tilt. Here's how to stop the spiral."
+    },
+    {
+      "title": "The tilt loop",
+      "say": "Tilt is a loop. A loss stings, emotion takes over, and you take a revenge trade with bigger size and no real setup. That leads to a bigger loss, and the loop starts again.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.5,
+          "stagger": 2.6,
+          "items": [
+            {
+              "label": "A loss",
+              "sub": "It stings",
+              "color": "bear"
+            },
+            {
+              "label": "Emotion",
+              "sub": "Anger, fear, the urge to get even",
+              "color": "liq"
+            },
+            {
+              "label": "Revenge trade",
+              "sub": "Bigger size, no setup",
+              "color": "bear"
+            },
+            {
+              "label": "Bigger loss",
+              "sub": "And the loop repeats",
+              "color": "bear"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Warning signs",
+      "say": "Learn your warning signs: trading faster than usual, raising size to win it back, skipping the checklist, and staring at your profit and loss instead of the chart. When you notice them, name the feeling before you click.",
+      "points": [
+        "Clicking faster than usual",
+        "Raising size to win it back",
+        "Skipping your checklist",
+        "Watching P&L, not the chart"
+      ],
+      "els": [
+        {
+          "type": "big",
+          "at": 0.5,
+          "text": "Notice it",
+          "sub": "Name the feeling before you click",
+          "color": "liq"
+        }
+      ]
+    },
+    {
+      "title": "Break the loop",
+      "say": "To break the loop: stop, take your hands off the mouse, and step away for at least fifteen minutes. When you come back, halve your risk, or stop for the day after three losses. Then write it down in your journal.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.5,
+          "stagger": 3.2,
+          "items": [
+            {
+              "label": "Stop",
+              "sub": "Hands off the mouse",
+              "color": "bull"
+            },
+            {
+              "label": "Step away",
+              "sub": "At least 15 minutes",
+              "color": "bull"
+            },
+            {
+              "label": "Cut risk",
+              "sub": "Halve it, or stop after 3 losses",
+              "color": "accent"
+            },
+            {
+              "label": "Journal it",
+              "sub": "What happened, and why",
+              "color": "accent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Decide in advance",
+      "say": "The secret is to decide before you trade, not during. Set your daily loss limit and stop rules while you're calm. The tilt guard in this app reads your journal and reminds you when to slow down.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Decide before, not during",
+          "sub": "Set your loss limit and stop rules while you're calm. The tilt guard enforces them.",
+          "color": "accent"
+        }
+      ]
+    },
+    {
+      "title": "Recap",
+      "say": "Remember: a loss is a business cost, not a debt you must repay today. Protect your mind and your account, and tomorrow's setups will still be there.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "A loss is a cost, not a debt",
+          "sub": "You never have to win it back today.",
+          "color": "bull"
+        }
+      ]
+    }
+  ]
+}

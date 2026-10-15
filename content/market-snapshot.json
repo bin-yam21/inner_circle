@@ -1,0 +1,56 @@
+{
+  "asOf": "7 Oct 2026",
+  "note": "Approximate levels from published market reports, not live prices",
+  "items": [
+    {
+      "k": "Dollar Index",
+      "v": "≈102.0",
+      "s": "Near 2-month high"
+    },
+    {
+      "k": "EUR/USD",
+      "v": "1.1225",
+      "s": "Aug high ≈1.1700"
+    },
+    {
+      "k": "GBP/USD",
+      "v": "≈1.3250",
+      "s": "Slipping"
+    },
+    {
+      "k": "USD/JPY",
+      "v": "≈158.0",
+      "s": "Holding near highs"
+    },
+    {
+      "k": "Gold",
+      "v": "≈$4,150",
+      "s": "Record ≈$5,500–5,600 (Jan)"
+    },
+    {
+      "k": "WTI crude",
+      "v": "≈$89.50",
+      "s": "Hormuz risk premium"
+    },
+    {
+      "k": "US 10-year",
+      "v": "≈5.3%",
+      "s": "Highest since 2002"
+    },
+    {
+      "k": "Fed funds",
+      "v": "3.75–4.00%",
+      "s": "Hiked 16 Sept"
+    },
+    {
+      "k": "ECB deposit",
+      "v": "2.00%",
+      "s": "Next: 29 Oct"
+    },
+    {
+      "k": "BoJ rate",
+      "v": "0.75%",
+      "s": "Next: 30 Oct"
+    }
+  ]
+}

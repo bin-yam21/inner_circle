@@ -1,0 +1,204 @@
+{
+  "id": "false-breakouts",
+  "order": 8,
+  "course": "ict-mentorship-2016",
+  "lessons": [
+    "ict-16",
+    "ict-15",
+    "ict-23",
+    "ict-37"
+  ],
+  "title": "The false breakout trap",
+  "subtitle": "How smart money sells to breakout buyers",
+  "scenes": [
+    {
+      "layout": "title",
+      "say": "Retail traders love a breakout. Smart money loves selling to them. Here's how the false breakout trap works."
+    },
+    {
+      "title": "The setup",
+      "say": "Price bounces between support and resistance. Retail traders draw a line on the top and wait. Some will buy the breakout, and everyone who sold short has a stop just above it.",
+      "els": [
+        {
+          "type": "candles",
+          "stagger": 0.15,
+          "walk": [
+            [
+              0,
+              40
+            ],
+            [
+              3,
+              60
+            ],
+            [
+              6,
+              44
+            ],
+            [
+              9,
+              60
+            ],
+            [
+              12,
+              45
+            ],
+            [
+              15,
+              59
+            ],
+            [
+              18,
+              48
+            ]
+          ]
+        },
+        {
+          "type": "level",
+          "at": 3.5,
+          "y": 61.5,
+          "label": "Resistance",
+          "color": "bear"
+        },
+        {
+          "type": "level",
+          "at": 4.5,
+          "y": 41.5,
+          "x1": 0,
+          "label": "Support",
+          "color": "bull"
+        },
+        {
+          "type": "stops",
+          "id": "bsl",
+          "at": 7,
+          "x1": 3,
+          "x2": 15,
+          "y": 61.5,
+          "side": "buy",
+          "label": "Buy stops + breakout orders"
+        }
+      ]
+    },
+    {
+      "title": "The breakout",
+      "carry": "chart",
+      "say": "Price breaks out above the line. Breakout buyers pile in and the short sellers' stops are triggered. All of those are buy orders, exactly what big sellers need. Then price collapses back into the range and through the other side.",
+      "els": [
+        {
+          "type": "candles",
+          "at": 0.3,
+          "stagger": 0.55,
+          "walk": [
+            [
+              19,
+              51
+            ],
+            [
+              21,
+              59
+            ],
+            [
+              22,
+              67
+            ],
+            [
+              23,
+              63
+            ],
+            [
+              25,
+              52
+            ],
+            [
+              28,
+              40
+            ],
+            [
+              31,
+              30
+            ]
+          ]
+        },
+        {
+          "type": "take",
+          "id": "bsl",
+          "at": 2
+        },
+        {
+          "type": "marker",
+          "at": 2.4,
+          "x": 22,
+          "y": 67.5,
+          "label": "Breakout buyers trapped",
+          "color": "bear"
+        },
+        {
+          "type": "arrow",
+          "at": 5,
+          "from": [
+            22,
+            64
+          ],
+          "to": [
+            30,
+            32
+          ],
+          "label": "The real move",
+          "color": "bear"
+        }
+      ]
+    },
+    {
+      "title": "Spot the trap",
+      "carry": true,
+      "say": "How do you spot it? The breakout runs into a higher-timeframe level, there's little follow-through, and price quickly closes back inside the range. That's the signal to look the other way.",
+      "points": [
+        "The breakout runs into a higher-timeframe level",
+        "Little follow-through above the line",
+        "A quick close back inside the range"
+      ]
+    },
+    {
+      "title": "The same trick, other patterns",
+      "say": "The same trick shows up in other classic patterns. Trend line breaks, head-and-shoulders necklines, and double tops and bottoms all create obvious clusters of stops for smart money to run.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.6,
+          "stagger": 3,
+          "items": [
+            {
+              "label": "Trend lines",
+              "sub": "Stops sit just beyond the line",
+              "color": "liq"
+            },
+            {
+              "label": "Head & shoulders",
+              "sub": "Neckline breaks that reverse",
+              "color": "bear"
+            },
+            {
+              "label": "Double tops & bottoms",
+              "sub": "Equal highs or lows are stop magnets",
+              "color": "accent"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Recap",
+      "say": "So before you chase a breakout, ask who's trapped and where their stops are. Often the smarter trade is the reversal after the stops are taken.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Ask who is trapped",
+          "sub": "Trade the reversal after the stops are taken, not the obvious breakout.",
+          "color": "bear"
+        }
+      ]
+    }
+  ]
+}

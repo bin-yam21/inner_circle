@@ -1,0 +1,246 @@
+{
+  "id": "premium-discount-ote",
+  "order": 2,
+  "course": "ict-mentorship-2016",
+  "lessons": [
+    "ict-04",
+    "ict-05",
+    "ict-06",
+    "ict-08"
+  ],
+  "title": "Premium, discount & OTE",
+  "subtitle": "Buying cheap and selling expensive, ICT style",
+  "scenes": [
+    {
+      "layout": "title",
+      "say": "Buy cheap, sell expensive. ICT measures cheap and expensive with one simple tool: the dealing range. Here's how it works."
+    },
+    {
+      "title": "The dealing range",
+      "say": "Start with an impulse swing: a fast move from a swing low to a swing high. Those two points form your dealing range. Everything inside it is either cheap or expensive.",
+      "els": [
+        {
+          "type": "candles",
+          "walk": [
+            [
+              0,
+              22
+            ],
+            [
+              3,
+              27
+            ],
+            [
+              5,
+              22
+            ],
+            [
+              10,
+              80
+            ],
+            [
+              11,
+              78
+            ]
+          ],
+          "stagger": 0.2
+        },
+        {
+          "type": "level",
+          "at": 3,
+          "y": 82.5,
+          "x1": 10,
+          "label": "Swing high",
+          "color": "ink"
+        },
+        {
+          "type": "level",
+          "at": 4.5,
+          "y": 17,
+          "x1": 0,
+          "label": "Swing low",
+          "color": "ink"
+        }
+      ]
+    },
+    {
+      "title": "Equilibrium splits the range",
+      "carry": true,
+      "say": "Cut the range in half. The fifty percent line is equilibrium, or fair value. Above it is premium, where smart money likes to sell. Below it is discount, where smart money likes to buy.",
+      "els": [
+        {
+          "type": "level",
+          "at": 1.5,
+          "y": 49.75,
+          "label": "Equilibrium 50%",
+          "color": "ink",
+          "solid": true
+        },
+        {
+          "type": "zone",
+          "at": 4,
+          "y1": 49.75,
+          "y2": 82.5,
+          "x1": 11,
+          "label": "Premium: expensive",
+          "color": "bear"
+        },
+        {
+          "type": "zone",
+          "at": 7,
+          "y1": 17,
+          "y2": 49.75,
+          "x1": 11,
+          "label": "Discount: cheap",
+          "color": "bull"
+        }
+      ]
+    },
+    {
+      "title": "Optimal trade entry (OTE)",
+      "carry": "chart",
+      "say": "In a bullish market, don't chase the high. Wait for a pullback into discount, ideally the optimal trade entry zone, between sixty-two and seventy-nine percent of the swing. The sweet spot is seventy point five. Then target the old high and the buy stops above it.",
+      "els": [
+        {
+          "type": "zone",
+          "at": 0.5,
+          "y1": 30.8,
+          "y2": 41.8,
+          "x1": 11,
+          "label": "OTE 62–79%",
+          "color": "accent"
+        },
+        {
+          "type": "level",
+          "at": 2,
+          "y": 36.4,
+          "x1": 11,
+          "label": "70.5% sweet spot",
+          "color": "accent"
+        },
+        {
+          "type": "candles",
+          "at": 3,
+          "stagger": 0.45,
+          "walk": [
+            [
+              12,
+              74
+            ],
+            [
+              14,
+              60
+            ],
+            [
+              17,
+              45
+            ],
+            [
+              19,
+              36
+            ],
+            [
+              20,
+              43
+            ],
+            [
+              24,
+              72
+            ],
+            [
+              27,
+              88
+            ]
+          ]
+        },
+        {
+          "type": "marker",
+          "at": 6.8,
+          "x": 19,
+          "y": 36,
+          "label": "Entry",
+          "below": true,
+          "color": "bull"
+        },
+        {
+          "type": "arrow",
+          "at": 9,
+          "from": [
+            19,
+            39
+          ],
+          "to": [
+            26,
+            85
+          ],
+          "label": "Target: old high & beyond",
+          "color": "bull"
+        }
+      ]
+    },
+    {
+      "title": "The mirror for shorts",
+      "say": "For shorts, flip it. Measure from the swing high down to the swing low, wait for price to retrace up into premium and the OTE zone, then sell, targeting the sell stops below the old lows.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.8,
+          "stagger": 3,
+          "items": [
+            {
+              "label": "Bearish swing",
+              "sub": "Measure from the high down to the low",
+              "color": "bear"
+            },
+            {
+              "label": "Wait for premium",
+              "sub": "Price retraces back above 50%",
+              "color": "liq"
+            },
+            {
+              "label": "Sell in the OTE",
+              "sub": "62–79% of the way back up",
+              "color": "bear"
+            },
+            {
+              "label": "Target old lows",
+              "sub": "The sell stops below them",
+              "color": "bull"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Rules of thumb",
+      "say": "A few rules of thumb. In strong trends, discount prices don't stay long, so expect fast moves away. If price breaks below the OTE and takes an old low, look for a turtle soup long rather than panic. And always measure the most recent impulse swing.",
+      "points": [
+        "Strong trend: discount doesn't last",
+        "Breaks the OTE and takes an old low? Look for a turtle soup long",
+        "Always measure the latest impulse swing"
+      ],
+      "els": [
+        {
+          "type": "big",
+          "at": 0.5,
+          "text": "50%",
+          "sub": "The line between cheap and expensive",
+          "color": "accent"
+        }
+      ]
+    },
+    {
+      "title": "Recap",
+      "say": "So: find the dealing range, buy in discount and sell in premium, and let the OTE zone give you a precise, low-risk entry.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Buy discount. Sell premium.",
+          "sub": "Wait for the 62–79% OTE zone inside the dealing range.",
+          "color": "bull"
+        }
+      ]
+    }
+  ]
+}

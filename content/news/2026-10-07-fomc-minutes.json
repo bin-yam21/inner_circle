@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-07",
+  "tag": "Central banks",
+  "markets": [
+    "USD",
+    "US10Y"
+  ],
+  "title": "Fed minutes: officials saw inflation risks worsening before the September hike",
+  "summary": "Minutes of the 15–16 September FOMC were released on 7 October. The 25 bp hike to 3.75–4.00% was unanimous, the first since 2023, and officials flagged worsening inflation risks. Markets now focus on the 28 October decision.",
+  "ict": "ICT calls interest rates the single most influential driving force. Before trusting a Dollar Index order block around CPI or FOMC, check the interest-rate triad (30-year, 10-year, 5-year futures) for a failure swing.",
+  "lessons": [
+    "ict-25",
+    "ict-22",
+    "ict-43"
+  ],
+  "source": "FXStreet",
+  "url": "https://www.fxstreet.com/news/fed-minutes-set-to-provide-some-insight-into-the-timing-of-next-rate-hikes-202610071400"
+}

@@ -1,0 +1,278 @@
+{
+  "id": "order-blocks",
+  "order": 3,
+  "course": "ict-mentorship-2016",
+  "lessons": [
+    "ict-27",
+    "ict-29",
+    "ict-32"
+  ],
+  "title": "Order blocks",
+  "subtitle": "The footprint smart money leaves behind",
+  "scenes": [
+    {
+      "layout": "title",
+      "say": "An order block is the footprint smart money leaves before a big move. Let's learn to spot one, validate it, and trade it."
+    },
+    {
+      "title": "Spot the candle",
+      "say": "In a bullish setup, the order block is the last down-close candle before price shoots higher. Look for the lowest down candle with the biggest body, near a support level.",
+      "els": [
+        {
+          "type": "candles",
+          "stagger": 0.5,
+          "ohlc": [
+            [
+              60,
+              61,
+              56,
+              57
+            ],
+            [
+              57,
+              58,
+              52,
+              53
+            ],
+            [
+              53,
+              55,
+              49,
+              50
+            ],
+            [
+              50,
+              51,
+              43.5,
+              45
+            ],
+            [
+              45,
+              56,
+              44,
+              55
+            ],
+            [
+              55,
+              64,
+              54,
+              63
+            ],
+            [
+              63,
+              70,
+              62,
+              69
+            ],
+            [
+              69,
+              72,
+              66,
+              71
+            ]
+          ]
+        },
+        {
+          "type": "focus",
+          "at": 5,
+          "x1": 3,
+          "x2": 3,
+          "label": "Bullish order block",
+          "color": "accent"
+        }
+      ]
+    },
+    {
+      "title": "Validate it",
+      "carry": true,
+      "say": "Next, validation. A later candle must trade through the order block's high. A strong, fast move away is called displacement. It shows institutions are behind it.",
+      "els": [
+        {
+          "type": "level",
+          "at": 0.5,
+          "y": 51,
+          "x1": 3,
+          "label": "OB high",
+          "color": "accent"
+        },
+        {
+          "type": "marker",
+          "at": 2.5,
+          "x": 4,
+          "y": 56,
+          "label": "Validated: trades through the high",
+          "color": "bull"
+        },
+        {
+          "type": "arrow",
+          "at": 5,
+          "from": [
+            4,
+            50
+          ],
+          "to": [
+            7,
+            71
+          ],
+          "label": "Displacement",
+          "color": "bull"
+        }
+      ]
+    },
+    {
+      "title": "Entry and stop",
+      "carry": "chart",
+      "say": "Now wait for price to come back. Enter as it returns to the top of the order block, with your stop below its low. The best order blocks hold above the fifty percent level of the body, called the mean threshold.",
+      "els": [
+        {
+          "type": "zone",
+          "at": 0.3,
+          "y1": 45,
+          "y2": 50,
+          "x1": 3,
+          "label": "Order block body",
+          "color": "accent"
+        },
+        {
+          "type": "candles",
+          "at": 1.5,
+          "stagger": 0.45,
+          "walk": [
+            [
+              8,
+              68
+            ],
+            [
+              10,
+              61
+            ],
+            [
+              12,
+              53
+            ],
+            [
+              13,
+              50
+            ],
+            [
+              15,
+              58
+            ],
+            [
+              18,
+              74
+            ],
+            [
+              20,
+              84
+            ]
+          ]
+        },
+        {
+          "type": "marker",
+          "at": 4.2,
+          "x": 13,
+          "y": 50,
+          "label": "Buy at the OB high",
+          "below": true,
+          "color": "bull"
+        },
+        {
+          "type": "level",
+          "at": 6,
+          "y": 43,
+          "x1": 3,
+          "label": "Stop below the OB low",
+          "color": "bear"
+        },
+        {
+          "type": "level",
+          "at": 9,
+          "y": 47.5,
+          "x1": 3,
+          "label": "Mean threshold 50%",
+          "color": "ink"
+        }
+      ]
+    },
+    {
+      "title": "Target external liquidity",
+      "carry": true,
+      "say": "Target the buy stops above the old high. ICT puts it simply: buy at internal range liquidity, the order block, and sell at external range liquidity, the stops beyond the range.",
+      "els": [
+        {
+          "type": "level",
+          "at": 0.3,
+          "y": 72.5,
+          "x1": 7,
+          "label": "Old high: buy stops",
+          "color": "liq"
+        },
+        {
+          "type": "arrow",
+          "at": 2,
+          "from": [
+            13,
+            52
+          ],
+          "to": [
+            19.6,
+            82
+          ],
+          "label": "Internal → external",
+          "color": "bull",
+          "dur": 1.5
+        }
+      ]
+    },
+    {
+      "title": "Context first",
+      "say": "Context matters. Only trade order blocks that agree with the higher-timeframe direction. When the trend is bullish, a bearish order block is just a place to take profits, not to sell. And a block that price trades straight through is no longer valid.",
+      "points": [
+        "Trade blocks in the direction of higher-timeframe flow",
+        "Against the trend, use them only to take profit",
+        "Price trades straight through? The block has failed"
+      ],
+      "els": [
+        {
+          "type": "big",
+          "at": 0.5,
+          "text": "Trend first",
+          "sub": "Then the order block",
+          "color": "accent"
+        }
+      ]
+    },
+    {
+      "title": "Recap",
+      "say": "To recap: spot the last opposite candle before displacement, confirm it's validated, enter on the return, keep your stop beyond it, and aim for external liquidity.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.4,
+          "stagger": 1.6,
+          "items": [
+            {
+              "label": "Spot",
+              "sub": "Last opposite candle before displacement"
+            },
+            {
+              "label": "Validate",
+              "sub": "Price trades through its high"
+            },
+            {
+              "label": "Enter",
+              "sub": "On the return, stop beyond it",
+              "color": "liq"
+            },
+            {
+              "label": "Target",
+              "sub": "External range liquidity",
+              "color": "bull"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

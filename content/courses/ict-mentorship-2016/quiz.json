@@ -1,0 +1,650 @@
+[
+  {
+    "lesson": "ict-04",
+    "q": "In ICT's equilibrium method, after the swing high forms, what must happen before you start waiting for a pullback?",
+    "options": [
+      "A fourth candle closes lower than the swing-high candle",
+      "Price breaks the impulse low",
+      "RSI drops below 50",
+      "Price touches the 79% level"
+    ],
+    "answer": 0,
+    "explain": "A swing high needs a lower candle on each side, then a 4th candle lower. Only then do you wait for equilibrium or discount."
+  },
+  {
+    "lesson": "ict-04",
+    "q": "Where does ICT want to buy inside a bullish impulse swing?",
+    "options": [
+      "At 50% exactly",
+      "Above 50% (premium)",
+      "Below 50%, ideally the 62–79% OTE",
+      "At the swing high breakout"
+    ],
+    "answer": 2,
+    "explain": "Below equilibrium is discount; the OTE 62–70.5–79% zone is the highest-probability buy area."
+  },
+  {
+    "lesson": "ict-05",
+    "q": "Equilibrium is…",
+    "options": [
+      "The 200-period moving average",
+      "50% of the current dealing range",
+      "The previous day's close",
+      "The Asian session high"
+    ],
+    "answer": 1,
+    "explain": "Equilibrium = the midpoint of a defined high-to-low range: fair value."
+  },
+  {
+    "lesson": "ict-01",
+    "q": "According to the four market conditions, consolidation is always followed by…",
+    "options": [
+      "Retracement",
+      "Reversal",
+      "Expansion",
+      "Another consolidation"
+    ],
+    "answer": 2,
+    "explain": "\"It never goes consolidation to retracement or reversal\": consolidation → expansion, then retracement or reversal."
+  },
+  {
+    "lesson": "ict-01",
+    "q": "Which ICT tool is paired with the EXPANSION condition?",
+    "options": [
+      "Order block",
+      "Equilibrium",
+      "Liquidity pool",
+      "Fair value gap"
+    ],
+    "answer": 0,
+    "explain": "Expansion → wait for the return to the order block left near equilibrium."
+  },
+  {
+    "lesson": "ict-01",
+    "q": "Which tool is paired with the RETRACEMENT condition?",
+    "options": [
+      "Order block",
+      "Fair value gaps / liquidity voids",
+      "Equilibrium",
+      "Seasonals"
+    ],
+    "answer": 1,
+    "explain": "A retracement reprices levels that weren't traded efficiently: FVGs and voids."
+  },
+  {
+    "lesson": "ict-01",
+    "q": "Which tool is paired with the REVERSAL condition?",
+    "options": [
+      "Liquidity pools above old highs / below old lows",
+      "Mean threshold",
+      "Moving averages",
+      "Open interest"
+    ],
+    "answer": 0,
+    "explain": "Reversals happen after stops are run: liquidity pools."
+  },
+  {
+    "lesson": "ict-08",
+    "q": "On a bullish day, what is the Judas swing after midnight New York?",
+    "options": [
+      "A rally to the day's high",
+      "A false move LOWER before the real move up",
+      "The New York close",
+      "A gap at the Sunday open"
+    ],
+    "answer": 1,
+    "explain": "Protraction: a time-sensitive move against the day's true direction, designed to trap traders."
+  },
+  {
+    "lesson": "ict-02",
+    "q": "In the daily template, what usually happens around 10:00–11:00 a.m. New York?",
+    "options": [
+      "Asian consolidation",
+      "London close reversal / profit-taking",
+      "The Judas swing",
+      "The 8:30 news spike"
+    ],
+    "answer": 1,
+    "explain": "London close is a reversal window, followed by consolidation for the rest of the day."
+  },
+  {
+    "lesson": "ict-02",
+    "q": "What role does the Asian range play in ICT's daily template?",
+    "options": [
+      "Expansion",
+      "Consolidation (equilibrium where orders build)",
+      "Reversal",
+      "Distribution"
+    ],
+    "answer": 1,
+    "explain": "Asia = consolidation; London manipulates and expands from it."
+  },
+  {
+    "lesson": "ict-09",
+    "q": "What is ICT's starter monthly goal for growing a small account?",
+    "options": [
+      "50%",
+      "20%",
+      "6% compounded",
+      "1%"
+    ],
+    "answer": 2,
+    "explain": "6% a month compounded doubles the account in about a year: one 20-pip trade a week at 1.5% risk."
+  },
+  {
+    "lesson": "ict-09",
+    "q": "At a 25% win rate, the minimum reward:risk to break even is…",
+    "options": [
+      "1:1",
+      "1.5:1",
+      "2:1",
+      "3:1"
+    ],
+    "answer": 3,
+    "explain": "25% → 3:1, 33% → 2:1, 40% → 1.5:1, 50% → 1:1."
+  },
+  {
+    "lesson": "ict-13",
+    "q": "You just lost 2% on a trade. What does ICT say to risk on the next one?",
+    "options": [
+      "4% to win it back",
+      "2% again",
+      "1% (half)",
+      "Stop trading for a month"
+    ],
+    "answer": 2,
+    "explain": "Cut risk in half after a loss. At half size, 2R recovers the loss."
+  },
+  {
+    "lesson": "ict-10",
+    "q": "In the AUD/USD 0.7512 example, how big was the 5-minute refined stop?",
+    "options": [
+      "8 pips",
+      "20 pips",
+      "35 pips",
+      "60 pips"
+    ],
+    "answer": 0,
+    "explain": "Buy ~0.7515, stop 0.7507 = 8 pips, versus 20 pips on the hourly framing."
+  },
+  {
+    "lesson": "ict-14",
+    "q": "ICT's 'seven things in agreement' are made of…",
+    "options": [
+      "7 indicators",
+      "2 big-picture + 2 intermediate + 3 short-term (one from each)",
+      "7 timeframes",
+      "7 candlestick patterns"
+    ],
+    "answer": 1,
+    "explain": "Big picture 2 of 4, intermediate 2 of 3, short-term 1 from each of correlation, time & price, and IPDA."
+  },
+  {
+    "lesson": "ict-15",
+    "q": "False bull flags most often appear…",
+    "options": [
+      "In mature bull trends or at HTF distribution levels",
+      "At deep discount",
+      "Only on the daily chart",
+      "During Asia only"
+    ],
+    "answer": 0,
+    "explain": "Judge a flag by where it forms (premium vs discount), not by its shape."
+  },
+  {
+    "lesson": "ict-16",
+    "q": "A false breakout BELOW a consolidation is typical of…",
+    "options": [
+      "Bearish markets",
+      "Bullish markets",
+      "Holiday markets",
+      "Gold only"
+    ],
+    "answer": 1,
+    "explain": "In a bullish model, smart money buys the sell stops below each consolidation, then runs to the buy stops."
+  },
+  {
+    "lesson": "ict-17",
+    "q": "Which chart does ICT call his favourite?",
+    "options": [
+      "1-minute",
+      "15-minute",
+      "Daily",
+      "Monthly"
+    ],
+    "answer": 2,
+    "explain": "\"If someone held a gun to my head\": the daily shows the long-term view plus the bank levels."
+  },
+  {
+    "lesson": "ict-17",
+    "q": "Which three setups does ICT say he trades?",
+    "options": [
+      "RSI, MACD, Bollinger",
+      "Trading inside the range, order blocks, turtle soups",
+      "Head & shoulders, flags, wedges",
+      "Breakouts only"
+    ],
+    "answer": 1,
+    "explain": "\"I only trade these three things… I could just reduce it to one.\""
+  },
+  {
+    "lesson": "ict-18",
+    "q": "Why does ICT analyse candle BODIES rather than wicks?",
+    "options": [
+      "Bodies are prettier",
+      "Bodies carry the institutional volume; wicks reflect retail/spread pricing",
+      "Wicks are always fake",
+      "Brokers hide the bodies"
+    ],
+    "answer": 1,
+    "explain": "Stop runs only need to reach past the bodies."
+  },
+  {
+    "lesson": "ict-19",
+    "q": "What is the clearest sign of institutional sponsorship at your entry level?",
+    "options": [
+      "A slow grind",
+      "An immediate, dynamic reaction away from the level",
+      "A high RSI",
+      "A news headline"
+    ],
+    "answer": 1,
+    "explain": "Lethargic price after entry means reduce risk or exit; sponsored levels react immediately."
+  },
+  {
+    "lesson": "ict-21",
+    "q": "GBP/USD makes a higher high but DXY FAILS to make a lower low. This suggests…",
+    "options": [
+      "Confirmed cable strength",
+      "Dollar accumulation: a cable stop-run likely to fail",
+      "Nothing",
+      "Buy GBP/USD"
+    ],
+    "answer": 1,
+    "explain": "Non-symmetrical USDX SMT: the trend is unlikely to continue; stalk reversals."
+  },
+  {
+    "lesson": "ict-22",
+    "q": "Treasury bond PRICES falling means…",
+    "options": [
+      "Yields falling, dollar weaker",
+      "Yields rising, which tends to support the dollar",
+      "Gold must rally",
+      "Nothing for FX"
+    ],
+    "answer": 1,
+    "explain": "Bond price moves inversely to yield; rising yields attract capital to the dollar."
+  },
+  {
+    "lesson": "ict-23",
+    "q": "HTF is bearish and a lower timeframe shows a clean up-trend line with two touches. ICT looks to…",
+    "options": [
+      "Buy the third touch",
+      "Sell the swing high between touch 2 and touch 3",
+      "Ignore it",
+      "Buy the breakout"
+    ],
+    "answer": 1,
+    "explain": "The obvious line is a trap: sell at the bearish OB or the turtle soup, target the stops under the line."
+  },
+  {
+    "lesson": "ict-25",
+    "q": "The interest-rate triad consists of…",
+    "options": [
+      "Fed, ECB, BoJ",
+      "30-year bond, 10-year note, 5-year note",
+      "2y, 5y, 10y yields of three countries",
+      "Gold, oil, copper"
+    ],
+    "answer": 1,
+    "explain": "A failure swing in any one of the three at a key DXY level validates the setup."
+  },
+  {
+    "lesson": "ict-26",
+    "q": "ICT's core habit is to ENTER at ___ and EXIT at ___.",
+    "options": [
+      "external / internal range liquidity",
+      "internal range liquidity / external range liquidity",
+      "the open / the close",
+      "resistance / support"
+    ],
+    "answer": 1,
+    "explain": "Enter at an OB/FVG inside the range; exit at stops beyond the range high or low."
+  },
+  {
+    "lesson": "ict-27",
+    "q": "A bullish order block is validated when…",
+    "options": [
+      "It closes green",
+      "A later candle trades through its HIGH",
+      "Volume increases",
+      "RSI crosses 30"
+    ],
+    "answer": 1,
+    "explain": "The lowest down-close candle near support, validated when its high is traded through."
+  },
+  {
+    "lesson": "ict-27",
+    "q": "The mean threshold of an order block is…",
+    "options": [
+      "Its wick high",
+      "50% of its body",
+      "Its close",
+      "The daily open"
+    ],
+    "answer": 1,
+    "explain": "The best order blocks don't close beyond the 50% of the body."
+  },
+  {
+    "lesson": "ict-28",
+    "q": "A bearish rejection block is framed from…",
+    "options": [
+      "The lowest low to the close",
+      "The highest body (open/close) up to the highest wick",
+      "The 50% level to the low",
+      "The Asian high to the London high"
+    ],
+    "answer": 1,
+    "explain": "Sell when price returns to the body level; stop above the wick."
+  },
+  {
+    "lesson": "ict-30",
+    "q": "What makes a propulsion block special?",
+    "options": [
+      "It is always 3 candles",
+      "It is ultra-sensitive: price only touches its high and its mean threshold shouldn't break",
+      "It forms on Sundays",
+      "It is a gap"
+    ],
+    "answer": 1,
+    "explain": "A down candle that traded into an earlier bullish OB. It allows an ultra-tight stop and gives immediate feedback."
+  },
+  {
+    "lesson": "ict-31",
+    "q": "A vacuum block created by 8:30 a.m. NY news usually…",
+    "options": [
+      "Never fills",
+      "Fills during the same day, with plenty of session left",
+      "Fills only on Fridays",
+      "Becomes a trend line"
+    ],
+    "answer": 1,
+    "explain": "Gaps formed after 10–11 a.m. often stay open that day and fill later."
+  },
+  {
+    "lesson": "ict-32",
+    "q": "A bullish breaker requires…",
+    "options": [
+      "A higher high then a lower high",
+      "A run below an old low, then a break of the swing high between the lows",
+      "Two inside bars",
+      "A gap up"
+    ],
+    "answer": 1,
+    "explain": "The up-close candle range in that swing high becomes support; trapped sellers mitigate there."
+  },
+  {
+    "lesson": "ict-33",
+    "q": "In ICT's FVG framing (bearish displacement), the gap is the space between…",
+    "options": [
+      "The left candle's LOW and the right candle's HIGH",
+      "The open and close of the middle candle",
+      "Two daily closes",
+      "The Asian high and low"
+    ],
+    "answer": 0,
+    "explain": "Only sell-side was offered there, so price usually returns to rebalance it."
+  },
+  {
+    "lesson": "ict-34",
+    "q": "On 15/30-minute charts, how far does ICT expect a typical sweep below an old low?",
+    "options": [
+      "1–2 pips",
+      "10–20 pips",
+      "80–100 pips",
+      "No sweep"
+    ],
+    "answer": 1,
+    "explain": "Enter 10–20 pips under the low with a 30–50 pip stop. More than ~25 pips through means it's probably not just a raid."
+  },
+  {
+    "lesson": "ict-37",
+    "q": "How does ICT project the target beyond a double top?",
+    "options": [
+      "Fibonacci 161.8%",
+      "Measure high to the low between the peaks and project it above the highs",
+      "Use the ATR",
+      "Use pivot points"
+    ],
+    "answer": 1,
+    "explain": "The algorithm's measured move: example projection 0.7445, actual high 0.7446."
+  },
+  {
+    "lesson": "ict-36",
+    "q": "Hidden (type-2) bullish divergence is…",
+    "options": [
+      "Lower low in price, higher low in the oscillator",
+      "Higher low in price while the oscillator makes a lower low",
+      "Price and oscillator both rising",
+      "Price flat, oscillator falling"
+    ],
+    "answer": 1,
+    "explain": "Trend-following divergence (credited to Nick Van Nuys). ICT uses indicators only to read retail sentiment."
+  },
+  {
+    "lesson": "ict-38",
+    "q": "For the IPDA look-back, where do you anchor the vertical line?",
+    "options": [
+      "Today's date",
+      "The first trading day of the most recent COMPLETED month",
+      "January 1st only",
+      "The last NFP date"
+    ],
+    "answer": 1,
+    "explain": "On 14 Nov you'd anchor at 1 Oct; then look back 20/40/60 trading days."
+  },
+  {
+    "lesson": "ict-41",
+    "q": "ICT's 'open float' window covers…",
+    "options": [
+      "The last 5 days",
+      "60 trading days back + 60 forward (120 days)",
+      "One year",
+      "Only the Asian session"
+    ],
+    "answer": 1,
+    "explain": "Its highest high and lowest low are where fund-level stops sit."
+  },
+  {
+    "lesson": "ict-40",
+    "q": "If every high and low inside the 60-day look-back has already been run, ICT expects…",
+    "options": [
+      "A quiet market",
+      "An explosive expansion to the next high/low OUTSIDE the 60 days",
+      "A reversal at equilibrium",
+      "Nothing"
+    ],
+    "answer": 1,
+    "explain": "Both sides are cleared, so the algorithm must reach further for liquidity."
+  },
+  {
+    "lesson": "ict-40",
+    "q": "Open interest collapses ≥15% while price hits major support. ICT reads it as…",
+    "options": [
+      "Bearish: more sellers",
+      "Bullish: the liquidity provider has finished its sell program and reset",
+      "Irrelevant for FX",
+      "A reason to short"
+    ],
+    "answer": 1,
+    "explain": "From Larry Williams' teaching, as ICT applies it to currency futures."
+  },
+  {
+    "lesson": "ict-42",
+    "q": "According to ICT, the market turns in only two ways. Which?",
+    "options": [
+      "Gap and trap",
+      "Stop run (breaker swing) and failure swing",
+      "Doji and hammer",
+      "Golden cross and death cross"
+    ],
+    "answer": 1,
+    "explain": "Sell at an old high or on the retracement to the break (and the reverse for buys)."
+  },
+  {
+    "lesson": "ict-43",
+    "q": "The 10-year note and the Dollar Index are moving in the SAME direction. ICT expects…",
+    "options": [
+      "A strong trend",
+      "A large consolidation: trade short-term only",
+      "A crash",
+      "Gold to rally"
+    ],
+    "answer": 1,
+    "explain": "Opposite directions with the seasonal mean a trending environment for position trades."
+  },
+  {
+    "lesson": "ict-45",
+    "q": "How does ICT pick a pair from interest-rate differentials?",
+    "options": [
+      "Buy the lowest-yield currency",
+      "Buy a high-yield currency against a low-yield one, then wait for HTF support plus OI or seasonal confirmation",
+      "Trade exotics only",
+      "Use RSI"
+    ],
+    "answer": 1,
+    "explain": "\"Money seeks yield.\" Example: AUD 1.5% vs USD 0.5–0.75% gave a 400+ pip rally."
+  },
+  {
+    "lesson": "ict-46",
+    "q": "In ICT's intermarket list, bullish oil usually means USD/CAD is…",
+    "options": [
+      "Bullish",
+      "Bearish",
+      "Unaffected",
+      "Locked to gold"
+    ],
+    "answer": 1,
+    "explain": "Canada is an oil exporter. Gold bearish is USD/CAD bullish."
+  },
+  {
+    "lesson": "ict-47",
+    "q": "The Canadian dollar futures seasonal is weak from September to Christmas. For USD/CAD that means…",
+    "options": [
+      "Bearish tendency",
+      "Bullish tendency (invert USD/xxx pairs)",
+      "No effect",
+      "Only on Mondays"
+    ],
+    "answer": 1,
+    "explain": "Only valid when the pair is already predisposed (bullish order flow)."
+  },
+  {
+    "lesson": "ict-49",
+    "q": "EUR/USD's ideal seasonal low tends to form in…",
+    "options": [
+      "January",
+      "June–July",
+      "October",
+      "December"
+    ],
+    "answer": 1,
+    "explain": "Mirrored by the Dollar Index seasonal high in June–July."
+  },
+  {
+    "lesson": "ict-50",
+    "q": "How much of the account does ICT allocate to trading in Money Management?",
+    "options": [
+      "100%",
+      "50%",
+      "30%",
+      "5%"
+    ],
+    "answer": 2,
+    "explain": "Risk is calculated on the 30% slice: $10,000 → $3,000 → 1% = $30."
+  },
+  {
+    "lesson": "ict-51",
+    "q": "Going UP from equilibrium, which PD array does price meet first?",
+    "options": [
+      "Old high",
+      "Bearish order block",
+      "Mitigation block",
+      "Rejection block"
+    ],
+    "answer": 2,
+    "explain": "Order: mitigation block → breaker → void → FVG → bearish OB → rejection block → old high. Breakers take precedence."
+  },
+  {
+    "lesson": "ict-52",
+    "q": "A daily bullish PD array fails. ICT says to…",
+    "options": [
+      "Flip short immediately",
+      "Look out to the WEEKLY array (then the monthly)",
+      "Delete your charts",
+      "Average down forever"
+    ],
+    "answer": 1,
+    "explain": "The election whipsaw broke daily levels but went into the lower weekly bullish OB."
+  },
+  {
+    "lesson": "ict-53",
+    "q": "Buying with a STOP entry (long-term model): where does the buy stop go?",
+    "options": [
+      "At the down candle's OPEN",
+      "At the down candle's close",
+      "At the weekly high",
+      "At 50%"
+    ],
+    "answer": 0,
+    "explain": "Strength gets you in; keep moving it to the next down candle until filled."
+  },
+  {
+    "lesson": "ict-54",
+    "q": "Buying with a LIMIT entry (long-term model): where does the buy limit go?",
+    "options": [
+      "At the down-close candle's CLOSE",
+      "At the open",
+      "At the monthly high",
+      "At the Asian low"
+    ],
+    "answer": 0,
+    "explain": "The next day trading below that close fills you deep in discount (USD/JPY 2016 examples: 360–1,800 pips)."
+  },
+  {
+    "lesson": "ict-55",
+    "q": "How does ICT trail stops on position trades?",
+    "options": [
+      "Move to break-even immediately",
+      "Beyond the 40-day low/high, tightening to the 20-day once the move has progressed",
+      "Never use stops",
+      "A fixed 10-pip trail"
+    ],
+    "answer": 1,
+    "explain": "Uses IPDA data ranges and avoids premature stop-outs."
+  },
+  {
+    "lesson": "ict-07",
+    "q": "Why is a rally toward a long-held old high, through lots of old price action, a 'high resistance liquidity run'?",
+    "options": [
+      "Because RSI is high",
+      "Many old highs and lows defend the path, so it usually needs a big catalyst",
+      "Because volume is low",
+      "It isn't"
+    ],
+    "answer": 1,
+    "explain": "Trade low-resistance runs instead: easy short-term highs with the HTF flow."
+  },
+  {
+    "lesson": "ict-06",
+    "q": "In Fair Valuation, 'fair value for market makers' means…",
+    "options": [
+      "Buying at a premium",
+      "Accumulating in discount and distributing in premium",
+      "The daily open",
+      "Equal highs"
+    ],
+    "answer": 1,
+    "explain": "What looks like strength to retail (a rally into premium) is distribution for smart money."
+  }
+]

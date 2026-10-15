@@ -1,0 +1,135 @@
+{
+  "id": "process-over-outcome",
+  "order": 2,
+  "course": "trading-psychology",
+  "lessons": [
+    "psy-01",
+    "psy-07"
+  ],
+  "title": "Process over outcome",
+  "subtitle": "Judge your decisions, not your P&L",
+  "scenes": [
+    {
+      "layout": "title",
+      "say": "Did you trade well? The answer isn't in your profit and loss. Let's see why the best traders judge the process, not the result."
+    },
+    {
+      "title": "Four kinds of trades",
+      "say": "Every trade falls into one of four boxes. Good process and a win. Good process and a loss, which is still a good trade. Bad process and a win, which is dangerous luck. And bad process with a loss.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.5,
+          "stagger": 2.6,
+          "items": [
+            {
+              "label": "Good process, win",
+              "sub": "Deserved success",
+              "color": "bull"
+            },
+            {
+              "label": "Good process, loss",
+              "sub": "Still a good trade",
+              "color": "accent"
+            },
+            {
+              "label": "Bad process, win",
+              "sub": "Dangerous luck",
+              "color": "liq"
+            },
+            {
+              "label": "Bad process, loss",
+              "sub": "Deserved lesson",
+              "color": "bear"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Why luck is dangerous",
+      "say": "The most dangerous box is the lucky win. It rewards breaking your rules, so you're likely to do it again, until the luck runs out.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Bad process + win = bad habit",
+          "sub": "Rewards teach you to repeat whatever you just did.",
+          "color": "liq"
+        }
+      ]
+    },
+    {
+      "title": "Your edge needs a big sample",
+      "say": "Any setup can lose several times in a row. Your edge only shows up over many trades. Judge yourself on ten trades and you're judging luck. Judge yourself on a hundred and you'll see your real edge.",
+      "els": [
+        {
+          "type": "bars",
+          "at": 1,
+          "stagger": 2.5,
+          "max": 100,
+          "items": [
+            {
+              "label": "10 trades",
+              "value": 25,
+              "text": "mostly luck",
+              "color": "liq"
+            },
+            {
+              "label": "50 trades",
+              "value": 60,
+              "text": "edge appears",
+              "color": "accent"
+            },
+            {
+              "label": "100+ trades",
+              "value": 100,
+              "text": "edge is reliable",
+              "color": "bull"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Grade the process",
+      "say": "So grade the process. Before the trade: did it pass your checklist? During: did you follow the plan and respect the stop? After: give yourself a grade and log your emotions in the journal.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.5,
+          "stagger": 3.5,
+          "items": [
+            {
+              "label": "Before",
+              "sub": "Did it pass the checklist?"
+            },
+            {
+              "label": "During",
+              "sub": "Followed the plan and the stop?",
+              "color": "liq"
+            },
+            {
+              "label": "After",
+              "sub": "Grade A–F, log your emotions",
+              "color": "bull"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Recap",
+      "say": "You control the process, not the outcome. Make good decisions again and again, and the results will take care of themselves.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Control the process",
+          "sub": "Accept the outcome. Good decisions, repeated, produce results.",
+          "color": "bull"
+        }
+      ]
+    }
+  ]
+}

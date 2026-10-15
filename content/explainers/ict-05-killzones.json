@@ -1,0 +1,210 @@
+{
+  "id": "killzones",
+  "order": 5,
+  "course": "ict-mentorship-2016",
+  "lessons": [
+    "ict-02",
+    "ict-03",
+    "ict-08"
+  ],
+  "title": "Killzones: when to trade",
+  "subtitle": "Time of day matters as much as price",
+  "scenes": [
+    {
+      "layout": "title",
+      "say": "In forex, when you trade matters as much as where. ICT focuses on a few windows of time called killzones."
+    },
+    {
+      "title": "The trading day",
+      "say": "Here's a trading day in New York time. The Asian session builds a quiet range in the evening. Then come three killzones: the London open from two to five, the New York open from seven to ten, and the London close from ten to noon.",
+      "els": [
+        {
+          "type": "sessions",
+          "at": 0.5,
+          "sweep": true,
+          "items": [
+            {
+              "from": 20,
+              "to": 24,
+              "label": "Asian range",
+              "color": "muted"
+            },
+            {
+              "from": 2,
+              "to": 5,
+              "label": "London open",
+              "color": "bull"
+            },
+            {
+              "from": 7,
+              "to": 10,
+              "label": "New York open",
+              "color": "liq"
+            },
+            {
+              "from": 10,
+              "to": 12,
+              "label": "London close",
+              "color": "bear"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "The Judas swing",
+      "say": "A classic pattern: shortly after midnight, price makes a false move through the Asian range, taking stops. ICT calls it the Judas swing. Then London delivers the real move the other way. On a bullish day, the London low often forms between two and five.",
+      "els": [
+        {
+          "type": "zone",
+          "at": 0.2,
+          "y1": 46.8,
+          "y2": 54.3,
+          "x1": 0,
+          "x2": 12,
+          "label": "Asian range",
+          "color": "muted"
+        },
+        {
+          "type": "candles",
+          "at": 0.3,
+          "stagger": 0.4,
+          "walk": [
+            [
+              0,
+              50
+            ],
+            [
+              3,
+              53
+            ],
+            [
+              6,
+              48
+            ],
+            [
+              9,
+              52
+            ],
+            [
+              12,
+              49
+            ],
+            [
+              14,
+              41
+            ],
+            [
+              16,
+              47
+            ],
+            [
+              20,
+              62
+            ],
+            [
+              24,
+              71
+            ]
+          ]
+        },
+        {
+          "type": "stops",
+          "id": "ssl",
+          "at": 3,
+          "x1": 3,
+          "x2": 11,
+          "y": 46.5,
+          "side": "sell"
+        },
+        {
+          "type": "take",
+          "id": "ssl",
+          "at": 5.6
+        },
+        {
+          "type": "marker",
+          "at": 6,
+          "x": 14,
+          "y": 40.5,
+          "label": "Judas swing",
+          "below": true,
+          "color": "liq"
+        },
+        {
+          "type": "arrow",
+          "at": 8,
+          "from": [
+            14,
+            44
+          ],
+          "to": [
+            23,
+            70
+          ],
+          "label": "London's real move",
+          "color": "bull"
+        }
+      ]
+    },
+    {
+      "title": "New York and the London close",
+      "say": "New York then either continues London's move or reverses it, often after the eight-thirty news. Around the London close, from ten to noon, traders take profits and price can snap back. Day traders are usually done by two in the afternoon.",
+      "els": [
+        {
+          "type": "flow",
+          "at": 0.6,
+          "stagger": 4,
+          "items": [
+            {
+              "label": "London open",
+              "sub": "2–5 am: often makes the day's high or low",
+              "color": "bull"
+            },
+            {
+              "label": "New York open",
+              "sub": "7–10 am: continuation or reversal after 8:30 news",
+              "color": "liq"
+            },
+            {
+              "label": "London close",
+              "sub": "10 am–noon: profit-taking and quick reversals",
+              "color": "bear"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Why time matters",
+      "say": "Why does it matter? Liquidity arrives at the session opens, so that's when moves are clean. A perfect level hit at the wrong hour is a lower-probability trade. Combine price with time.",
+      "points": [
+        "Volume and liquidity arrive at the opens",
+        "Outside killzones, setups are lower probability",
+        "Fewer, better trades: wait for your window"
+      ],
+      "els": [
+        {
+          "type": "big",
+          "at": 0.5,
+          "text": "Price + Time",
+          "sub": "A level matters most when price reaches it at the right hour",
+          "color": "accent"
+        }
+      ]
+    },
+    {
+      "title": "Recap",
+      "say": "So mark the Asian range, watch for the Judas swing, and do your trading inside the killzones. The session clock in Tools shows them live.",
+      "els": [
+        {
+          "type": "big",
+          "at": 0.3,
+          "text": "Trade the killzones",
+          "sub": "London open 2–5 · New York open 7–10 · London close 10–12 (New York time)",
+          "color": "bull"
+        }
+      ]
+    }
+  ]
+}
