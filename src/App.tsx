@@ -3,10 +3,12 @@ import { NavLink, Route, Routes, useLocation } from "react-router-dom";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "./lib/db";
 import { lessons } from "./lib/content";
-import { Bar, useSettings } from "./components/ui";
+import { Bar, useSettings, ThemeToggle } from "./components/ui";
 import { Icon } from "./components/fx";
 import { useXp } from "./lib/xp";
+import { useAuth } from "./lib/auth";
 import { persistStorage, runAutoBackup } from "./lib/autobackup";
+import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import Today from "./pages/Today";
 const Courses = lazy(() => import("./pages/Courses"));
@@ -53,6 +55,7 @@ export default function App() {
   const total = lessons.length;
   const loc = useLocation();
   const xp = useXp();
+  const { enabled: authEnabled, loading: authLoading, session, user, signOut } = useAuth();
   const [moreOpen, setMoreOpen] = useState(() => { try { return localStorage.getItem("navMore") === "1"; } catch { return false; } });
   useEffect(() => { window.scrollTo(0, 0); }, [loc.pathname]);
   // Ask the browser to keep our data, and back up to the chosen folder on start and then hourly (it writes at most once a day).
@@ -67,11 +70,18 @@ export default function App() {
     if (settings.theme === "system") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", settings.theme);
   }, [settings.theme]);
 
+  // Auth gate: only when Supabase is configured. Otherwise the app stays open (local mode).
+  if (authEnabled && authLoading) return <div style={{ display: "grid", placeItems: "center", minHeight: "100dvh", color: "var(--muted)" }}>Loading…</div>;
+  if (authEnabled && !session) return <Auth />;
+
   const pct = total ? doneCount / total : 0;
   return (
     <div className="app">
       <aside className="side" aria-label="Main navigation">
-        <div className="brand"><span className="logo"><Icon name="candlestick-chart" size={20} /></span><span>Trading Academy<small>Learn · Trade · Mind</small></span></div>
+        <div className="brand-row">
+          <div className="brand"><span className="logo"><Icon name="candlestick-chart" size={20} /></span><span>Inner Circle<small>Learn · Trade · Mind</small></span></div>
+          <ThemeToggle />
+        </div>
         {xp && (
           <NavLink to="/#achievements" className="lvl" title={`${xp.xp} XP`}>
             <span className="badge">{xp.level}</span>
@@ -94,11 +104,14 @@ export default function App() {
             );
           })}
         </nav>
-        <div className="foot"><span className="store ok">Saved on this device</span></div>
+        <div className="foot">
+          <span className="store ok">{authEnabled && user ? (user.email ?? "Signed in") : "Saved on this device"}</span>
+          {authEnabled && user && <button type="button" className="signout" onClick={() => signOut()}><Icon name="log-out" size={13} /> Sign out</button>}
+        </div>
       </aside>
       <div className="mainp">
         <div className="topnav">
-          <div className="tp"><span>Trading Academy</span><span>{doneCount}/{total} lessons</span></div>
+          <div className="tp"><span>Inner Circle</span><span style={{ display: "flex", gap: 10, alignItems: "center" }}>{doneCount}/{total} lessons <ThemeToggle /></span></div>
           <div className="row" style={{ flexWrap: "nowrap", overflowX: "auto" }}>
             {NAV.flatMap((g) => g.items).map(([to, , label]) => <NavLink key={to} to={to} end={to === "/"} className={({ isActive }) => (isActive ? "active" : "")}>{label}</NavLink>)}
           </div>

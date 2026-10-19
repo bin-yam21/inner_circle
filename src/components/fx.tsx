@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ArrowRight, BadgeCheck, BookA, BookOpen, Brain, ChartCandlestick, Check, Circle, CircleHelp, Clock, Eye, Flame, Footprints,
   GraduationCap, HeartPulse, Layers, LayoutDashboard, Library, ListChecks, Lock, Mountain, Newspaper, NotebookPen, Play,
-  ScrollText, Settings, Sparkles, Star, Sun, Target, Trophy, Wrench, X, Zap, TrendingUp, Rewind, SkipForward, Pause, Shuffle, Upload, type LucideProps,
+  ScrollText, Settings, Sparkles, Star, Sun, Moon, LogOut, Target, Trophy, Wrench, X, Zap, TrendingUp, Rewind, SkipForward, Pause, Shuffle, Upload, type LucideProps,
 } from "lucide-react";
 
 const reduced = () => typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -14,7 +14,7 @@ const ICONS: Record<string, React.ComponentType<LucideProps>> = {
   footprints: Footprints, "graduation-cap": GraduationCap, "heart-pulse": HeartPulse, layers: Layers,
   "layout-dashboard": LayoutDashboard, library: Library, "list-checks": ListChecks, lock: Lock, mountain: Mountain,
   newspaper: Newspaper, "notebook-pen": NotebookPen, play: Play, "scroll-text": ScrollText, settings: Settings,
-  sparkles: Sparkles, star: Star, sun: Sun, target: Target, trophy: Trophy, wrench: Wrench, x: X, zap: Zap,
+  sparkles: Sparkles, star: Star, sun: Sun, moon: Moon, "log-out": LogOut, target: Target, trophy: Trophy, wrench: Wrench, x: X, zap: Zap,
   "trending-up": TrendingUp, rewind: Rewind, "skip-forward": SkipForward, pause: Pause, shuffle: Shuffle, upload: Upload,
 };
 

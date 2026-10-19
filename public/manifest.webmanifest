@@ -1,10 +1,10 @@
 {
-  "name": "Trading Academy",
-  "short_name": "Trading Academy",
+  "name": "Inner Circle",
+  "short_name": "Inner Circle",
   "description": "Courses, trade journal, psychology and tools for learning to trade.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#11161c",
-  "theme_color": "#11161c",
+  "background_color": "#070a12",
+  "theme_color": "#070a12",
   "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
 }

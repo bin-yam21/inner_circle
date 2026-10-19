@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
-import { DEFAULT_SETTINGS, db, type AppSettings } from "../lib/db";
+import { DEFAULT_SETTINGS, db, saveSetting, type AppSettings } from "../lib/db";
 import { renderMarkdown } from "../lib/markdown";
 import { drawConceptDiagrams } from "../lib/diagrams";
 import { Icon } from "./fx";
@@ -12,6 +12,24 @@ export function useSettings(): AppSettings {
     for (const r of rows ?? []) out[r.key] = r.value;
     return out as unknown as AppSettings;
   }, [rows]);
+}
+
+/** Light/dark toggle. Resolves "system" to the OS preference, then flips to an explicit theme. */
+export function ThemeToggle() {
+  const settings = useSettings();
+  const sysDark = typeof window !== "undefined" && !!window.matchMedia?.("(prefers-color-scheme: dark)").matches;
+  const isDark = settings.theme === "dark" || (settings.theme === "system" && sysDark);
+  return (
+    <button
+      type="button"
+      className="theme-toggle"
+      aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
+      title={isDark ? "Light mode" : "Dark mode"}
+      onClick={() => saveSetting("theme", isDark ? "light" : "dark")}
+    >
+      <Icon name={isDark ? "sun" : "moon"} size={18} />
+    </button>
+  );
 }
 
 export function PageHead({ eyebrow, title, lede, actions }: { eyebrow: string; title: string; lede?: ReactNode; actions?: ReactNode }) {

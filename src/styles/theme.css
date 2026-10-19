@@ -3,32 +3,34 @@
    Layered over base/app/extra CSS. Every color is a token; dark + light.
    ===================================================================== */
 :root{
-  --paper:#f3f6fb; --sheet:#ffffff; --sheet-2:#f7f9fd; --ink:#121a2a; --muted:#5d6880; --rule:#e1e6f0;
-  --bull:#0f9e7e; --bear:#e5484d; --liq:#e8960c; --accent:#2f6bf0; --glow:#10b8a0;
-  --bull-tint:rgba(15,158,126,.12); --bear-tint:rgba(229,72,77,.11); --liq-tint:rgba(232,150,12,.14); --acc-tint:rgba(47,107,240,.10);
-  --grad:linear-gradient(120deg,var(--glow) 0%,var(--accent) 100%);
-  --grad-warm:linear-gradient(120deg,var(--liq) 0%,var(--bear) 100%);
-  --shadow:0 1px 2px rgba(16,24,40,.06),0 8px 24px -12px rgba(16,24,40,.18);
-  --shadow-lg:0 2px 4px rgba(16,24,40,.06),0 22px 44px -18px rgba(16,24,40,.30);
-  --grid-line:rgba(18,26,42,.045);
-  --radius:14px;
+  --paper:#f5f7fc; --sheet:#ffffff; --sheet-2:#f1f4fb; --ink:#0b1020; --muted:#656f85; --rule:#e6eaf3;
+  --bull:#16c784; --bear:#ea3943; --liq:#f7a600; --accent:#6d5efc; --glow:#12d6a8;
+  --bull-tint:rgba(22,199,132,.12); --bear-tint:rgba(234,57,67,.11); --liq-tint:rgba(247,166,0,.14); --acc-tint:rgba(109,94,252,.10);
+  --grad:linear-gradient(135deg,#6d5efc 0%,#a855f7 100%);
+  --grad-warm:linear-gradient(135deg,var(--liq) 0%,var(--bear) 100%);
+  --shadow:0 1px 2px rgba(16,24,40,.05),0 10px 30px -14px rgba(16,24,40,.20);
+  --shadow-lg:0 2px 6px rgba(16,24,40,.06),0 28px 56px -20px rgba(16,24,40,.34);
+  --grid-line:rgba(18,26,42,.04);
+  --radius:18px;
   --ease:cubic-bezier(.2,.8,.2,1);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --paper:#0a0e16; --sheet:#111827; --sheet-2:#151d2e; --ink:#e7ecf6; --muted:#93a0b8; --rule:#222c40;
-  --bull:#2fd3a4; --bear:#ff6b70; --liq:#ffc04d; --accent:#7aa2ff; --glow:#2fd3a4;
-  --bull-tint:rgba(47,211,164,.13); --bear-tint:rgba(255,107,112,.13); --liq-tint:rgba(255,192,77,.14); --acc-tint:rgba(122,162,255,.13);
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
-  --shadow-lg:0 2px 6px rgba(0,0,0,.45),0 26px 50px -20px rgba(0,0,0,.85);
-  --grid-line:rgba(231,236,246,.035);
+  --paper:#070a12; --sheet:#0f1420; --sheet-2:#151c2b; --ink:#eef2fb; --muted:#93a1b9; --rule:#202a3d;
+  --bull:#2fe3a8; --bear:#ff5c63; --liq:#ffb224; --accent:#8b7bff; --glow:#2fe3a8;
+  --bull-tint:rgba(47,227,168,.13); --bear-tint:rgba(255,92,99,.13); --liq-tint:rgba(255,178,36,.14); --acc-tint:rgba(139,123,255,.14);
+  --grad:linear-gradient(135deg,#8b7bff 0%,#b982ff 100%);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -16px rgba(0,0,0,.75);
+  --shadow-lg:0 2px 6px rgba(0,0,0,.5),0 30px 60px -22px rgba(0,0,0,.9);
+  --grid-line:rgba(231,236,246,.03);
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --paper:#0a0e16; --sheet:#111827; --sheet-2:#151d2e; --ink:#e7ecf6; --muted:#93a0b8; --rule:#222c40;
-  --bull:#2fd3a4; --bear:#ff6b70; --liq:#ffc04d; --accent:#7aa2ff; --glow:#2fd3a4;
-  --bull-tint:rgba(47,211,164,.13); --bear-tint:rgba(255,107,112,.13); --liq-tint:rgba(255,192,77,.14); --acc-tint:rgba(122,162,255,.13);
-  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -14px rgba(0,0,0,.7);
-  --shadow-lg:0 2px 6px rgba(0,0,0,.45),0 26px 50px -20px rgba(0,0,0,.85);
-  --grid-line:rgba(231,236,246,.035);
+  --paper:#070a12; --sheet:#0f1420; --sheet-2:#151c2b; --ink:#eef2fb; --muted:#93a1b9; --rule:#202a3d;
+  --bull:#2fe3a8; --bear:#ff5c63; --liq:#ffb224; --accent:#8b7bff; --glow:#2fe3a8;
+  --bull-tint:rgba(47,227,168,.13); --bear-tint:rgba(255,92,99,.13); --liq-tint:rgba(255,178,36,.14); --acc-tint:rgba(139,123,255,.14);
+  --grad:linear-gradient(135deg,#8b7bff 0%,#b982ff 100%);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 32px -16px rgba(0,0,0,.75);
+  --shadow-lg:0 2px 6px rgba(0,0,0,.5),0 30px 60px -22px rgba(0,0,0,.9);
+  --grid-line:rgba(231,236,246,.03);
   color-scheme:dark}
 
 /* ---------- canvas ---------- */
