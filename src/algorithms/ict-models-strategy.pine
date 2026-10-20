@@ -1,0 +1,442 @@
+//@version=6
+// ICT Models strategy — the four execution models from the Trading Academy app
+// (content/models/*.json), with the app's structure detector (src/lib/detect.ts),
+// risk rules (Settings + tilt guard) and Daye's Quarterly Theory overlay.
+//
+//   Model             When (New York)                 Entry                              Stop                      Target
+//   Judas swing       London killzone 02:00–05:00     FVG after the reversal, beyond     Judas extreme             Previous day high / low
+//                                                     the midnight open
+//   Turtle soup       Killzones                       FVG after a sweep of obvious       Extreme of the stop run   Nearest opposite liquidity
+//                                                     liquidity
+//   Silver Bullet     03–04, 10–11, 14–15             FVG formed in the window           Swing that made the gap   Nearest liquidity (draw)
+//   OTE               Killzones                       70.5% of a displacement leg that   Start of the leg (100%)   End of the leg (0%)
+//                                                     broke structure
+//
+// Detector (same thresholds as the app): fractal swings (2 bars each side), FVG ≥ 0.15 ATR,
+// displacement = body ≥ 1.2 ATR and ≥ 60% of the candle, "obvious" liquidity = equal
+// highs/lows (within 0.15 ATR) or a swing that held 8+ bars, sweep = wick through and close back.
+// Risk (app defaults): 1% of a 30% allocation per trade, halve after each loss, stop for the
+// day after 3 losses in a row or at −2R, minimum 2:1 reward:risk.
+//
+// These are mechanical approximations of discretionary ICT models. Backtest results show how
+// the rules behaved on past data, not what they will do. Practise on demo first.
+
+strategy("ICT Models + Quarterly Theory", shorttitle="ICT Models", overlay=true,
+     initial_capital=10000, currency=currency.USD, pyramiding=0,
+     max_labels_count=500, max_lines_count=500)
+
+tz = "America/New_York"
+
+//==================================================
+// INPUTS
+//==================================================
+useJudas  = input.bool(true, "Judas swing / Power of 3", group="Models")
+useTurtle = input.bool(true, "Turtle soup", group="Models")
+useSB     = input.bool(true, "Silver Bullet", group="Models")
+useOTE    = input.bool(true, "OTE", group="Models")
+kzOnly    = input.bool(true, "Turtle soup & OTE only inside killzones", group="Models")
+
+biasMode = input.string("Auto", "Daily bias", options=["Auto", "Bullish", "Bearish", "Both directions"], group="Bias",
+     tooltip="Set this from your Daily log each morning. Auto is a simple proxy: bullish when yesterday closed in the upper half of its range.")
+
+allocationPct  = input.float(30, "Allocation to trading (%)", minval=1, maxval=100, group="Risk (app settings)")
+riskPct        = input.float(1, "Risk per trade (% of allocation)", minval=0.05, maxval=5, step=0.05, group="Risk (app settings)")
+useHalving     = input.bool(true, "Halve risk after each loss (tilt guard)", group="Risk (app settings)")
+dailyLossLimit = input.float(2, "Daily loss limit (R)", minval=0.5, step=0.5, group="Risk (app settings)")
+minRR          = input.float(2, "Minimum reward:risk", minval=1, step=0.25, group="Risk (app settings)")
+expiryBars     = input.int(20, "Cancel unfilled orders after (bars)", minval=1, group="Risk (app settings)")
+
+fvgMinAtr    = input.float(0.15, "FVG minimum size (× ATR)", step=0.05, group="Detector (app defaults)")
+dispBodyAtr  = input.float(1.2, "Displacement body (× ATR)", step=0.1, group="Detector (app defaults)")
+dispBodyPct  = input.float(0.6, "Displacement body (share of candle)", step=0.05, group="Detector (app defaults)")
+equalTolAtr  = input.float(0.15, "Equal highs/lows tolerance (× ATR)", step=0.05, group="Detector (app defaults)")
+obviousAge   = input.int(8, "Swing counts as obvious after (bars)", minval=1, group="Detector (app defaults)")
+oteLookback  = input.int(20, "OTE leg lookback (bars)", minval=5, group="Detector (app defaults)")
+
+showSignals = input.bool(true, "Show setups (entry / stop / target)", group="Display")
+showStats   = input.bool(true, "Show results by model", group="Display")
+showQT      = input.bool(true, "Show Quarterly Theory overlay", group="Display")
+
+showAsia   = input.bool(true, "Asia Session (18:00–00:00)", group="Quarterly Theory")
+showLondon = input.bool(true, "London Session (00:00–06:00)", group="Quarterly Theory")
+showNYAM   = input.bool(true, "New York AM (06:00–12:00)", group="Quarterly Theory")
+showNYPM   = input.bool(false, "New York PM (12:00–18:00)", group="Quarterly Theory")
+showBgColors = input.bool(true, "Color 90-Minute Quarters", group="Quarterly Theory")
+showTrueOpen = input.bool(true, "Show Q2 True Open", group="Quarterly Theory")
+showQ1Range  = input.bool(true, "Show Q1 High/Low", group="Quarterly Theory")
+colorQ1 = input.color(color.new(color.blue, 92), "Q1 Accumulation", group="Quarterly Theory")
+colorQ2 = input.color(color.new(color.orange, 90), "Q2 Manipulation", group="Quarterly Theory")
+colorQ3 = input.color(color.new(color.green, 90), "Q3 Distribution", group="Quarterly Theory")
+colorQ4 = input.color(color.new(color.purple, 92), "Q4 Reversal/Continuation", group="Quarterly Theory")
+colorTO    = input.color(color.yellow, "True Open Line", group="Quarterly Theory")
+colorRange = input.color(color.gray, "Q1 High/Low Lines", group="Quarterly Theory")
+
+//==================================================
+// TIME (New York, with daylight saving)
+//==================================================
+intraday = timeframe.isintraday
+exactTf  = intraday and 5400 % timeframe.in_seconds() == 0
+
+nyHour   = hour(time, tz)
+nyMinute = minute(time, tz)
+nyYear   = year(time, tz)
+nyMonth  = month(time, tz)
+nyDay    = dayofmonth(time, tz)
+nyMin    = nyHour * 60 + nyMinute
+newNyDay = bar_index > 0 and nyDay != nyDay[1]
+
+inWindow(startMin, endMin) => nyMin >= startMin and nyMin < endMin
+inLondonKZ = inWindow(120, 300)
+inNYKZ     = inWindow(420, 600)
+inKillzone = inLondonKZ or inNYKZ
+inSilverBullet = inWindow(180, 240) or inWindow(600, 660) or inWindow(840, 900)
+
+// Midnight open and the day's range so far (for the Judas swing).
+var float midnightOpen = na
+var float lowSinceMidnight = na
+var float highSinceMidnight = na
+if newNyDay
+    midnightOpen := open
+    lowSinceMidnight := low
+    highSinceMidnight := high
+else
+    lowSinceMidnight := na(lowSinceMidnight) ? low : math.min(lowSinceMidnight, low)
+    highSinceMidnight := na(highSinceMidnight) ? high : math.max(highSinceMidnight, high)
+
+// Previous day (completed, no repainting).
+[pdH, pdL, pdC] = request.security(syminfo.tickerid, "D", [high[1], low[1], close[1]], lookahead=barmerge.lookahead_on)
+
+autoBias = pdC > (pdH + pdL) / 2 ? 1 : -1
+bias = biasMode == "Bullish" ? 1 : biasMode == "Bearish" ? -1 : biasMode == "Both directions" ? 0 : autoBias
+allowLong  = bias >= 0
+allowShort = bias <= 0
+
+//==================================================
+// DETECTOR (mirrors src/lib/detect.ts)
+//==================================================
+// The app's ATR: plain average of true range over 14 bars.
+atrApp = ta.sma(ta.tr(true), 14)
+
+// Fair value gap with displacement, completed on this bar (this bar = candle 3).
+// Thresholds use the ATR at candle 1, like the app (no dependence on later volatility).
+a1    = atrApp[2]
+body2 = math.abs(close[1] - open[1])
+disp2 = a1 > 0 and body2 >= dispBodyAtr * a1 and body2 >= dispBodyPct * (high[1] - low[1])
+bullFvg = low > high[2] and (low - high[2]) >= fvgMinAtr * a1 and close[1] > open[1] and disp2
+bearFvg = high < low[2] and (low[2] - high) >= fvgMinAtr * a1 and close[1] < open[1] and disp2
+
+// Swings and resting liquidity.
+ph = ta.pivothigh(high, 2, 2)
+pl = ta.pivotlow(low, 2, 2)
+var float lastPh = na
+var float lastPl = na
+
+var array<float> bslPrice = array.new<float>()
+var array<int>   bslBar   = array.new<int>()
+var array<bool>  bslEqual = array.new<bool>()
+var array<float> sslPrice = array.new<float>()
+var array<int>   sslBar   = array.new<int>()
+var array<bool>  sslEqual = array.new<bool>()
+MAX_POOLS = 40
+
+// Sweeps of obvious liquidity on this bar (wick through, close back inside).
+var int   bslSweepBar = na
+var float bslSweepHigh = na
+var int   sslSweepBar = na
+var float sslSweepLow = na
+
+bool sweptBslNow = false
+bool sweptSslNow = false
+if array.size(bslPrice) > 0
+    for i = array.size(bslPrice) - 1 to 0
+        p = array.get(bslPrice, i)
+        if high > p
+            obvious = array.get(bslEqual, i) or bar_index - array.get(bslBar, i) >= obviousAge
+            if obvious and close < p
+                sweptBslNow := true
+            array.remove(bslPrice, i)
+            array.remove(bslBar, i)
+            array.remove(bslEqual, i)
+if array.size(sslPrice) > 0
+    for i = array.size(sslPrice) - 1 to 0
+        p = array.get(sslPrice, i)
+        if low < p
+            obvious = array.get(sslEqual, i) or bar_index - array.get(sslBar, i) >= obviousAge
+            if obvious and close > p
+                sweptSslNow := true
+            array.remove(sslPrice, i)
+            array.remove(sslBar, i)
+            array.remove(sslEqual, i)
+
+if sweptBslNow
+    bslSweepBar := bar_index
+    bslSweepHigh := high
+else if not na(bslSweepBar)
+    bslSweepHigh := math.max(bslSweepHigh, high)
+if sweptSslNow
+    sslSweepBar := bar_index
+    sslSweepLow := low
+else if not na(sslSweepBar)
+    sslSweepLow := math.min(sslSweepLow, low)
+
+// New swings (confirmed 2 bars after the pivot). Equal highs/lows merge into one pool.
+if not na(ph)
+    lastPh := ph
+    if math.max(high, high[1]) <= ph   // still resting (not already run)
+        tol = equalTolAtr * atrApp[2]
+        int mergeAt = -1
+        if array.size(bslPrice) > 0
+            for i = array.size(bslPrice) - 1 to 0
+                if mergeAt == -1 and math.abs(array.get(bslPrice, i) - ph) <= tol
+                    mergeAt := i
+        if mergeAt >= 0
+            array.set(bslPrice, mergeAt, math.max(array.get(bslPrice, mergeAt), ph))
+            array.set(bslBar, mergeAt, bar_index - 2)
+            array.set(bslEqual, mergeAt, true)
+        else
+            array.push(bslPrice, ph)
+            array.push(bslBar, bar_index - 2)
+            array.push(bslEqual, false)
+            if array.size(bslPrice) > MAX_POOLS
+                array.shift(bslPrice)
+                array.shift(bslBar)
+                array.shift(bslEqual)
+if not na(pl)
+    lastPl := pl
+    if math.min(low, low[1]) >= pl
+        tol = equalTolAtr * atrApp[2]
+        int mergeAt = -1
+        if array.size(sslPrice) > 0
+            for i = array.size(sslPrice) - 1 to 0
+                if mergeAt == -1 and math.abs(array.get(sslPrice, i) - pl) <= tol
+                    mergeAt := i
+        if mergeAt >= 0
+            array.set(sslPrice, mergeAt, math.min(array.get(sslPrice, mergeAt), pl))
+            array.set(sslBar, mergeAt, bar_index - 2)
+            array.set(sslEqual, mergeAt, true)
+        else
+            array.push(sslPrice, pl)
+            array.push(sslBar, bar_index - 2)
+            array.push(sslEqual, false)
+            if array.size(sslPrice) > MAX_POOLS
+                array.shift(sslPrice)
+                array.shift(sslBar)
+                array.shift(sslEqual)
+
+// Nearest resting liquidity above / below a price (the draw on liquidity).
+nearestAbove(float level) =>
+    float best = na
+    if array.size(bslPrice) > 0
+        for i = 0 to array.size(bslPrice) - 1
+            p = array.get(bslPrice, i)
+            if p > level and (na(best) or p < best)
+                best := p
+    best
+nearestBelow(float level) =>
+    float best = na
+    if array.size(sslPrice) > 0
+        for i = 0 to array.size(sslPrice) - 1
+            p = array.get(sslPrice, i)
+            if p < level and (na(best) or p > best)
+                best := p
+    best
+
+lowest5   = ta.lowest(low, 5)
+highest5  = ta.highest(high, 5)
+legLow    = ta.lowest(low, oteLookback)
+legHigh   = ta.highest(high, oteLookback)
+recentHigh = ta.highest(high, 3)
+recentLow  = ta.lowest(low, 3)
+
+//==================================================
+// RISK STATE (app: risk settings + tilt guard)
+//==================================================
+var int   lossStreak = 0
+var float dayR = 0.0
+var bool  blockedToday = false
+var int   lastClosed = 0
+var map<string, float> riskById  = map.new<string, float>()
+var map<string, int>   modelById = map.new<string, int>()
+var array<string> MODEL_NAMES = array.from("Judas swing", "Turtle soup", "Silver Bullet", "OTE")
+var array<int>   mTrades = array.new<int>(4, 0)
+var array<int>   mWins   = array.new<int>(4, 0)
+var array<float> mR      = array.new<float>(4, 0.0)
+
+if newNyDay
+    dayR := 0.0
+    blockedToday := false
+
+if strategy.closedtrades > lastClosed
+    for k = lastClosed to strategy.closedtrades - 1
+        string tid = strategy.closedtrades.entry_id(k)
+        float pnl = strategy.closedtrades.profit(k)
+        float riskAmt = map.contains(riskById, tid) ? map.get(riskById, tid) : na
+        float r = na(riskAmt) or riskAmt == 0 ? 0.0 : pnl / riskAmt
+        if map.contains(modelById, tid)
+            int mi = map.get(modelById, tid)
+            array.set(mTrades, mi, array.get(mTrades, mi) + 1)
+            array.set(mWins, mi, array.get(mWins, mi) + (pnl > 0 ? 1 : 0))
+            array.set(mR, mi, array.get(mR, mi) + r)
+        dayR += r
+        lossStreak := pnl < 0 ? lossStreak + 1 : 0
+        if lossStreak >= 3
+            blockedToday := true
+    lastClosed := strategy.closedtrades
+
+riskMult = useHalving ? math.pow(0.5, math.min(lossStreak, 2)) : 1.0
+
+// Pending order bookkeeping: one order or position at a time.
+var string pendingId = ""
+var int pendingBar = na
+if pendingId != "" and strategy.position_size != 0
+    pendingId := ""
+if pendingId != "" and strategy.position_size == 0 and bar_index - pendingBar > expiryBars
+    strategy.cancel(pendingId)
+    strategy.cancel("x " + pendingId)
+    pendingId := ""
+
+tradingAllowed = intraday and strategy.position_size == 0 and pendingId == "" and not blockedToday and dayR > -dailyLossLimit
+
+//==================================================
+// MODELS → one setup per bar (priority: Judas, Turtle soup, Silver Bullet, OTE)
+//==================================================
+validSetup(int dir, float e, float st, float tg) =>
+    ok = not na(e) and not na(st) and not na(tg)
+    if ok
+        ok := dir == 1 ? st < e and tg > e and (tg - e) / (e - st) >= minRR : st > e and tg < e and (e - tg) / (st - e) >= minRR
+    ok
+
+int   sDir = 0
+int   sModel = -1
+float sEntry = na
+float sStop = na
+float sTarget = na
+
+// --- Longs ---
+if bullFvg and allowLong
+    float e = low   // top of the bullish FVG
+    // Judas swing: London killzone, price traded below the midnight open first, entry below it.
+    if sDir == 0 and useJudas and inLondonKZ and lowSinceMidnight < midnightOpen and e < midnightOpen and validSetup(1, e, lowSinceMidnight, pdH)
+        sDir := 1, sModel := 0, sEntry := e, sStop := lowSinceMidnight, sTarget := pdH
+    // Turtle soup: obvious sell-side liquidity swept within the last 5 bars.
+    tsTarget = nearestAbove(close)
+    if sDir == 0 and useTurtle and (not kzOnly or inKillzone) and not na(sslSweepBar) and bar_index - sslSweepBar <= 5 and validSetup(1, e, sslSweepLow, tsTarget)
+        sDir := 1, sModel := 1, sEntry := e, sStop := sslSweepLow, sTarget := tsTarget
+    // Silver Bullet: FVG formed inside a window, target the draw above.
+    if sDir == 0 and useSB and inSilverBullet and validSetup(1, e, lowest5, tsTarget)
+        sDir := 1, sModel := 2, sEntry := e, sStop := lowest5, sTarget := tsTarget
+    // OTE: the leg broke the last swing high; buy 70.5% of the leg.
+    oteEntry = recentHigh - 0.705 * (recentHigh - legLow)
+    if sDir == 0 and useOTE and (not kzOnly or inKillzone) and not na(lastPh) and recentHigh > lastPh and validSetup(1, oteEntry, legLow, recentHigh)
+        sDir := 1, sModel := 3, sEntry := oteEntry, sStop := legLow, sTarget := recentHigh
+
+// --- Shorts (mirror) ---
+if bearFvg and allowShort
+    float e = high   // bottom of the bearish FVG
+    if sDir == 0 and useJudas and inLondonKZ and highSinceMidnight > midnightOpen and e > midnightOpen and validSetup(-1, e, highSinceMidnight, pdL)
+        sDir := -1, sModel := 0, sEntry := e, sStop := highSinceMidnight, sTarget := pdL
+    tsTarget = nearestBelow(close)
+    if sDir == 0 and useTurtle and (not kzOnly or inKillzone) and not na(bslSweepBar) and bar_index - bslSweepBar <= 5 and validSetup(-1, e, bslSweepHigh, tsTarget)
+        sDir := -1, sModel := 1, sEntry := e, sStop := bslSweepHigh, sTarget := tsTarget
+    if sDir == 0 and useSB and inSilverBullet and validSetup(-1, e, highest5, tsTarget)
+        sDir := -1, sModel := 2, sEntry := e, sStop := highest5, sTarget := tsTarget
+    oteEntry = recentLow + 0.705 * (legHigh - recentLow)
+    if sDir == 0 and useOTE and (not kzOnly or inKillzone) and not na(lastPl) and recentLow < lastPl and validSetup(-1, oteEntry, legHigh, recentLow)
+        sDir := -1, sModel := 3, sEntry := oteEntry, sStop := legHigh, sTarget := recentLow
+
+//==================================================
+// ORDERS
+//==================================================
+var int tradeSeq = 0
+if tradingAllowed and sDir != 0
+    riskMoney = strategy.equity * allocationPct / 100 * riskPct / 100 * riskMult
+    perUnit = math.abs(sEntry - sStop) * syminfo.pointvalue
+    qty = perUnit > 0 ? riskMoney / perUnit : 0.0
+    if qty > 0
+        tradeSeq += 1
+        string modelName = array.get(MODEL_NAMES, sModel)
+        string id = modelName + " #" + str.tostring(tradeSeq)
+        strategy.entry(id, sDir == 1 ? strategy.long : strategy.short, qty=qty, limit=sEntry)
+        strategy.exit("x " + id, from_entry=id, stop=sStop, limit=sTarget)
+        map.put(riskById, id, riskMoney)
+        map.put(modelById, id, sModel)
+        pendingId := id
+        pendingBar := bar_index
+        rr = math.abs(sTarget - sEntry) / math.abs(sEntry - sStop)
+        alert(str.format("{0} {1} {2}: limit {3}, stop {4}, target {5} ({6}R), risk x{7}", syminfo.ticker, modelName, sDir == 1 ? "LONG" : "SHORT",
+             str.tostring(sEntry, format.mintick), str.tostring(sStop, format.mintick), str.tostring(sTarget, format.mintick),
+             str.tostring(rr, "#.##"), str.tostring(riskMult, "#.##")), alert.freq_once_per_bar_close)
+        if showSignals
+            label.new(bar_index, sDir == 1 ? low : high, modelName + "\n" + str.tostring(rr, "#.#") + "R",
+                 style=sDir == 1 ? label.style_label_up : label.style_label_down,
+                 color=color.new(sDir == 1 ? color.teal : color.red, 15), textcolor=color.white, size=size.small)
+            line.new(bar_index, sEntry, bar_index + expiryBars, sEntry, color=color.blue, width=2)
+            line.new(bar_index, sStop, bar_index + expiryBars, sStop, color=color.red, style=line.style_dashed)
+            line.new(bar_index, sTarget, bar_index + expiryBars, sTarget, color=color.green, style=line.style_dashed)
+
+//==================================================
+// DAYE'S QUARTERLY THEORY (visual)
+//==================================================
+offsetMin  = (nyMin - 1080 + 1440) % 1440
+sessionIdx = int(math.floor(offsetMin / 360)) + 1
+quarterIdx = int(math.floor((offsetMin % 360) / 90)) + 1
+sessionEnabled = showQT and intraday and (
+     (sessionIdx == 1 and showAsia) or
+     (sessionIdx == 2 and showLondon) or
+     (sessionIdx == 3 and showNYAM) or
+     (sessionIdx == 4 and showNYPM))
+sessionStartMin = (1080 + (sessionIdx - 1) * 360) % 1440
+quarterStartMin = sessionStartMin + (quarterIdx - 1) * 90
+sessionStart = timestamp(tz, nyYear, nyMonth, nyDay, int(math.floor(sessionStartMin / 60)), sessionStartMin % 60)
+quarterStart = timestamp(tz, nyYear, nyMonth, nyDay, int(math.floor(quarterStartMin / 60)), quarterStartMin % 60)
+newSession = bar_index > 0 and sessionStart != sessionStart[1]
+newQuarter = bar_index > 0 and quarterStart != quarterStart[1]
+
+var float q1High = na
+var float q1Low = na
+var float trueOpen = na
+if newSession
+    q1High := na
+    q1Low := na
+    trueOpen := na
+if sessionEnabled and quarterIdx == 1
+    q1High := na(q1High) ? high : math.max(q1High, high)
+    q1Low  := na(q1Low) ? low : math.min(q1Low, low)
+if sessionEnabled and quarterIdx == 2 and newQuarter
+    trueOpen := open
+
+plot(sessionEnabled and showTrueOpen and quarterIdx >= 2 ? trueOpen : na, title="Q2 True Open", color=colorTO, linewidth=2, style=plot.style_linebr)
+plot(sessionEnabled and showQ1Range and quarterIdx >= 2 ? q1High : na, title="Q1 High", color=colorRange, linewidth=1, style=plot.style_linebr)
+plot(sessionEnabled and showQ1Range and quarterIdx >= 2 ? q1Low : na, title="Q1 Low", color=colorRange, linewidth=1, style=plot.style_linebr)
+quarterColor = quarterIdx == 1 ? colorQ1 : quarterIdx == 2 ? colorQ2 : quarterIdx == 3 ? colorQ3 : colorQ4
+bgcolor(sessionEnabled and showBgColors ? quarterColor : na, title="Quarter Background")
+
+//==================================================
+// RESULTS BY MODEL + STATUS
+//==================================================
+// Signed number, e.g. +1.25 / -0.5.
+fmtSigned(float x) => (x > 0 ? "+" : "") + str.tostring(x, "#.##")
+
+var table stats = table.new(position.bottom_right, 4, 7, border_width=1, frame_color=color.gray)
+if barstate.islast and showStats
+    table.cell(stats, 0, 0, "Model", text_color=color.white, bgcolor=color.new(color.gray, 20), text_size=size.small)
+    table.cell(stats, 1, 0, "Trades", text_color=color.white, bgcolor=color.new(color.gray, 20), text_size=size.small)
+    table.cell(stats, 2, 0, "Win %", text_color=color.white, bgcolor=color.new(color.gray, 20), text_size=size.small)
+    table.cell(stats, 3, 0, "Avg R", text_color=color.white, bgcolor=color.new(color.gray, 20), text_size=size.small)
+    for i = 0 to 3
+        n = array.get(mTrades, i)
+        avgR = n > 0 ? array.get(mR, i) / n : na
+        table.cell(stats, 0, i + 1, array.get(MODEL_NAMES, i), text_size=size.small)
+        table.cell(stats, 1, i + 1, str.tostring(n), text_size=size.small)
+        table.cell(stats, 2, i + 1, n > 0 ? str.tostring(100.0 * array.get(mWins, i) / n, "#") + "%" : "–", text_size=size.small)
+        table.cell(stats, 3, i + 1, n > 0 ? fmtSigned(avgR) : "–", text_size=size.small,
+             text_color=na(avgR) ? color.gray : avgR >= 0 ? color.green : color.red)
+    biasText = bias == 1 ? "Bullish" : bias == -1 ? "Bearish" : "Both"
+    table.cell(stats, 0, 5, "Bias: " + biasText + (biasMode == "Auto" ? " (auto)" : ""), text_size=size.small)
+    table.cell(stats, 1, 5, "Risk ×" + str.tostring(riskMult, "#.##"), text_size=size.small)
+    table.cell(stats, 2, 5, "Today " + fmtSigned(dayR) + "R", text_size=size.small)
+    table.cell(stats, 3, 5, blockedToday or dayR <= -dailyLossLimit ? "STOPPED" : "OK", text_size=size.small,
+         text_color=blockedToday or dayR <= -dailyLossLimit ? color.red : color.green)
+    table.merge_cells(stats, 0, 6, 3, 6)
+    table.cell(stats, 0, 6, not intraday ? "Use an intraday chart." : not exactTf ? "Use 1, 3, 5, 15, 30 or 45 min for exact sessions." : "Backtest ≠ future results. Practise on demo.",
+         text_size=size.tiny, text_color=not exactTf ? color.orange : color.gray)

@@ -5,8 +5,10 @@ import { db } from "./lib/db";
 import { lessons } from "./lib/content";
 import { Bar, useSettings, ThemeToggle } from "./components/ui";
 import { Icon } from "./components/fx";
+import { ProGate } from "./components/ProGate";
 import { useXp } from "./lib/xp";
 import { useAuth } from "./lib/auth";
+import { useEntitlement } from "./lib/entitlement";
 import { persistStorage, runAutoBackup } from "./lib/autobackup";
 import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
@@ -37,6 +39,8 @@ const ChartDrills = lazy(() => import("./pages/ChartDrills"));
 const Edge = lazy(() => import("./pages/Edge"));
 const Models = lazy(() => import("./pages/Models"));
 const PreTrade = lazy(() => import("./pages/PreTrade"));
+const Pricing = lazy(() => import("./pages/Pricing"));
+const Algorithms = lazy(() => import("./pages/Algorithms"));
 
 /**
  * Navigation: [path, icon name (see ICONS in components/fx.tsx), label]. To add a page: create it in
@@ -45,8 +49,8 @@ const PreTrade = lazy(() => import("./pages/PreTrade"));
 export const NAV: { group: string; collapsed?: boolean; items: [string, string, string][] }[] = [
   { group: "Daily", items: [["/today", "sun", "Today"], ["/", "layout-dashboard", "Dashboard"], ["/pretrade", "badge-check", "Pre-trade check"], ["/journal", "candlestick-chart", "Trade journal"], ["/daily", "notebook-pen", "Daily log"]] },
   { group: "Learn", items: [["/courses", "graduation-cap", "Courses"], ["/models", "layers", "Strategy models"], ["/chart-drills", "eye", "Chart drills"], ["/flashcards", "zap", "Flashcards"], ["/quiz", "circle-help", "Quizzes"]] },
-  { group: "Practise & review", items: [["/replay", "rewind", "Replay trainer"], ["/edge", "target", "Edge finder"], ["/progress", "trending-up", "My progress"], ["/psychology", "brain", "Psychology"]] },
-  { group: "More", collapsed: true, items: [["/routine", "list-checks", "Pre-session routine"], ["/explainers", "play", "Explainers"], ["/reference", "book-open", "Reference"], ["/playbook", "star", "Playbook"], ["/tools", "wrench", "Tools"], ["/news", "newspaper", "News desk"], ["/library", "library", "My library"], ["/plan", "list-checks", "Practice plan"], ["/tutor", "sparkles", "AI tutor"], ["/glossary", "book-a", "Glossary"], ["/settings", "settings", "Settings"]] },
+  { group: "Practise & review", items: [["/replay", "rewind", "Replay trainer"], ["/edge", "target", "Edge finder"], ["/algorithms", "scroll-text", "Algorithms"], ["/progress", "trending-up", "My progress"], ["/psychology", "brain", "Psychology"]] },
+  { group: "More", collapsed: true, items: [["/routine", "list-checks", "Pre-session routine"], ["/explainers", "play", "Explainers"], ["/reference", "book-open", "Reference"], ["/playbook", "star", "Playbook"], ["/tools", "wrench", "Tools"], ["/news", "newspaper", "News desk"], ["/library", "library", "My library"], ["/plan", "list-checks", "Practice plan"], ["/tutor", "sparkles", "AI tutor"], ["/glossary", "book-a", "Glossary"], ["/pricing", "badge-check", "Membership"], ["/settings", "settings", "Settings"]] },
 ];
 
 export default function App() {
@@ -56,6 +60,7 @@ export default function App() {
   const loc = useLocation();
   const xp = useXp();
   const { enabled: authEnabled, loading: authLoading, session, user, signOut } = useAuth();
+  const { isPro, billingEnabled } = useEntitlement();
   const [moreOpen, setMoreOpen] = useState(() => { try { return localStorage.getItem("navMore") === "1"; } catch { return false; } });
   useEffect(() => { window.scrollTo(0, 0); }, [loc.pathname]);
   // Ask the browser to keep our data, and back up to the chosen folder on start and then hourly (it writes at most once a day).
@@ -89,6 +94,9 @@ export default function App() {
           </NavLink>
         )}
         <div className="prog-mini">{doneCount} / {total} lessons · {Math.round(pct * 100)}%<Bar value={pct} /></div>
+        {billingEnabled && !isPro && (
+          <NavLink to="/pricing" className="upgrade-cta"><Icon name="sparkles" size={15} /> Upgrade to Pro</NavLink>
+        )}
         <nav className="nav">
           {NAV.map((g) => {
             const links = g.items.map(([to, ic, label]) => (
@@ -139,18 +147,20 @@ export default function App() {
             <Route path="/news" element={<News />} />
             <Route path="/plan" element={<Plan />} />
             <Route path="/tools" element={<Tools />} />
-            <Route path="/tutor" element={<Tutor />} />
+            <Route path="/tutor" element={<ProGate feature="AI tutor"><Tutor /></ProGate>} />
             <Route path="/glossary" element={<Glossary />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/progress" element={<Progress />} />
-            <Route path="/replay" element={<Replay />} />
+            <Route path="/replay" element={<ProGate feature="Replay trainer"><Replay /></ProGate>} />
             <Route path="/flashcards" element={<Flashcards />} />
             <Route path="/routine" element={<Routine />} />
             <Route path="/playbook" element={<Playbook />} />
             <Route path="/chart-drills" element={<ChartDrills />} />
-            <Route path="/edge" element={<Edge />} />
+            <Route path="/edge" element={<ProGate feature="Edge finder"><Edge /></ProGate>} />
             <Route path="/models" element={<Models />} />
             <Route path="/pretrade" element={<PreTrade />} />
+            <Route path="/algorithms" element={<ProGate feature="Algorithm export"><Algorithms /></ProGate>} />
+            <Route path="/pricing" element={<Pricing />} />
             <Route path="*" element={<Dashboard />} />
           </Routes>
           </Suspense>

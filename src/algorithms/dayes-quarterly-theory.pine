@@ -1,0 +1,158 @@
+//@version=6
+indicator("Daye's Quarterly Theory", overlay=true, max_labels_count=500, max_lines_count=500)
+
+//==================================================
+// 1. SESSION SETTINGS — NEW YORK TIME
+//==================================================
+showAsia   = input.bool(true, "Asia Session (18:00–00:00)", group="Sessions")
+showLondon = input.bool(true, "London Session (00:00–06:00)", group="Sessions")
+showNYAM   = input.bool(true, "New York AM (06:00–12:00)", group="Sessions")
+showNYPM   = input.bool(false, "New York PM (12:00–18:00)", group="Sessions")
+
+//==================================================
+// 2. VISUAL SETTINGS
+//==================================================
+showBgColors = input.bool(true, "Color 90-Minute Quarters", group="Visuals")
+showLabels   = input.bool(true, "Show Quarter Labels", group="Visuals")
+showTrueOpen = input.bool(true, "Show Q2 True Open", group="Visuals")
+showQ1Range  = input.bool(true, "Show Q1 High/Low", group="Visuals")
+showTfWarn   = input.bool(true, "Warn when the timeframe can't split quarters exactly", group="Visuals")
+
+//==================================================
+// 3. COLORS
+//==================================================
+colorQ1 = input.color(color.new(color.blue, 92), "Q1 Accumulation", group="Colors")
+colorQ2 = input.color(color.new(color.orange, 90), "Q2 Manipulation", group="Colors")
+colorQ3 = input.color(color.new(color.green, 90), "Q3 Distribution", group="Colors")
+colorQ4 = input.color(color.new(color.purple, 92), "Q4 Reversal/Continuation", group="Colors")
+
+colorTO    = input.color(color.yellow, "True Open Line", group="Colors")
+colorRange = input.color(color.gray, "Q1 High/Low Lines", group="Colors")
+
+//==================================================
+// 4. TIMEFRAME CHECK
+// The quarters are 90 minutes long. They're only exact when each bar fits
+// inside one quarter: 1, 3, 5, 15, 30 or 45 minutes (or seconds charts).
+// On 1H/2H/4H a bar can straddle a quarter boundary. On daily and higher
+// the theory doesn't apply, so nothing is drawn.
+//==================================================
+tfSeconds = timeframe.in_seconds()
+active    = timeframe.isintraday
+exactTf   = active and 5400 % tfSeconds == 0
+
+//==================================================
+// 5. TIME CALCULATIONS
+// Uses New York local time, including daylight saving.
+// Each session is 6 hours; each quarter is 90 minutes.
+//==================================================
+nyHour   = hour(time, "America/New_York")
+nyMinute = minute(time, "America/New_York")
+nyYear   = year(time, "America/New_York")
+nyMonth  = month(time, "America/New_York")
+nyDay    = dayofmonth(time, "America/New_York")
+totalMin = nyHour * 60 + nyMinute
+
+// The daily cycle starts at 18:00 New York time.
+offsetMin = (totalMin - 1080 + 1440) % 1440
+
+sessionIdx = int(math.floor(offsetMin / 360)) + 1
+quarterIdx = int(math.floor((offsetMin % 360) / 90)) + 1
+
+sessionEnabled = active and (
+     (sessionIdx == 1 and showAsia) or
+     (sessionIdx == 2 and showLondon) or
+     (sessionIdx == 3 and showNYAM) or
+     (sessionIdx == 4 and showNYPM))
+
+// Detect a new session/quarter by its START TIME, not just its number.
+// Comparing numbers misses a reset when a gap (weekend, missing data) lands
+// on a bar with the same session or quarter number as the previous bar.
+// Start times are built from the New York date and clock time, so a
+// daylight-saving switch inside a session (24/7 markets) can't fake a new one.
+// Every session lies within one New York calendar day (Asia is 18:00–24:00).
+sessionStartMin = (1080 + (sessionIdx - 1) * 360) % 1440
+quarterStartMin = sessionStartMin + (quarterIdx - 1) * 90
+sessionStart = timestamp("America/New_York", nyYear, nyMonth, nyDay, int(math.floor(sessionStartMin / 60)), sessionStartMin % 60)
+quarterStart = timestamp("America/New_York", nyYear, nyMonth, nyDay, int(math.floor(quarterStartMin / 60)), quarterStartMin % 60)
+
+newSession = bar_index > 0 and sessionStart != sessionStart[1]
+newQuarter = bar_index > 0 and quarterStart != quarterStart[1]
+
+//==================================================
+// 6. TRACK Q1 HIGH/LOW AND Q2 TRUE OPEN
+//==================================================
+var float q1High = na
+var float q1Low = na
+var float trueOpen = na
+
+if newSession
+    q1High := na
+    q1Low := na
+    trueOpen := na
+
+// Record the high and low during Q1.
+if sessionEnabled and quarterIdx == 1
+    q1High := na(q1High) ? high : math.max(q1High, high)
+    q1Low  := na(q1Low) ? low : math.min(q1Low, low)
+
+// Record the opening price of the first bar of Q2.
+if sessionEnabled and quarterIdx == 2 and newQuarter
+    trueOpen := open
+
+//==================================================
+// 7. PLOT TRUE OPEN AND Q1 RANGE
+//==================================================
+plotTrueOpen = sessionEnabled and showTrueOpen and quarterIdx >= 2 ? trueOpen : na
+plotQ1High   = sessionEnabled and showQ1Range and quarterIdx >= 2 ? q1High : na
+plotQ1Low    = sessionEnabled and showQ1Range and quarterIdx >= 2 ? q1Low : na
+
+plot(plotTrueOpen, title="Q2 True Open", color=colorTO, linewidth=2, style=plot.style_linebr)
+plot(plotQ1High, title="Q1 High", color=colorRange, linewidth=1, style=plot.style_linebr)
+plot(plotQ1Low, title="Q1 Low", color=colorRange, linewidth=1, style=plot.style_linebr)
+
+//==================================================
+// 8. QUARTER BACKGROUND COLORS
+//==================================================
+quarterColor = quarterIdx == 1 ? colorQ1 :
+     quarterIdx == 2 ? colorQ2 :
+     quarterIdx == 3 ? colorQ3 : colorQ4
+
+bgcolor(sessionEnabled and showBgColors ? quarterColor : na, title="Quarter Background")
+
+//==================================================
+// 9. QUARTER LABELS
+//==================================================
+if sessionEnabled and newQuarter and showLabels
+    string quarterName = quarterIdx == 1 ? "Q1\nAccumulation" :
+         quarterIdx == 2 ? "Q2\nManipulation" :
+         quarterIdx == 3 ? "Q3\nDistribution" :
+         "Q4\nReversal/Continuation"
+
+    color labelColor = quarterIdx == 1 ? color.blue :
+         quarterIdx == 2 ? color.orange :
+         quarterIdx == 3 ? color.green : color.purple
+
+    string labelText = quarterIdx == 2 ?
+         quarterName + "\nTrue Open: " + str.tostring(open, format.mintick) :
+         quarterName
+
+    label.new(
+         bar_index,
+         high,
+         text=labelText,
+         color=color.new(labelColor, 20),
+         textcolor=color.white,
+         style=label.style_label_down,
+         size=size.tiny
+         )
+
+//==================================================
+// 10. TIMEFRAME WARNING
+//==================================================
+var table warnTable = table.new(position.top_right, 1, 1)
+
+if barstate.islast and showTfWarn
+    if not active
+        table.cell(warnTable, 0, 0, "Quarterly Theory: use an intraday chart.", text_color=color.white, bgcolor=color.new(color.red, 30), text_size=size.small)
+    else if not exactTf
+        table.cell(warnTable, 0, 0, "Quarters are approximate on this timeframe.\nUse 1, 3, 5, 15, 30 or 45 min for exact quarters.", text_color=color.white, bgcolor=color.new(color.orange, 30), text_size=size.small)
